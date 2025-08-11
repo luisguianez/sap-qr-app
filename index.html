@@ -902,7 +902,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showSpinner();
         try {
-            const response = await fetch('/getSearchHelpData', {
+            const response = await fetch('http://api.lndsap.com:5000/getSearchHelpData', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -1212,7 +1212,7 @@ document.addEventListener('DOMContentLoaded', () => {
             is_guest: isGuestMode
         };
         try {
-            const response = await fetch("/getMsegData", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+            const response = await fetch("http://api.lndsap.com:5000/getMsegData", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
             const result = await response.json();
             if (result.success) {
                 setScanStatus(getText('validationSuccess'), "success");
@@ -1321,7 +1321,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setScanStatus(getText('loadingData'), "info");
         showSpinner();
         try {
-            const response = await fetch('/getModalData', {
+            const response = await fetch('http://api.lndsap.com:5000/getModalData', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
@@ -1435,7 +1435,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         setScanStatus(getText('savingData'), "info");
         try {
-            const response = await fetch("/saveDataToSap", { method: "POST", body: formData });
+            const response = await fetch("http://api.lndsap.com:5000/saveDataToSap", { method: "POST", body: formData });
             const result = await response.json();
             
             if (result.success) {
@@ -1631,7 +1631,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectedArea = document.querySelector('input[name="sublocationArea"]:checked').value;
         showSpinner();
         try {
-            const response = await fetch('/getSublocationData', {
+            const response = await fetch('http://api.lndsap.com:5000/getSublocationData', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
