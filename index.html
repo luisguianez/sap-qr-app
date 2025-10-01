@@ -15,7 +15,7 @@
         .message-error { color: #dc3545; font-weight: bold; }
         .message-warning { color: #ffc107; font-weight: bold; }
         .table-responsive { max-height: 60vh; }
-        #msegTable td input[type="text"], #sublocationTable td { font-size: 0.85em; white-space: nowrap; }
+        #msegTable td input[type="text"], #sublocationTable td, #ingresoItemsTable td input, #ingresoItemsTable td select { font-size: 0.85em; white-space: nowrap; }
         #msegTable .filename-display { background-color: #e9ecef !important; border-radius: 4px; padding: 2px 5px; }
         .checkbox-container { display: none; }
         .checkbox-container.visible { display: flex; align-items: end; }
@@ -98,15 +98,15 @@
                         <h3 class="card-title text-center mb-4" data-translate="selectModeTitle">Seleccione un Modo</h3>
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="radio" name="appMode" id="modeEtiqueta" value="etiqueta" checked>
-                            <label class="form-check-label" for="modeEtiqueta" data-translate="labelReadingMode">
-                                Lectura de Etiqueta (QR)
-                            </label>
+                            <label class="form-check-label" for="modeEtiqueta" data-translate="labelReadingMode">Lectura de Etiqueta (QR)</label>
                         </div>
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="radio" name="appMode" id="modeSublocation" value="sublocation">
-                            <label class="form-check-label" for="modeSublocation" data-translate="sublocationQueryMode">
-                                Consulta por Sub-Ubicación
-                            </label>
+                            <label class="form-check-label" for="modeSublocation" data-translate="sublocationQueryMode">Consulta por Sub-Ubicación</label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="appMode" id="modeIngreso" value="ingreso">
+                            <label class="form-check-label" for="modeIngreso" data-translate="materialReceiptMode">Ingreso de Materiales por Pedido</label>
                         </div>
                         <div class="d-grid gap-2 mt-4">
                             <button id="continueButton" class="btn btn-primary" data-translate="continueButton">Continuar</button>
@@ -309,87 +309,165 @@
             </table>
         </div>
     </div>
-</div>
 
-<!-- MODAL DE AYUDA DE BÚSQUEDA (MATCHCODE) -->
-<div class="modal fade" id="searchHelpModal" tabindex="-1" aria-labelledby="searchHelpModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="searchHelpModalLabel" data-translate="searchHelpTitle">Ayuda para Búsqueda</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- NUEVO CONTENIDO PARA INGRESO DE MATERIALES -->
+    <div id="ingresoContent" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="mb-0" data-translate="materialReceiptTitle">Ingreso de Materiales por Pedido</h2>
+            <div>
+                <button id="backButtonIngreso" class="btn btn-secondary me-2" data-translate="backButton">Volver</button>
+                <span id="loggedInUserDisplayIngreso" class="badge bg-success me-3"></span>
+                <button id="logoutButtonIngreso" class="btn btn-danger" data-translate="logoutButton">Logout</button>
             </div>
-            <div class="modal-body">
-                <input type="text" id="searchHelpFilter" class="form-control mb-3" placeholder="Filtrar..." data-translate="filterPlaceholder">
-                <div class="table-responsive" style="max-height: 400px;">
-                    <table class="table table-hover table-sm">
-                        <thead id="searchHelpTableHead"></thead>
-                        <tbody id="searchHelpTableBody"></tbody>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <!-- CABECERA -->
+                <h4 class="mb-3">Datos de Cabecera</h4>
+                <div class="row g-3 p-3 border rounded bg-light mb-4">
+                    <div class="col-md-3">
+                        <label for="ingresoNroPedido" class="form-label">Nro de Pedido</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="ingresoNroPedido">
+                            <button class="btn btn-primary" type="button" id="searchPoButton">Buscar Pedido</button>
+                        </div>
+                    </div>
+                    <div class="col-md-2"><label for="ingresoTipoMovimiento" class="form-label">Tipo de Movimiento</label><input type="text" class="form-control" id="ingresoTipoMovimiento" value="101" readonly></div>
+                    <div class="col-md-4">
+                        <label class="form-label">Indicador de Stock Especial</label>
+                        <div>
+                            <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="ingresoStockEspecial" id="stockSin" value="" checked><label class="form-check-label" for="stockSin">Sin Indicador</label></div>
+                            <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="ingresoStockEspecial" id="stockQ" value="Q"><label class="form-check-label" for="stockQ">Q</label></div>
+                            <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="ingresoStockEspecial" id="stockE" value="E"><label class="form-check-label" for="stockE">E</label></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end"><div class="form-check"><input class="form-check-input" type="checkbox" id="ingresoItemAdopted"><label class="form-check-label" for="ingresoItemAdopted">Item Adopted</label></div></div>
+                    <div class="col-md-3"><label for="ingresoFechaDoc" class="form-label">Fecha de Documento</label><input type="date" class="form-control" id="ingresoFechaDoc"></div>
+                    <div class="col-md-3"><label for="ingresoFechaCont" class="form-label">Fecha de Contabilización</label><input type="date" class="form-control" id="ingresoFechaCont"></div>
+                    <div class="col-md-3"><label for="ingresoMaterialSlip" class="form-label">Material Slip (Nota de Entrega)</label><input type="text" class="form-control" id="ingresoMaterialSlip"></div>
+                    <div class="col-md-3"><label for="ingresoTextoCabecera" class="form-label">Texto de Cabecera</label><input type="text" class="form-control" id="ingresoTextoCabecera"></div>
+                </div>
+
+                <!-- POSICIONES (ALV) -->
+                <h4 class="mb-3 mt-4">Posiciones del Pedido</h4>
+                <div class="table-responsive">
+                    <table id="ingresoItemsTable" class="table table-bordered table-sm">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="selectAllIngresoItemsCheckbox"></th>
+                                <th>Pos.</th>
+                                <th>Material</th>
+                                <th>Descripción</th>
+                                <th class="wbs-col">Elemento PEP (WBS)</th>
+                                <th class="so-col">Pedido Venta</th>
+                                <th class="so-col">Pos. Ped. Venta</th>
+                                <th>Planta</th>
+                                <th>Almacén</th>
+                                <th>Cantidad</th>
+                                <th>UM</th>
+                                <th>Lote</th>
+                                <th>Sub-Ubicación</th>
+                                <th>Certificado</th>
+                                <th>Documentos</th>
+                                <th>Inspección</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ingresoItemsTableBody">
+                            <!-- Las filas se generarán dinámicamente -->
+                        </tbody>
                     </table>
                 </div>
+                
+                <hr>
+                <div class="text-center">
+                    <button id="ingresoClearButton" class="btn btn-warning me-2">Limpiar</button>
+                    <button id="ingresoSaveButton" class="btn btn-success" disabled>Guardar en SAP</button>
+                </div>
+                 <p id="ingresoStatus" class="mt-3 text-center"></p>
             </div>
         </div>
     </div>
-</div>
-
-<!-- MODAL PARA FIRMAS Y ETIQUETA -->
-<div class="modal fade" id="signatureModal" tabindex="-1" aria-labelledby="signatureModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="signatureModalLabel" data-translate="additionalConfirmationTitle">Confirmación Adicional</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p data-translate="completeFollowingData">Por favor, complete los siguientes datos para finalizar el guardado.</p>
-                <div id="modal-error-message" class="alert alert-danger" style="display: none;"></div>
-                
-                <div class="mb-3">
-                    <label for="receptorSelect" class="form-label" data-translate="receiverLabel">Receptor:</label>
-                    <select id="receptorSelect" class="form-select" required>
-                        <option value="" data-translate="loading">Cargando...</option>
-                    </select>
+    
+    <!-- MODAL DE AYUDA DE BÚSQUEDA (MATCHCODE) -->
+    <div class="modal fade" id="searchHelpModal" tabindex="-1" aria-labelledby="searchHelpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="searchHelpModalLabel" data-translate="searchHelpTitle">Ayuda para Búsqueda</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                
-                <div class="mb-3">
-                    <label for="despachadorSelect" class="form-label" data-translate="dispatcherLabel">Despachador:</label>
-                    <select id="despachadorSelect" class="form-select" required>
-                        <option value="" data-translate="loading">Cargando...</option>
-                    </select>
+                <div class="modal-body">
+                    <input type="text" id="searchHelpFilter" class="form-control mb-3" placeholder="Filtrar..." data-translate="filterPlaceholder">
+                    <div class="table-responsive" style="max-height: 400px;">
+                        <table class="table table-hover table-sm">
+                            <thead id="searchHelpTableHead"></thead>
+                            <tbody id="searchHelpTableBody"></tbody>
+                        </table>
+                    </div>
                 </div>
-                
-                <div class="mb-3" id="labelSizeContainer">
-                    <label for="labelSizeSelect" class="form-label" data-translate="labelSizeLabel">Tamaño de Etiqueta:</label>
-                    <select id="labelSizeSelect" class="form-select" required>
-                        <option value="" data-translate="selectSize">Seleccione un tamaño...</option>
-                        <option value="S" data-translate="smallLabel">S - Pequeña</option>
-                        <option value="M" data-translate="mediumLabel">M - Mediana</option>
-                        <option value="L" data-translate="largeLabel">L - Grande</option>
-                    </select>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close" data-translate="cancelButton">Cancelar</button>
-                <button type="button" id="confirmSaveButton" class="btn btn-primary" data-translate="confirmAndSaveButton">Confirmar y Guardar</button>
             </div>
         </div>
     </div>
-</div>
 
-<!-- MODAL PARA SELECCIÓN DE LAYOUT -->
-<div class="modal fade" id="layoutModal" tabindex="-1" aria-labelledby="layoutModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="layoutModalLabel" data-translate="layoutModalTitle">Seleccionar Columnas Visibles</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- MODAL PARA FIRMAS Y ETIQUETA -->
+    <div class="modal fade" id="signatureModal" tabindex="-1" aria-labelledby="signatureModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="signatureModalLabel" data-translate="additionalConfirmationTitle">Confirmación Adicional</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p data-translate="completeFollowingData">Por favor, complete los siguientes datos para finalizar el guardado.</p>
+                    <div id="modal-error-message" class="alert alert-danger" style="display: none;"></div>
+                    
+                    <div class="mb-3">
+                        <label for="receptorSelect" class="form-label" data-translate="receiverLabel">Receptor:</label>
+                        <select id="receptorSelect" class="form-select" required>
+                            <option value="" data-translate="loading">Cargando...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="despachadorSelect" class="form-label" data-translate="dispatcherLabel">Despachador:</label>
+                        <select id="despachadorSelect" class="form-select" required>
+                            <option value="" data-translate="loading">Cargando...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="labelSizeContainer">
+                        <label for="labelSizeSelect" class="form-label" data-translate="labelSizeLabel">Tamaño de Etiqueta:</label>
+                        <select id="labelSizeSelect" class="form-select" required>
+                            <option value="" data-translate="selectSize">Seleccione un tamaño...</option>
+                            <option value="S" data-translate="smallLabel">S - Pequeña</option>
+                            <option value="M" data-translate="mediumLabel">M - Mediana</option>
+                            <option value="L" data-translate="largeLabel">L - Grande</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close" data-translate="cancelButton">Cancelar</button>
+                    <button type="button" id="confirmSaveButton" class="btn btn-primary" data-translate="confirmAndSaveButton">Confirmar y Guardar</button>
+                </div>
             </div>
-            <div class="modal-body" id="layoutModalBody">
-                <!-- Content is now fully generated by JS -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-translate="cancelButton">Cancelar</button>
-                <button type="button" id="applyLayoutButton" class="btn btn-primary" data-translate="applyButton">Aplicar</button>
+        </div>
+    </div>
+
+    <!-- MODAL PARA SELECCIÓN DE LAYOUT -->
+    <div class="modal fade" id="layoutModal" tabindex="-1" aria-labelledby="layoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="layoutModalLabel" data-translate="layoutModalTitle">Seleccionar Columnas Visibles</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="layoutModalBody">
+                    <!-- Content is now fully generated by JS -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-translate="cancelButton">Cancelar</button>
+                    <button type="button" id="applyLayoutButton" class="btn btn-primary" data-translate="applyButton">Aplicar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -405,217 +483,49 @@ document.addEventListener('DOMContentLoaded', () => {
     const translations = {
         en: {
             // General
-            loading: "Loading...",
-            user: "User",
-            logoutButton: "Logout",
-            continueButton: "Continue",
-            cancelButton: "Cancel",
-            clearButton: "Clear",
-            saveButton: "Save to SAP",
-            backButton: "Back",
-            activateCameraButton: "Activate Camera",
-            applyButton: "Apply",
-            selectAll: "Select All",
-            deselectAll: "Deselect All",
+            loading: "Loading...", user: "User", logoutButton: "Logout", continueButton: "Continue", cancelButton: "Cancel", clearButton: "Clear", saveButton: "Save to SAP", backButton: "Back", activateCameraButton: "Activate Camera", applyButton: "Apply", selectAll: "Select All", deselectAll: "Deselect All",
             // Login Screen
-            loginTitle: "SAP Login",
-            sapEnvironmentLabel: "SAP Environment",
-            devEnvironment: "Development (DEV)",
-            qasEnvironment: "Quality (QAS)",
-            prdEnvironment: "Production (PRD)",
-            clientLabel: "Client",
-            userLabel: "SAP User",
-            passwordLabel: "Password",
-            useSapRouterLabel: "Use SAP Router",
-            guestLoginButton: "Guest Login",
+            loginTitle: "SAP Login", sapEnvironmentLabel: "SAP Environment", devEnvironment: "Development (DEV)", qasEnvironment: "Quality (QAS)", prdEnvironment: "Production (PRD)", clientLabel: "Client", userLabel: "SAP User", passwordLabel: "Password", useSapRouterLabel: "Use SAP Router", guestLoginButton: "Guest Login",
             // Mode Selection
-            selectModeTitle: "Select a Mode",
-            labelReadingMode: "Label Reading (QR)",
-            sublocationQueryMode: "Query by Sublocation",
+            selectModeTitle: "Select a Mode", labelReadingMode: "Label Reading (QR)", sublocationQueryMode: "Query by Sublocation", materialReceiptMode: "Material Receipt by PO",
             // Label Reading Program
-            mainContentTitle: "Movement Capture (QR Reading)",
-            headerDataTitle: "Header Data",
-            moveTypeLabel: "Move. Type:",
-            specialStockLabel: "Special Stock:",
-            plantLabel: "Plant:",
-            storageLocationLabel: "Storage Loc.:",
-            headerTextLabel: "Header Text:",
-            postingDateLabel: "Posting Date:",
-            reservationLabel: "Reservation",
-            lastQrLabel: "Last QR Read:",
+            mainContentTitle: "Movement Capture (QR Reading)", headerDataTitle: "Header Data", moveTypeLabel: "Move. Type:", specialStockLabel: "Special Stock:", plantLabel: "Plant:", storageLocationLabel: "Storage Loc.:", headerTextLabel: "Header Text:", postingDateLabel: "Posting Date:", reservationLabel: "Reservation", lastQrLabel: "Last QR Read:",
             // Sublocation Query Program
-            sublocationQueryTitle: "Query by Sublocation",
-            searchFiltersTitle: "Search Filters",
-            areaLabel: "Area:",
-            allLabel: "All",
-            scanSublocationQr: "Scan the Sublocation's QR code",
-            completeFiltersToScan: "Complete filters to scan.",
-            searchResultsTitle: "Search Results",
-            filterPlaceholder: "Filter results...",
+            sublocationQueryTitle: "Query by Sublocation", searchFiltersTitle: "Search Filters", areaLabel: "Area:", allLabel: "All", scanSublocationQr: "Scan the Sublocation's QR code", completeFiltersToScan: "Complete filters to scan.", searchResultsTitle: "Search Results", filterPlaceholder: "Filter results...", materialReceiptTitle: "Material Receipt by PO",
             // Modals
-            searchHelpTitle: "Search Help",
-            layoutModalTitle: "Select Visible Columns",
-            additionalConfirmationTitle: "Additional Confirmation",
-            completeFollowingData: "Please complete the following data to finalize saving.",
-            receiverLabel: "Receiver:",
-            dispatcherLabel: "Dispatcher:",
-            labelSizeLabel: "Label Size:",
-            selectSize: "Select a size...",
-            smallLabel: "S - Small",
-            mediumLabel: "M - Medium",
-            largeLabel: "L - Large",
-            confirmAndSaveButton: "Confirm and Save",
+            searchHelpTitle: "Search Help", layoutModalTitle: "Select Visible Columns", additionalConfirmationTitle: "Additional Confirmation", completeFollowingData: "Please complete the following data to finalize saving.", receiverLabel: "Receiver:", dispatcherLabel: "Dispatcher:", labelSizeLabel: "Label Size:", selectSize: "Select a size...", smallLabel: "S - Small", mediumLabel: "M - Medium", largeLabel: "L - Large", confirmAndSaveButton: "Confirm and Save",
             // Table Headers
-            docCol: "Document", yearCol: "Year", posCol: "Item", materialCol: "Material", materialDescCol: "Material Text", qtyCol: "Quantity",
-            unitCol: "Unit", batchCol: "Batch", certCol: "Certificate", docsCol: "Documents", inspCol: "Inspection", itemTextCol: "Item Text",
-            tagCol: "TAG", subLocCol: "Sublocation", areaCol: "Area", orderNoCol: "Order No.", wbsCol: "WBS Element", reservationCol: "Reservation",
-            salesOrderCol: "Sales Order", salesOrderItemCol: "SO Item",
+            docCol: "Document", yearCol: "Year", posCol: "Item", materialCol: "Material", materialDescCol: "Material Text", qtyCol: "Quantity", unitCol: "Unit", batchCol: "Batch", certCol: "Certificate", docsCol: "Documents", inspCol: "Inspection", itemTextCol: "Item Text", tagCol: "TAG", subLocCol: "Sublocation", areaCol: "Area", orderNoCol: "Order No.", wbsCol: "WBS Element", reservationCol: "Reservation", salesOrderCol: "Sales Order", salesOrderItemCol: "SO Item",
             // Sublocation Table Headers
-            sublocationCol: "Sublocation", countryCol: "Country", uomCol: "Unit of Measure", currencyCol: "Currency", freeStockCol: "Free Stock",
-            freeValueCol: "Free Value", transferStockCol: "Transfer Stock", transferValueCol: "Transfer Value", qualityStockCol: "Quality Stock",
-            qualityValueCol: "Quality Value", nonFreeStockCol: "Non-Free Stock", nonFreeValueCol: "Non-Free Value", blockedStockCol: "Blocked Stock",
-            blockedValueCol: "Blocked Value", returnsStockCol: "Returns Stock", returnsValueCol: "Returns Value",
+            sublocationCol: "Sublocation", countryCol: "Country", uomCol: "Unit of Measure", currencyCol: "Currency", freeStockCol: "Free Stock", freeValueCol: "Free Value", transferStockCol: "Transfer Stock", transferValueCol: "Transfer Value", qualityStockCol: "Quality Stock", qualityValueCol: "Quality Value", nonFreeStockCol: "Non-Free Stock", nonFreeValueCol: "Non-Free Value", blockedStockCol: "Blocked Stock", blockedValueCol: "Blocked Value", returnsStockCol: "Returns Stock", returnsValueCol: "Returns Value",
             // Dynamic Messages
-            validating: "Validating...",
-            sessionClosed: "Session closed.",
-            readyToScan: "Ready to scan",
-            cameraError: "Error starting camera",
-            scannerStopped: "Scanner stopped.",
-            invalidQrFormat: "Unrecognized QR format.",
-            codeAlreadyScanned: "Code already scanned.",
-            processing: "Processing...",
-            validationSuccess: "Validation successful.",
-            networkError: "Network error",
-            sessionError: "Session error.",
-            loadingData: "Loading data...",
-            confirmWindowError: "Could not open confirmation window",
-            allFieldsRequired: "All visible fields are required.",
-            preparingData: "Preparing data...",
-            savingData: "Saving movement and uploading files...",
-            processCompleted: "Process completed!",
-            saveError: "Error while saving",
-            noDataToExport: "No data to export.",
-            noFilteredDataToExport: "The current filter returns no results to export.",
-            processingSublocation: "Processing sublocation",
-            recordsFound: "{count} records found.",
+            validating: "Validating...", sessionClosed: "Session closed.", readyToScan: "Ready to scan", cameraError: "Error starting camera", scannerStopped: "Scanner stopped.", invalidQrFormat: "Unrecognized QR format.", codeAlreadyScanned: "Code already scanned.", processing: "Processing...", validationSuccess: "Validation successful.", networkError: "Network error", sessionError: "Session error.", loadingData: "Loading data...", confirmWindowError: "Could not open confirmation window", allFieldsRequired: "All visible fields are required.", preparingData: "Preparing data...", savingData: "Saving movement and uploading files...", processCompleted: "Process completed!", saveError: "Error while saving", noDataToExport: "No data to export.", noFilteredDataToExport: "The current filter returns no results to export.", processingSublocation: "Processing sublocation", recordsFound: "{count} records found.",
             // Search Help Translations
-            searchHelpForPlant: "Search Help - Plant",
-            searchHelpForStorage: "Search Help - Storage Location",
-            searchHelpForMoveType: "Search Help - Movement Type",
-            searchHelpForSpecialStock: "Search Help - Special Stock",
-            plantCol: "Plant",
-            plantNameCol: "Plant Name",
-            storageCol: "Stor. Location",
-            storageNameCol: "Location Name",
-            moveTypeCol: "Move. Type",
-            specialStockCol: "Special Stock"
+            searchHelpForPlant: "Search Help - Plant", searchHelpForStorage: "Search Help - Storage Location", searchHelpForMoveType: "Search Help - Movement Type", searchHelpForSpecialStock: "Search Help - Special Stock", plantCol: "Plant", plantNameCol: "Plant Name", storageCol: "Stor. Location", storageNameCol: "Location Name", moveTypeCol: "Move. Type", specialStockCol: "Special Stock",
+            searchHelpForSublocation: "Search Help - Sublocation"
         },
         es: {
-            // General
-            loading: "Cargando...",
-            user: "Usuario",
-            logoutButton: "Logout",
-            continueButton: "Continuar",
-            cancelButton: "Cancelar",
-            clearButton: "Limpiar",
-            saveButton: "Guardar en SAP",
-            backButton: "Volver",
-            activateCameraButton: "Activar Cámara",
-            applyButton: "Aplicar",
-            selectAll: "Marcar todo",
-            deselectAll: "Desmarcar todo",
+             // General
+            loading: "Cargando...", user: "Usuario", logoutButton: "Logout", continueButton: "Continuar", cancelButton: "Cancelar", clearButton: "Limpiar", saveButton: "Guardar en SAP", backButton: "Volver", activateCameraButton: "Activar Cámara", applyButton: "Aplicar", selectAll: "Marcar todo", deselectAll: "Desmarcar todo",
             // Login Screen
-            loginTitle: "Login SAP",
-            sapEnvironmentLabel: "Entorno SAP",
-            devEnvironment: "Desarrollo (DEV)",
-            qasEnvironment: "Calidad (QAS)",
-            prdEnvironment: "Producción (PRD)",
-            clientLabel: "Mandante",
-            userLabel: "Usuario SAP",
-            passwordLabel: "Contraseña",
-            useSapRouterLabel: "Usar SAP Router",
-            guestLoginButton: "Login de Invitado",
+            loginTitle: "Login SAP", sapEnvironmentLabel: "Entorno SAP", devEnvironment: "Desarrollo (DEV)", qasEnvironment: "Calidad (QAS)", prdEnvironment: "Producción (PRD)", clientLabel: "Mandante", userLabel: "Usuario SAP", passwordLabel: "Contraseña", useSapRouterLabel: "Usar SAP Router", guestLoginButton: "Login de Invitado",
             // Mode Selection
-            selectModeTitle: "Seleccione un Modo",
-            labelReadingMode: "Lectura de Etiqueta (QR)",
-            sublocationQueryMode: "Consulta por Sub-Ubicación",
+            selectModeTitle: "Seleccione un Modo", labelReadingMode: "Lectura de Etiqueta (QR)", sublocationQueryMode: "Consulta por Sub-Ubicación", materialReceiptMode: "Ingreso de Materiales por Pedido",
             // Label Reading Program
-            mainContentTitle: "Captura de Movimientos (Lectura QR)",
-            headerDataTitle: "Datos de Cabecera",
-            moveTypeLabel: "Cl.Movimiento:",
-            specialStockLabel: "Stock Especial:",
-            plantLabel: "Centro:",
-            storageLocationLabel: "Almacén:",
-            headerTextLabel: "Texto Cabecera:",
-            postingDateLabel: "Fecha Contab.:",
-            reservationLabel: "Reserva",
-            lastQrLabel: "Último QR leído:",
+            mainContentTitle: "Captura de Movimientos (Lectura QR)", headerDataTitle: "Datos de Cabecera", moveTypeLabel: "Cl.Movimiento:", specialStockLabel: "Stock Especial:", plantLabel: "Centro:", storageLocationLabel: "Almacén:", headerTextLabel: "Texto Cabecera:", postingDateLabel: "Fecha Contab.:", reservationLabel: "Reserva", lastQrLabel: "Último QR leído:",
             // Sublocation Query Program
-            sublocationQueryTitle: "Consulta por Sub-Ubicación",
-            searchFiltersTitle: "Filtros de Búsqueda",
-            areaLabel: "Área:",
-            allLabel: "Todos",
-            scanSublocationQr: "Escanee el código QR de la Sub-Ubicación",
-            completeFiltersToScan: "Complete los filtros para escanear.",
-            searchResultsTitle: "Resultados de la Búsqueda",
-            filterPlaceholder: "Filtrar resultados...",
+            sublocationQueryTitle: "Consulta por Sub-Ubicación", searchFiltersTitle: "Filtros de Búsqueda", areaLabel: "Área:", allLabel: "Todos", scanSublocationQr: "Escanee el código QR de la Sub-Ubicación", completeFiltersToScan: "Complete los filtros para escanear.", searchResultsTitle: "Resultados de la Búsqueda", filterPlaceholder: "Filtrar resultados...", materialReceiptTitle: "Ingreso de Materiales por Pedido",
             // Modals
-            searchHelpTitle: "Ayuda para Búsqueda",
-            layoutModalTitle: "Seleccionar Columnas Visibles",
-            additionalConfirmationTitle: "Confirmación Adicional",
-            completeFollowingData: "Por favor, complete los siguientes datos para finalizar el guardado.",
-            receiverLabel: "Receptor:",
-            dispatcherLabel: "Despachador:",
-            labelSizeLabel: "Tamaño de Etiqueta:",
-            selectSize: "Seleccione un tamaño...",
-            smallLabel: "S - Pequeña",
-            mediumLabel: "M - Mediana",
-            largeLabel: "L - Grande",
-            confirmAndSaveButton: "Confirmar y Guardar",
+            searchHelpTitle: "Ayuda para Búsqueda", layoutModalTitle: "Seleccionar Columnas Visibles", additionalConfirmationTitle: "Confirmación Adicional", completeFollowingData: "Por favor, complete los siguientes datos para finalizar el guardado.", receiverLabel: "Receptor:", dispatcherLabel: "Despachador:", labelSizeLabel: "Tamaño de Etiqueta:", selectSize: "Seleccione un tamaño...", smallLabel: "S - Pequeña", mediumLabel: "M - Mediana", largeLabel: "L - Grande", confirmAndSaveButton: "Confirmar y Guardar",
             // Table Headers
-            docCol: "Documento", yearCol: "Año", posCol: "Pos.", materialCol: "Material", materialDescCol: "Texto Material", qtyCol: "Cantidad",
-            unitCol: "Unidad", batchCol: "Lote", certCol: "Certificado", docsCol: "Documentos", inspCol: "Inspección", itemTextCol: "Texto Pos.",
-            tagCol: "TAG", subLocCol: "Sub Ubicacion", areaCol: "Área", orderNoCol: "Nro. Pedido", wbsCol: "Elemento PEP", reservationCol: "Reserva",
-            salesOrderCol: "Pedido Cliente", salesOrderItemCol: "Pos. Pedido Cliente",
+            docCol: "Documento", yearCol: "Año", posCol: "Pos.", materialCol: "Material", materialDescCol: "Texto Material", qtyCol: "Cantidad", unitCol: "Unidad", batchCol: "Lote", certCol: "Certificado", docsCol: "Documentos", inspCol: "Inspección", itemTextCol: "Texto Pos.", tagCol: "TAG", subLocCol: "Sub Ubicacion", areaCol: "Área", orderNoCol: "Nro. Pedido", wbsCol: "Elemento PEP", reservationCol: "Reserva", salesOrderCol: "Pedido Cliente", salesOrderItemCol: "Pos. Pedido Cliente",
             // Sublocation Table Headers
-            sublocationCol: "Sub Ubicación", countryCol: "Pais", uomCol: "Unidada de Medida", currencyCol: "Moneda", freeStockCol: "Stock Libre Utilizacion",
-            freeValueCol: "Valor Libre Utilizacion", transferStockCol: "Stock Traslado", transferValueCol: "Valor Traslado", qualityStockCol: "Stock Calidad",
-            qualityValueCol: "Valor Calidad", nonFreeStockCol: "Stock No Libre", nonFreeValueCol: "Valor No Libre", blockedStockCol: "Stock Bloqueado",
-            blockedValueCol: "Valor Bloqueado", returnsStockCol: "Stock Devolución", returnsValueCol: "Valor Devolución",
+            sublocationCol: "Sub Ubicación", countryCol: "Pais", uomCol: "Unidada de Medida", currencyCol: "Moneda", freeStockCol: "Stock Libre Utilizacion", freeValueCol: "Valor Libre Utilizacion", transferStockCol: "Stock Traslado", transferValueCol: "Valor Traslado", qualityStockCol: "Stock Calidad", qualityValueCol: "Valor Calidad", nonFreeStockCol: "Stock No Libre", nonFreeValueCol: "Valor No Libre", blockedStockCol: "Stock Bloqueado", blockedValueCol: "Valor Bloqueado", returnsStockCol: "Stock Devolución", returnsValueCol: "Valor Devolución",
             // Dynamic Messages
-            validating: "Validando...",
-            sessionClosed: "Sesión cerrada.",
-            readyToScan: "Listo para escanear",
-            cameraError: "Error al iniciar cámara",
-            scannerStopped: "Escáner detenido.",
-            invalidQrFormat: "Formato de QR no reconocido.",
-            codeAlreadyScanned: "Código ya escaneado.",
-            processing: "Procesando...",
-            validationSuccess: "Validación exitosa.",
-            networkError: "Error de red",
-            sessionError: "Error de sesión.",
-            loadingData: "Cargando datos...",
-            confirmWindowError: "No se pudo abrir la ventana de confirmación",
-            allFieldsRequired: "Todos los campos visibles son obligatorios.",
-            preparingData: "Preparando datos...",
-            savingData: "Guardando movimiento y subiendo archivos...",
-            processCompleted: "¡Proceso completado!",
-            saveError: "Error al guardar",
-            noDataToExport: "No hay datos para exportar.",
-            noFilteredDataToExport: "El filtro actual no devuelve resultados para exportar.",
-            processingSublocation: "Procesando sub-ubicación",
-            recordsFound: "Se encontraron {count} registros.",
-            // Traducciones de Ayuda de Búsqueda
-            searchHelpForPlant: "Ayuda para Búsqueda - Centro",
-            searchHelpForStorage: "Ayuda para Búsqueda - Almacén",
-            searchHelpForMoveType: "Ayuda para Búsqueda - Clase de Movimiento",
-            searchHelpForSpecialStock: "Ayuda para Búsqueda - Stock Especial",
-            plantCol: "Centro",
-            plantNameCol: "Nombre Centro",
-            storageCol: "Almacén",
-            storageNameCol: "Nombre Almacén",
-            moveTypeCol: "Clase Mov.",
-            specialStockCol: "Stock Esp."
+            validating: "Validando...", sessionClosed: "Sesión cerrada.", readyToScan: "Listo para escanear", cameraError: "Error al iniciar cámara", scannerStopped: "Escáner detenido.", invalidQrFormat: "Formato de QR no reconocido.", codeAlreadyScanned: "Código ya escaneado.", processing: "Procesando...", validationSuccess: "Validación exitosa.", networkError: "Error de red", sessionError: "Error de sesión.", loadingData: "Cargando datos...", confirmWindowError: "No se pudo abrir la ventana de confirmación", allFieldsRequired: "Todos los campos visibles son obligatorios.", preparingData: "Preparando datos...", savingData: "Guardando movimiento y subiendo archivos...", processCompleted: "¡Proceso completado!", saveError: "Error al guardar", noDataToExport: "No hay datos para exportar.", noFilteredDataToExport: "El filtro actual no devuelve resultados para exportar.", processingSublocation: "Procesando sub-ubicación", recordsFound: "Se encontraron {count} registros.",
+            // Search Help Translations
+            searchHelpForPlant: "Ayuda para Búsqueda - Centro", searchHelpForStorage: "Ayuda para Búsqueda - Almacén", searchHelpForMoveType: "Ayuda para Búsqueda - Clase de Movimiento", searchHelpForSpecialStock: "Ayuda para Búsqueda - Stock Especial", plantCol: "Centro", plantNameCol: "Nombre Centro", storageCol: "Almacén", storageNameCol: "Nombre Almacén", moveTypeCol: "Clase Mov.", specialStockCol: "Stock Esp.",
+            searchHelpForSublocation: "Ayuda para Búsqueda - Sub-Ubicación"
         }
     };
 
@@ -634,7 +544,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         document.documentElement.lang = lang;
-        // Re-renderizar cabeceras de la tabla de sub-ubicación
         const sublocationTable = document.getElementById('sublocationTable');
         if (sublocationTable) {
             const thead = sublocationTable.querySelector('thead');
@@ -647,7 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 else if (columnKey === 'LGORT') translationKey = 'storageLocationLabel';
                 else if (columnKey === 'CHARG') translationKey = 'batchCol';
                 else if (columnKey === 'SOBKZ') translationKey = 'specialStockLabel';
-                else if (columnKey === 'KZBWS') translationKey = 'Val. Stock Esp.'; // TODO: Add to translations
+                else if (columnKey === 'KZBWS') translationKey = 'Val. Stock Esp.'; 
                 else if (columnKey === 'PS_PSP_PNR') translationKey = 'wbsCol';
                 else if (columnKey === 'ZZUBICACION') translationKey = 'tagCol';
                 else if (columnKey === 'ZZSUB_UBICACION') translationKey = 'sublocationCol';
@@ -696,6 +605,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let msegColumnVisibility = {};
     let sublocationColumnVisibility = {};
     let currentLayoutConfig = {};
+    let poItemsData = []; // Para almacenar los items del pedido en la nueva pestaña
 
     // --- Referencias al DOM ---
     const spinner = document.getElementById('spinner-overlay');
@@ -703,6 +613,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modeSelectionSection = document.getElementById('modeSelectionSection');
     const mainContent = document.getElementById('mainContent');
     const sublocationContent = document.getElementById('sublocationContent');
+    const ingresoContent = document.getElementById('ingresoContent'); 
     
     const loginButton = document.getElementById('loginButton');
     const guestLoginButton = document.getElementById('guestLoginButton');
@@ -722,7 +633,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const loggedInUserDisplay = document.getElementById('loggedInUserDisplay');
     const loggedInUserDisplaySub = document.getElementById('loggedInUserDisplaySub');
     
-    // DOM para programa de etiquetas
     const headerDataSection = document.getElementById('headerDataSection');
     const clMovimientoInput = document.getElementById('clMovimiento');
     const almacenInput = document.getElementById('almacen');
@@ -742,7 +652,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const headerInputs = [clMovimientoInput, almacenInput, centroInput, fechaContabInput, specialStockIndicatorInput];
     const startScanButton = document.getElementById('startScanButton');
 
-    // DOM para programa de sub-ubicación
     const sublocationReader = document.getElementById('sublocationReader');
     const sublocationScanStatus = document.getElementById('sublocationScanStatus');
     const sublocationTableHead = document.getElementById('sublocationTableHead');
@@ -757,7 +666,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const startSublocationScanButton = document.getElementById('startSublocationScanButton');
     const layoutButtonSub = document.getElementById('layoutButtonSub');
 
-    // Referencias a la Modal
+    const backButtonIngreso = document.getElementById('backButtonIngreso');
+    const logoutButtonIngreso = document.getElementById('logoutButtonIngreso');
+    const loggedInUserDisplayIngreso = document.getElementById('loggedInUserDisplayIngreso');
+    const ingresoNroPedidoInput = document.getElementById('ingresoNroPedido');
+    const ingresoItemsTableBody = document.getElementById('ingresoItemsTableBody');
+    const ingresoSaveButton = document.getElementById('ingresoSaveButton');
+    const ingresoClearButton = document.getElementById('ingresoClearButton');
+    const ingresoStatus = document.getElementById('ingresoStatus');
+    const selectAllIngresoItemsCheckbox = document.getElementById('selectAllIngresoItemsCheckbox');
+
+
     const signatureModalElement = document.getElementById('signatureModal');
     const signatureModal = new bootstrap.Modal(signatureModalElement);
     const receptorSelect = document.getElementById('receptorSelect');
@@ -767,7 +686,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmSaveButton = document.getElementById('confirmSaveButton');
     const modalErrorMessage = document.getElementById('modal-error-message');
     
-    // Referencias a la Modal de Ayuda de Búsqueda
     const searchHelpModalElement = document.getElementById('searchHelpModal');
     const searchHelpModal = new bootstrap.Modal(searchHelpModalElement);
     const searchHelpModalLabel = document.getElementById('searchHelpModalLabel');
@@ -775,19 +693,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchHelpTableHead = document.getElementById('searchHelpTableHead');
     const searchHelpTableBody = document.getElementById('searchHelpTableBody');
 
-    // Referencias a la Modal de Layout
     const layoutModalElement = document.getElementById('layoutModal');
     const layoutModal = new bootstrap.Modal(layoutModalElement);
     const layoutModalBody = document.getElementById('layoutModalBody');
     const applyLayoutButton = document.getElementById('applyLayoutButton');
 
     // --- FUNCIONES DEL SPINNER ---
-    function showSpinner() {
-        spinner.style.display = 'flex';
-    }
-    function hideSpinner() {
-        spinner.style.display = 'none';
-    }
+    function showSpinner() { spinner.style.display = 'flex'; }
+    function hideSpinner() { spinner.style.display = 'none'; }
 
     // --- REGISTRO DE EVENTOS ---
     loginButton.addEventListener('click', () => handleLogin(false));
@@ -798,6 +711,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     backButtonMain.addEventListener('click', goBackToModeSelection);
     backButtonSub.addEventListener('click', goBackToModeSelection);
+    backButtonIngreso.addEventListener('click', goBackToModeSelection);
+    logoutButtonIngreso.addEventListener('click', handleLogout);
 
     headerInputs.forEach(input => input.addEventListener('input', handleHeaderChange));
     reservaCheckbox.addEventListener('change', toggleReservaColumn);
@@ -880,7 +795,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // --- LÓGICA DE AYUDA DE BÚSQUEDA (MATCHCODE) ---
+    document.getElementById('searchPoButton').addEventListener('click', fetchPurchaseOrderItems);
+    ingresoClearButton.addEventListener('click', () => clearIngresoForm(true));
+    ingresoSaveButton.addEventListener('click', saveIngresoData);
+    ingresoItemsTableBody.addEventListener('click', (e) => {
+        const target = e.target.closest('.search-subloc-btn');
+        if (target) {
+            const werks = target.dataset.werks;
+            const targetId = target.dataset.targetId;
+            if (werks && targetId) {
+                openSearchHelp(targetId, 'Z_SEARCH_HELP_SUBLOC', { IV_WERKS: werks }, 'searchHelpForSublocation');
+            } else {
+                alert('No se pudo determinar el centro para esta posición.');
+            }
+        }
+    });
+    
+    selectAllIngresoItemsCheckbox.addEventListener('change', (e) => {
+        const isChecked = e.target.checked;
+        ingresoItemsTableBody.querySelectorAll('.item-checkbox').forEach(checkbox => checkbox.checked = isChecked);
+        ingresoSaveButton.disabled = !isChecked || ingresoItemsTableBody.querySelectorAll('.item-checkbox').length === 0;
+    });
+
+    ingresoItemsTableBody.addEventListener('change', (e) => {
+        if (e.target.classList.contains('item-checkbox')) {
+            const checkedCount = ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked').length;
+            ingresoSaveButton.disabled = checkedCount === 0;
+
+            const totalCount = ingresoItemsTableBody.querySelectorAll('.item-checkbox').length;
+            selectAllIngresoItemsCheckbox.checked = totalCount > 0 && checkedCount === totalCount;
+        }
+    });
+
+    // *** NUEVO ***: Event listener para los radio buttons de stock especial
+    document.querySelectorAll('input[name="ingresoStockEspecial"]').forEach(radio => {
+        radio.addEventListener('change', updateIngresoTableVisibility);
+    });
+    
     async function openSearchHelp(targetInputId, rfcName, params, titleKey) {
         currentSearchHelpTarget = document.getElementById(targetInputId);
         searchHelpModalLabel.textContent = getText(titleKey, `${getText('searchHelpTitle')} - ${targetInputId}`);
@@ -931,18 +882,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const headerTranslations = {
-            'WERKS': 'plantCol', 
-            'NAME1': 'plantNameCol', 
-            'LGORT': 'storageCol', 
-            'LGOBE': 'storageNameCol',
-            'CL_MOV': 'moveTypeCol',
-            'STOCK_ESP': 'specialStockCol'
-        };
+        const headerTranslations = { 'WERKS': 'plantCol', 'NAME1': 'plantNameCol', 'LGORT': 'storageCol', 'LGOBE': 'storageNameCol', 'CL_MOV': 'moveTypeCol', 'STOCK_ESP': 'specialStockCol', 'ZZ_SUB_UBIC': 'sublocationCol', 'DESCRIPCION': 'materialDescCol'};
         
         const allHeaders = Object.keys(data[0]);
-        const codeFields = ['WERKS', 'LGORT', 'CL_MOV', 'STOCK_ESP'];
-        const descFields = ['NAME1', 'LGOBE'];
+        const codeFields = ['WERKS', 'LGORT', 'CL_MOV', 'STOCK_ESP', 'ZZ_SUB_UBIC'];
+        const descFields = ['NAME1', 'LGOBE', 'DESCRIPCION'];
 
         let orderedHeaders = [];
         let codeHeader = allHeaders.find(h => codeFields.includes(h));
@@ -1004,27 +948,21 @@ document.addEventListener('DOMContentLoaded', () => {
         showSpinner();
         
         sapConnection = null;
-
         const selectedOption = sapEnvSelect.options[sapEnvSelect.selectedIndex];
-        
         const connectionParamsForThisAttempt = {
             ashost: selectedOption.dataset.host,
             sysnr: selectedOption.dataset.sysnr,
             client: sapClientInput.value.trim(),
         };
-
         if (useSapRouter.checked) {
             connectionParamsForThisAttempt.saprouter = SAP_ROUTER_STRING;
         }
-
         if (!isGuest) {
             connectionParamsForThisAttempt.user = sapUserInput.value.trim();
             connectionParamsForThisAttempt.passwd = sapPassInput.value.trim();
         }
         
         const endpoint = isGuest ? '/validateGuestLogin' : '/validateLogin';
-
-        console.log("Enviando parámetros de conexión:", JSON.parse(JSON.stringify(connectionParamsForThisAttempt)));
 
         try {
             const response = await fetch(endpoint, {
@@ -1036,14 +974,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (result.success) {
                 sapConnection = connectionParamsForThisAttempt;
-
                 const userToShow = isGuest ? (result.guest_user || 'Invitado') : connectionParamsForThisAttempt.user;
                 
                 loginSection.style.display = 'none';
                 modeSelectionSection.style.display = 'block';
-                loggedInUserDisplay.textContent = `${getText('user')}: ${userToShow} (${sapEnvSelect.value})`;
-                loggedInUserDisplaySub.textContent = `${getText('user')}: ${userToShow} (${sapEnvSelect.value})`;
-
+                const userDisplayText = `${getText('user')}: ${userToShow} (${sapEnvSelect.value})`;
+                loggedInUserDisplay.textContent = userDisplayText;
+                loggedInUserDisplaySub.textContent = userDisplayText;
+                loggedInUserDisplayIngreso.textContent = userDisplayText;
             } else {
                 sapConnection = null;
                 setLoginStatus(`Error: ${result.error}`, 'error');
@@ -1065,6 +1003,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         mainContent.style.display = 'none';
         sublocationContent.style.display = 'none';
+        ingresoContent.style.display = 'none';
         modeSelectionSection.style.display = 'none';
         loginSection.style.display = 'block';
         
@@ -1089,6 +1028,11 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (selectedMode === 'sublocation') {
             sublocationContent.style.display = 'block';
             manageSublocationScannerState();
+        } else if (selectedMode === 'ingreso') {
+            ingresoContent.style.display = 'block';
+            document.getElementById('ingresoFechaDoc').valueAsDate = new Date();
+            document.getElementById('ingresoFechaCont').valueAsDate = new Date();
+            updateIngresoTableVisibility(); // Llamada inicial para establecer el estado correcto
         }
     }
 
@@ -1096,6 +1040,7 @@ document.addEventListener('DOMContentLoaded', () => {
         await stopAllScanners();
         mainContent.style.display = 'none';
         sublocationContent.style.display = 'none';
+        ingresoContent.style.display = 'none';
         modeSelectionSection.style.display = 'block';
         clearAllScreens();
     }
@@ -1152,9 +1097,7 @@ document.addEventListener('DOMContentLoaded', () => {
         html5QrCode = new Html5Qrcode("reader");
         const config = { fps: 10, qrbox: { width: 250, height: 250 } };
         try {
-            await html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, (errorMessage) => {
-                // console.log(`QR Code no match: ${errorMessage}`);
-            });
+            await html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, (errorMessage) => {});
             setScanStatus(getText('readyToScan'), "success");
         } catch (err) {
             setScanStatus(`${getText('cameraError')}: ${err}`, "error");
@@ -1488,7 +1431,7 @@ document.addEventListener('DOMContentLoaded', () => {
         scanStatusElement.className = `lead text-center message-${type}`;
     }
 
-    // --- NUEVA LÓGICA PARA CONSULTA POR SUB-UBICACIÓN Y LAYOUTS ---
+    // --- LÓGICA PARA CONSULTA POR SUB-UBICACIÓN Y LAYOUTS ---
     function initializeColumnVisibility(tableId, visibilityObject) {
         visibilityObject = {};
         document.querySelectorAll(`#${tableId} thead th`).forEach(th => {
@@ -1503,7 +1446,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function openLayoutModal(tableId, visibilityObject, titleKey) {
         currentLayoutConfig = { tableId, visibilityObject };
         layoutModalLabel.textContent = getText(titleKey);
-        layoutModalBody.innerHTML = ''; // Clear previous content
+        layoutModalBody.innerHTML = ''; 
 
         const buttonContainer = document.createElement('div');
         buttonContainer.className = 'd-flex justify-content-end mb-2';
@@ -1562,7 +1505,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const isVisible = visibilityObject[columnKey];
             const cells = document.querySelectorAll(`#${tableId} [data-column="${columnKey}"], #${tableId} .cell-${columnKey}`);
             cells.forEach(cell => {
-                // Special handling for reserva column to respect its own logic
                 if (columnKey === 'reservationCol' && !reservaCheckbox.checked) {
                     return;
                 }
@@ -1599,9 +1541,7 @@ document.addEventListener('DOMContentLoaded', () => {
         html5QrCodeSublocation = new Html5Qrcode("sublocationReader");
         const config = { fps: 10, qrbox: { width: 250, height: 250 } };
         try {
-            await html5QrCodeSublocation.start({ facingMode: "environment" }, config, onSublocationScanSuccess, (errorMessage) => {
-                // console.log(`QR Code no match: ${errorMessage}`);
-            });
+            await html5QrCodeSublocation.start({ facingMode: "environment" }, config, onSublocationScanSuccess, (errorMessage) => {});
         } catch (err) {
             sublocationScanStatus.textContent = `${getText('cameraError')}: ${err}`;
             sublocationScanStatus.className = "lead mt-2 message-error";
@@ -1646,11 +1586,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
 
             if (result.success) {
-                sublocationData = result.data; // Guardar los datos originales
-                sortState = { column: null, direction: 'asc' }; // Resetear ordenamiento
+                sublocationData = result.data;
+                sortState = { column: null, direction: 'asc' };
                 sublocationScanStatus.textContent = getText('recordsFound').replace('{count}', sublocationData.length);
                 sublocationScanStatus.className = "lead mt-2 message-success";
-                filterAndRender(); // Usar la nueva función para renderizar
+                filterAndRender();
                 beepSound.play();
             } else {
                 throw new Error(result.error);
@@ -1825,9 +1765,214 @@ document.addEventListener('DOMContentLoaded', () => {
         const today = new Date().toISOString().slice(0, 10);
         XLSX.writeFile(workbook, `Consulta_Sububicacion_${today}.xlsx`);
     }
+    
+    // --- NUEVAS FUNCIONES PARA INGRESO DE MATERIALES POR PEDIDO---
+    
+    // *** NUEVO ***: Función para actualizar la visibilidad de las columnas
+    function updateIngresoTableVisibility() {
+        const stockType = document.querySelector('input[name="ingresoStockEspecial"]:checked').value;
+        const wbsCols = document.querySelectorAll('.wbs-col');
+        const soCols = document.querySelectorAll('.so-col');
 
+        wbsCols.forEach(el => el.classList.toggle('d-none', stockType !== 'Q'));
+        soCols.forEach(el => el.classList.toggle('d-none', stockType !== 'E'));
+    }
+
+    async function fetchPurchaseOrderItems() {
+        const poNumber = ingresoNroPedidoInput.value.trim();
+        if (!poNumber) {
+            clearIngresoForm(false);
+            return;
+        }
+        setIngresoStatus(`Buscando pedido ${poNumber}...`, 'info');
+        showSpinner();
+        try {
+            const response = await fetch('/getPurchaseOrderItems', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    connection_params: sapConnection,
+                    po_number: poNumber,
+                    is_guest: isGuestMode
+                })
+            });
+            const result = await response.json();
+            if (result.success && result.items.length > 0) {
+                poItemsData = result.items; // Guardamos los datos originales
+                renderIngresoItemsTable(result.items);
+                setIngresoStatus(`${result.items.length} posiciones cargadas.`, 'success');
+                ingresoSaveButton.disabled = false;
+                beepSound.play();
+            } else {
+                throw new Error(result.error || 'No se encontraron posiciones para este pedido o el pedido no existe.');
+            }
+        } catch (err) {
+            clearIngresoForm(false);
+            setIngresoStatus(`Error: ${err.message}`, 'error');
+            errorSound.play();
+        } finally {
+            hideSpinner();
+        }
+    }
+
+    function renderIngresoItemsTable(items) {
+        ingresoItemsTableBody.innerHTML = '';
+        selectAllIngresoItemsCheckbox.checked = false;
+        items.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.dataset.pos = item.EBELP;
+            const sublocationInputId = `sublocation-${item.EBELP}`;
+            tr.innerHTML = `
+                <td><input type="checkbox" class="form-check-input item-checkbox" data-pos="${item.EBELP}"></td>
+                <td>${item.EBELP}</td>
+                <td class="material-cell">${item.MATNR}</td>
+                <td>${item.TXZ01}</td>
+                <td class="wbs-col">${item.PS_PSP_PNR || ''}</td>
+                <td class="so-col">${item.KDAUF || ''}</td>
+                <td class="so-col">${item.KDPOS || ''}</td>
+                <td class="plant-cell">${item.WERKS}</td>
+                <td><input type="text" class="form-control form-control-sm" name="almacen" value="${item.LGORT || ''}"></td>
+                <td><input type="number" class="form-control form-control-sm" name="cantidad" value="${item.MENGE || 0}"></td>
+                <td class="um-cell">${item.MEINS}</td>
+                <td><input type="text" class="form-control form-control-sm" name="lote"></td>
+                <td>
+                    <div class="input-group input-group-sm">
+                        <input type="text" class="form-control" name="sublocation" id="${sublocationInputId}">
+                        <button class="btn btn-outline-secondary search-subloc-btn" type="button" data-werks="${item.WERKS}" data-target-id="${sublocationInputId}"><i class="bi bi-search"></i></button>
+                    </div>
+                </td>
+                <td><input type="file" class="form-control form-control-sm" name="certificado" data-pos="${item.EBELP}"></td>
+                <td><input type="file" class="form-control form-control-sm" name="documentos" data-pos="${item.EBELP}"></td>
+                <td><input type="file" class="form-control form-control-sm" name="inspeccion" data-pos="${item.EBELP}"></td>
+            `;
+            ingresoItemsTableBody.appendChild(tr);
+        });
+        updateIngresoTableVisibility(); // Llamada para ajustar la visibilidad después de renderizar
+    }
+
+    async function saveIngresoData() {
+        const selectedItems = [];
+        ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
+            const tr = checkbox.closest('tr');
+            const pos = tr.dataset.pos;
+            const originalItem = poItemsData.find(d => d.EBELP === pos);
+            if (originalItem) {
+                selectedItems.push({
+                    posicion: pos,
+                    material: originalItem.MATNR,
+                    plant: originalItem.WERKS,
+                    almacen: tr.querySelector('[name="almacen"]').value,
+                    cantidad: tr.querySelector('[name="cantidad"]').value,
+                    um: originalItem.MEINS,
+                    lote: tr.querySelector('[name="lote"]').value,
+                    sublocation: tr.querySelector('[name="sublocation"]').value,
+                    // *** CORRECCIÓN ***: Enviar datos de imputación a Python
+                    wbs_element: originalItem.PS_PSP_PNR,
+                    sales_order: originalItem.KDAUF,
+                    sales_order_item: originalItem.KDPOS
+                });
+            }
+        });
+
+        if (selectedItems.length === 0) {
+            alert('Debe seleccionar al menos una posición para guardar.');
+            return;
+        }
+
+        setIngresoStatus('Preparando datos para guardar...', 'info');
+        showSpinner();
+        
+        const headerData = {
+            nro_pedido: document.getElementById('ingresoNroPedido').value,
+            tipo_movimiento: document.getElementById('ingresoTipoMovimiento').value,
+            stock_especial: document.querySelector('input[name="ingresoStockEspecial"]:checked').value,
+            fecha_doc: document.getElementById('ingresoFechaDoc').value,
+            fecha_cont: document.getElementById('ingresoFechaCont').value,
+            material_slip: document.getElementById('ingresoMaterialSlip').value,
+            item_adopted: document.getElementById('ingresoItemAdopted').checked,
+            texto_cabecera: document.getElementById('ingresoTextoCabecera').value,
+        };
+
+        const formData = new FormData();
+        const payload = {
+            connection_params: sapConnection,
+            is_guest: isGuestMode,
+            header: headerData,
+            items: selectedItems
+        };
+        formData.append('json_data', JSON.stringify(payload));
+
+        const fileMetadata = [];
+        ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
+            const tr = checkbox.closest('tr');
+            const pos = tr.dataset.pos;
+            const certFile = tr.querySelector('[name="certificado"]').files[0];
+            const docFile = tr.querySelector('[name="documentos"]').files[0];
+            const inspFile = tr.querySelector('[name="inspeccion"]').files[0];
+
+            if (certFile) {
+                formData.append('files[]', certFile);
+                fileMetadata.push({ posicion: pos, field: 'certificado', filename: certFile.name });
+            }
+            if (docFile) {
+                formData.append('files[]', docFile);
+                fileMetadata.push({ posicion: pos, field: 'documentos', filename: docFile.name });
+            }
+            if (inspFile) {
+                formData.append('files[]', inspFile);
+                fileMetadata.push({ posicion: pos, field: 'inspeccion', filename: inspFile.name });
+            }
+        });
+        formData.append('file_metadata', JSON.stringify(fileMetadata));
+
+        try {
+            const response = await fetch('/saveIngreso', { method: 'POST', body: formData });
+            const result = await response.json();
+
+            if (result.success) {
+                let msg = `¡Éxito! Documento de material ${result.doc_number} creado.`;
+                if(result.warning) { msg += `\n\nADVERTENCIA:\n${result.warning}`}
+                setIngresoStatus(msg, result.warning ? 'warning' : 'success');
+                beepSound.play();
+                alert(msg);
+                clearIngresoForm(true);
+            } else {
+                throw new Error(result.error);
+            }
+
+        } catch(err) {
+            setIngresoStatus(`Error al guardar: ${err.message}`, 'error');
+            errorSound.play();
+            alert(`Error al guardar: ${err.message}`);
+        } finally {
+            hideSpinner();
+        }
+    }
+
+    function clearIngresoForm(clearAll = true) {
+        if(clearAll) {
+            const headerFields = document.querySelectorAll('#ingresoContent .card-body [id^="ingreso"]');
+            headerFields.forEach(field => {
+                if(field.type === 'text' || field.type === 'date' || field.type === 'number') {
+                    if(field.id !== 'ingresoTipoMovimiento') field.value = '';
+                }
+            });
+            document.getElementById('stockSin').checked = true;
+            document.getElementById('ingresoItemAdopted').checked = false;
+        }
+        ingresoItemsTableBody.innerHTML = '';
+        ingresoSaveButton.disabled = true;
+        setIngresoStatus('', 'info');
+        selectAllIngresoItemsCheckbox.checked = false;
+        updateIngresoTableVisibility(); // Reset visibility on clear
+    }
+    
+    function setIngresoStatus(message, type) {
+        ingresoStatus.textContent = message;
+        ingresoStatus.className = `mt-3 text-center message-${type}`;
+    }
+    
     function clearAllScreens() {
-        // Limpiar pantalla de lectura de etiquetas
         msegTableBody.innerHTML = ''; 
         scannedCodes.clear(); 
         qrContentElement.textContent = '';
@@ -1841,7 +1986,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateButtonsVisibility(); 
         toggleReservaColumn();
 
-        // Limpiar pantalla de consulta de sub-ubicación
         sublocationCentroInput.value = '';
         sublocationAlmacenInput.value = '';
         sublocationQrContent.textContent = '';
@@ -1850,21 +1994,39 @@ document.addEventListener('DOMContentLoaded', () => {
         filterInput.value = '';
         document.getElementById('areaTodos').checked = true;
         sublocationAreaContainer.style.display = 'none';
-        sublocationData = []; // Limpiar datos almacenados
-        sortState = { column: null, direction: 'asc' }; // Resetear ordenamiento
+        sublocationData = [];
+        sortState = { column: null, direction: 'asc' };
         updateSortArrows();
         exportToExcelButton.disabled = true;
         
-        // Reset layouts
         msegColumnVisibility = initializeColumnVisibility('msegTable', msegColumnVisibility);
         sublocationColumnVisibility = initializeColumnVisibility('sublocationTable', sublocationColumnVisibility);
         updateTableVisibility('msegTable', msegColumnVisibility);
         updateTableVisibility('sublocationTable', sublocationColumnVisibility);
+
+        clearIngresoForm(true); 
     }
     
-    // Initialize tooltips and layouts
+    // Delegación de eventos para checkboxes de la tabla de ingreso
+    ingresoItemsTableBody.addEventListener('change', (e) => {
+        if (e.target.classList.contains('item-checkbox')) {
+            const checkedCheckboxes = ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked').length;
+            ingresoSaveButton.disabled = checkedCheckboxes === 0;
+            const selectAllCheckbox = document.getElementById('selectAllIngresoItemsCheckbox');
+            const totalCheckboxes = ingresoItemsTableBody.querySelectorAll('.item-checkbox').length;
+            selectAllCheckbox.checked = (totalCheckboxes > 0 && checkedCheckboxes === totalCheckboxes);
+        }
+    });
+
+    document.getElementById('selectAllIngresoItemsCheckbox').addEventListener('change', (e) => {
+        const isChecked = e.target.checked;
+        ingresoItemsTableBody.querySelectorAll('.item-checkbox').forEach(checkbox => checkbox.checked = isChecked);
+        const totalCheckboxes = ingresoItemsTableBody.querySelectorAll('.item-checkbox').length;
+        ingresoSaveButton.disabled = !isChecked || totalCheckboxes === 0;
+    });
+
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
     msegColumnVisibility = initializeColumnVisibility('msegTable', msegColumnVisibility);
     sublocationColumnVisibility = initializeColumnVisibility('sublocationTable', sublocationColumnVisibility);
 
