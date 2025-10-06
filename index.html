@@ -48,7 +48,6 @@
     </style>
 </head>
 <body>
-<!-- SPINNER DE CARGA -->
 <div id="spinner-overlay">
     <div class="spinner-border text-light" role="status">
         <span class="visually-hidden" data-translate="loading">Cargando...</span>
@@ -56,7 +55,6 @@
 </div>
 
 <div class="container">
-    <!-- SECCIÓN DE LOGIN -->
     <div id="loginSection">
         <div class="row justify-content-center">
             <div class="col-md-6">
@@ -89,7 +87,6 @@
         </div>
     </div>
 
-    <!-- NUEVA SECCIÓN DE SELECCIÓN DE MODO -->
     <div id="modeSelectionSection" style="display: none;">
         <div class="row justify-content-center">
             <div class="col-md-6">
@@ -121,7 +118,6 @@
         </div>
     </div>
 
-    <!-- CONTENIDO PRINCIPAL (Lectura de Etiqueta) -->
     <div id="mainContent" style="display: none;">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="mb-0" data-translate="mainContentTitle">Captura de Movimientos (Lectura QR)</h2>
@@ -132,7 +128,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-lg-7" id="headerDataSection"> 
+            <div class="col-lg-7" id="headerDataSection">
                 <div class="p-3 border rounded bg-light mb-4">
                     <h4 class="mb-3" data-translate="headerDataTitle">Datos de Cabecera</h4>
                     <div class="row g-3">
@@ -214,7 +210,6 @@
         </div>
     </div>
 
-    <!-- NUEVO CONTENIDO PARA CONSULTA POR SUB-UBICACIÓN -->
     <div id="sublocationContent" style="display: none;">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="mb-0" data-translate="sublocationQueryTitle">Consulta por Sub-Ubicación</h2>
@@ -224,7 +219,6 @@
                 <button id="logoutButtonSub" class="btn btn-danger" data-translate="logoutButton">Logout</button>
             </div>
         </div>
-        <!-- Filtros y Cámara en la parte superior -->
         <div class="p-3 border rounded bg-light mb-4">
             <div class="row align-items-end">
                 <div class="col-lg-8">
@@ -268,7 +262,6 @@
                 </div>
             </div>
         </div>
-        <!-- Tabla de resultados abajo -->
         <div class="d-flex justify-content-between align-items-center">
             <h4 class="mt-4" data-translate="searchResultsTitle">Resultados de la Búsqueda</h4>
             <div class="d-flex align-items-center">
@@ -314,8 +307,7 @@
         </div>
     </div>
 
-    <!-- CONTENIDO PARA INGRESO DE MATERIALES -->
-    <div id="ingresoContent" style="display: none;">
+<div id="ingresoContent" style="display: none;">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="mb-0">Ingreso de Materiales por Pedido</h2>
             <div>
@@ -387,7 +379,6 @@
     </div>
 </div>
 
-<!-- MODAL DE AYUDA DE BÚSQUEDA (MATCHCODE) -->
 <div class="modal fade" id="searchHelpModal" tabindex="-1" aria-labelledby="searchHelpModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -408,7 +399,6 @@
     </div>
 </div>
 
-<!-- MODAL PARA FIRMAS Y ETIQUETA -->
 <div class="modal fade" id="signatureModal" tabindex="-1" aria-labelledby="signatureModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -419,21 +409,21 @@
             <div class="modal-body">
                 <p data-translate="completeFollowingData">Por favor, complete los siguientes datos para finalizar el guardado.</p>
                 <div id="modal-error-message" class="alert alert-danger" style="display: none;"></div>
-                
+
                 <div class="mb-3">
                     <label for="receptorSelect" class="form-label" data-translate="receiverLabel">Receptor:</label>
                     <select id="receptorSelect" class="form-select" required>
                         <option value="" data-translate="loading">Cargando...</option>
                     </select>
                 </div>
-                
+
                 <div class="mb-3">
                     <label for="despachadorSelect" class="form-label" data-translate="dispatcherLabel">Despachador:</label>
                     <select id="despachadorSelect" class="form-select" required>
                         <option value="" data-translate="loading">Cargando...</option>
                     </select>
                 </div>
-                
+
                 <div class="mb-3" id="labelSizeContainer">
                     <label for="labelSizeSelect" class="form-label" data-translate="labelSizeLabel">Tamaño de Etiqueta:</label>
                     <select id="labelSizeSelect" class="form-select" required>
@@ -452,7 +442,6 @@
     </div>
 </div>
 
-<!-- MODAL PARA SELECCIÓN DE LAYOUT -->
 <div class="modal fade" id="layoutModal" tabindex="-1" aria-labelledby="layoutModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -461,8 +450,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="layoutModalBody">
-                <!-- Content is now fully generated by JS -->
-            </div>
+                </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-translate="cancelButton">Cancelar</button>
                 <button type="button" id="applyLayoutButton" class="btn btn-primary" data-translate="applyButton">Aplicar</button>
@@ -477,31 +465,245 @@
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // *** AJUSTE CLAVE: URL BASE PARA EL BACKEND EN PYTHON ***
-    const API_BASE_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') 
-        ? '' 
-        : 'https://api.lndsap.com';
-    
+ // *** AJUSTE CLAVE: URL BASE PARA EL BACKEND EN PYTHON ***
+    const API_BASE_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
+        ? '' // Usa rutas relativas para el entorno local (ej. /validateLogin)
+        : 'https://api.lndsap.com'; // Usa la URL completa para producción
+
     // --- LÓGICA DE TRADUCCIÓN ---
     const translations = {
         en: {
-            loading: "Loading...", user: "User", logoutButton: "Logout", continueButton: "Continue", cancelButton: "Cancel", clearButton: "Clear", saveButton: "Save to SAP", backButton: "Back", activateCameraButton: "Activate Camera", applyButton: "Apply", selectAll: "Select All", deselectAll: "Deselect All", loginTitle: "SAP Login", sapEnvironmentLabel: "SAP Environment", devEnvironment: "Development (DEV)", qasEnvironment: "Quality (QAS)", prdEnvironment: "Production (PRD)", clientLabel: "Client", userLabel: "SAP User", passwordLabel: "Password", useSapRouterLabel: "Use SAP Router", guestLoginButton: "Guest Login", selectModeTitle: "Select a Mode", labelReadingMode: "Label Reading (QR)", sublocationQueryMode: "Query by Sublocation", materialReceiptMode: "Material Receipt by PO", mainContentTitle: "Movement Capture (QR Reading)", headerDataTitle: "Header Data", moveTypeLabel: "Move. Type:", specialStockLabel: "Special Stock:", plantLabel: "Plant:", storageLocationLabel: "Storage Loc.:", headerTextLabel: "Header Text:", postingDateLabel: "Posting Date:", reservationLabel: "Reservation", lastQrLabel: "Last QR Read:", sublocationQueryTitle: "Query by Sublocation", searchFiltersTitle: "Search Filters", areaLabel: "Area:", allLabel: "All", scanSublocationQr: "Scan the Sublocation's QR code", completeFiltersToScan: "Complete filters to scan.", searchResultsTitle: "Search Results", filterPlaceholder: "Filter results...", searchHelpTitle: "Search Help", layoutModalTitle: "Select Visible Columns", additionalConfirmationTitle: "Additional Confirmation", completeFollowingData: "Please complete the following data to finalize saving.", receiverLabel: "Receiver:", dispatcherLabel: "Dispatcher:", labelSizeLabel: "Label Size:", selectSize: "Select a size...", smallLabel: "S - Small", mediumLabel: "M - Medium", largeLabel: "L - Large", confirmAndSaveButton: "Confirm and Save", docCol: "Document", yearCol: "Year", posCol: "Item", materialCol: "Material", materialDescCol: "Material Text", qtyCol: "Quantity", unitCol: "Unit", batchCol: "Batch", certCol: "Certificate", docsCol: "Documents", inspCol: "Inspection", itemTextCol: "Item Text", tagCol: "TAG", subLocCol: "Sublocation", areaCol: "Area", orderNoCol: "Order No.", wbsCol: "WBS Element", reservationCol: "Reservation", salesOrderCol: "Sales Order", salesOrderItemCol: "SO Item", sublocationCol: "Sublocation", countryCol: "Country", uomCol: "Unit of Measure", currencyCol: "Currency", freeStockCol: "Free Stock", freeValueCol: "Free Value", transferStockCol: "Transfer Stock", transferValueCol: "Transfer Value", qualityStockCol: "Quality Stock", qualityValueCol: "Quality Value", nonFreeStockCol: "Non-Free Stock", nonFreeValueCol: "Non-Free Value", blockedStockCol: "Blocked Stock", blockedValueCol: "Blocked Value", returnsStockCol: "Returns Stock", returnsValueCol: "Returns Value", validating: "Validating...", sessionClosed: "Session closed.", readyToScan: "Ready to scan", cameraError: "Error starting camera", scannerStopped: "Scanner stopped.", invalidQrFormat: "Unrecognized QR format.", codeAlreadyScanned: "Code already scanned.", processing: "Processing...", validationSuccess: "Validation successful.", networkError: "Network error", sessionError: "Session error.", loadingData: "Loading data...", confirmWindowError: "Could not open confirmation window", allFieldsRequired: "All visible fields are required.", preparingData: "Preparing data...", savingData: "Saving movement and uploading files...", processCompleted: "Process completed!", saveError: "Error while saving", noDataToExport: "No data to export.", noFilteredDataToExport: "The current filter returns no results to export.", processingSublocation: "Processing sublocation", recordsFound: "{count} records found.", searchHelpForPlant: "Search Help - Plant", searchHelpForStorage: "Search Help - Storage Location", searchHelpForMoveType: "Search Help - Movement Type", searchHelpForSpecialStock: "Search Help - Special Stock", plantCol: "Plant", plantNameCol: "Plant Name", storageCol: "Stor. Location", storageNameCol: "Location Name", moveTypeCol: "Move. Type", specialStockCol: "Special Stock"
+            // General
+            loading: "Loading...",
+            user: "User",
+            logoutButton: "Logout",
+            continueButton: "Continue",
+            cancelButton: "Cancel",
+            clearButton: "Clear",
+            saveButton: "Save to SAP",
+            backButton: "Back",
+            activateCameraButton: "Activate Camera",
+            applyButton: "Apply",
+            selectAll: "Select All",
+            deselectAll: "Deselect All",
+            // Login Screen
+            loginTitle: "SAP Login",
+            sapEnvironmentLabel: "SAP Environment",
+            devEnvironment: "Development (DEV)",
+            qasEnvironment: "Quality (QAS)",
+            prdEnvironment: "Production (PRD)",
+            clientLabel: "Client",
+            userLabel: "SAP User",
+            passwordLabel: "Password",
+            useSapRouterLabel: "Use SAP Router",
+            guestLoginButton: "Guest Login",
+            // Mode Selection
+            selectModeTitle: "Select a Mode",
+            labelReadingMode: "Label Reading (QR)",
+            sublocationQueryMode: "Query by Sublocation",
+            // Label Reading Program
+            mainContentTitle: "Movement Capture (QR Reading)",
+            headerDataTitle: "Header Data",
+            moveTypeLabel: "Move. Type:",
+            specialStockLabel: "Special Stock:",
+            plantLabel: "Plant:",
+            storageLocationLabel: "Storage Loc.:",
+            headerTextLabel: "Header Text:",
+            postingDateLabel: "Posting Date:",
+            reservationLabel: "Reservation",
+            lastQrLabel: "Last QR Read:",
+            // Sublocation Query Program
+            sublocationQueryTitle: "Query by Sublocation",
+            searchFiltersTitle: "Search Filters",
+            areaLabel: "Area:",
+            allLabel: "All",
+            scanSublocationQr: "Scan the Sublocation's QR code",
+            completeFiltersToScan: "Complete filters to scan.",
+            searchResultsTitle: "Search Results",
+            filterPlaceholder: "Filter results...",
+            // Modals
+            searchHelpTitle: "Search Help",
+            layoutModalTitle: "Select Visible Columns",
+            additionalConfirmationTitle: "Additional Confirmation",
+            completeFollowingData: "Please complete the following data to finalize saving.",
+            receiverLabel: "Receiver:",
+            dispatcherLabel: "Dispatcher:",
+            labelSizeLabel: "Label Size:",
+            selectSize: "Select a size...",
+            smallLabel: "S - Small",
+            mediumLabel: "M - Medium",
+            largeLabel: "L - Large",
+            confirmAndSaveButton: "Confirm and Save",
+            // Table Headers
+            docCol: "Document", yearCol: "Year", posCol: "Item", materialCol: "Material", materialDescCol: "Material Text", qtyCol: "Quantity",
+            unitCol: "Unit", batchCol: "Batch", certCol: "Certificate", docsCol: "Documents", inspCol: "Inspection", itemTextCol: "Item Text",
+            tagCol: "TAG", subLocCol: "Sublocation", areaCol: "Area", orderNoCol: "Order No.", wbsCol: "WBS Element", reservationCol: "Reservation",
+            salesOrderCol: "Sales Order", salesOrderItemCol: "SO Item",
+            // Sublocation Table Headers
+            sublocationCol: "Sublocation", countryCol: "Country", uomCol: "Unit of Measure", currencyCol: "Currency", freeStockCol: "Free Stock",
+            freeValueCol: "Free Value", transferStockCol: "Transfer Stock", transferValueCol: "Transfer Value", qualityStockCol: "Quality Stock",
+            qualityValueCol: "Quality Value", nonFreeStockCol: "Non-Free Stock", nonFreeValueCol: "Non-Free Value", blockedStockCol: "Blocked Stock",
+            blockedValueCol: "Blocked Value", returnsStockCol: "Returns Stock", returnsValueCol: "Returns Value",
+            // Dynamic Messages
+            validating: "Validating...",
+            sessionClosed: "Session closed.",
+            readyToScan: "Ready to scan",
+            cameraError: "Error starting camera",
+            scannerStopped: "Scanner stopped.",
+            invalidQrFormat: "Unrecognized QR format.",
+            codeAlreadyScanned: "Code already scanned.",
+            processing: "Processing...",
+            validationSuccess: "Validation successful.",
+            networkError: "Network error",
+            sessionError: "Session error.",
+            loadingData: "Loading data...",
+            confirmWindowError: "Could not open confirmation window",
+            allFieldsRequired: "All visible fields are required.",
+            preparingData: "Preparing data...",
+            savingData: "Saving movement and uploading files...",
+            processCompleted: "Process completed!",
+            saveError: "Error while saving",
+            noDataToExport: "No data to export.",
+            noFilteredDataToExport: "The current filter returns no results to export.",
+            processingSublocation: "Processing sublocation",
+            recordsFound: "{count} records found.",
+            // Search Help Translations
+            searchHelpForPlant: "Search Help - Plant",
+            searchHelpForStorage: "Search Help - Storage Location",
+            searchHelpForMoveType: "Search Help - Movement Type",
+            searchHelpForSpecialStock: "Search Help - Special Stock",
+            plantCol: "Plant",
+            plantNameCol: "Plant Name",
+            storageCol: "Stor. Location",
+            storageNameCol: "Location Name",
+            moveTypeCol: "Move. Type",
+            specialStockCol: "Special Stock"
         },
         es: {
-            loading: "Cargando...", user: "Usuario", logoutButton: "Logout", continueButton: "Continuar", cancelButton: "Cancelar", clearButton: "Limpiar", saveButton: "Guardar en SAP", backButton: "Volver", activateCameraButton: "Activar Cámara", applyButton: "Aplicar", selectAll: "Marcar todo", deselectAll: "Desmarcar todo", loginTitle: "Login SAP", sapEnvironmentLabel: "Entorno SAP", devEnvironment: "Desarrollo (DEV)", qasEnvironment: "Calidad (QAS)", prdEnvironment: "Producción (PRD)", clientLabel: "Mandante", userLabel: "Usuario SAP", passwordLabel: "Contraseña", useSapRouterLabel: "Usar SAP Router", guestLoginButton: "Login de Invitado", selectModeTitle: "Seleccione un Modo", labelReadingMode: "Lectura de Etiqueta (QR)", sublocationQueryMode: "Consulta por Sub-Ubicación", materialReceiptMode: "Ingreso de Materiales por Pedido", mainContentTitle: "Captura de Movimientos (Lectura QR)", headerDataTitle: "Datos de Cabecera", moveTypeLabel: "Cl.Movimiento:", specialStockLabel: "Stock Especial:", plantLabel: "Centro:", storageLocationLabel: "Almacén:", headerTextLabel: "Texto Cabecera:", postingDateLabel: "Fecha Contab.:", reservationLabel: "Reserva", lastQrLabel: "Último QR leído:", sublocationQueryTitle: "Consulta por Sub-Ubicación", searchFiltersTitle: "Filtros de Búsqueda", areaLabel: "Área:", allLabel: "Todos", scanSublocationQr: "Escanee el código QR de la Sub-Ubicación", completeFiltersToScan: "Complete los filtros para escanear.", searchResultsTitle: "Resultados de la Búsqueda", filterPlaceholder: "Filtrar resultados...", searchHelpTitle: "Ayuda para Búsqueda", layoutModalTitle: "Seleccionar Columnas Visibles", additionalConfirmationTitle: "Confirmación Adicional", completeFollowingData: "Por favor, complete los siguientes datos para finalizar el guardado.", receiverLabel: "Receptor:", dispatcherLabel: "Despachador:", labelSizeLabel: "Tamaño de Etiqueta:", selectSize: "Seleccione un tamaño...", smallLabel: "S - Pequeña", mediumLabel: "M - Mediana", largeLabel: "L - Grande", confirmAndSaveButton: "Confirmar y Guardar", docCol: "Documento", yearCol: "Año", posCol: "Pos.", materialCol: "Material", materialDescCol: "Texto Material", qtyCol: "Cantidad", unitCol: "Unidad", batchCol: "Lote", certCol: "Certificado", docsCol: "Documentos", inspCol: "Inspección", itemTextCol: "Texto Pos.", tagCol: "TAG", subLocCol: "Sub Ubicacion", areaCol: "Área", orderNoCol: "Nro. Pedido", wbsCol: "Elemento PEP", reservationCol: "Reserva", salesOrderCol: "Pedido Cliente", salesOrderItemCol: "Pos. Pedido Cliente", sublocationCol: "Sub Ubicación", countryCol: "Pais", uomCol: "Unidada de Medida", currencyCol: "Moneda", freeStockCol: "Stock Libre Utilizacion", freeValueCol: "Valor Libre Utilizacion", transferStockCol: "Stock Traslado", transferValueCol: "Valor Traslado", qualityStockCol: "Stock Calidad", qualityValueCol: "Valor Calidad", nonFreeStockCol: "Stock No Libre", nonFreeValueCol: "Valor No Libre", blockedStockCol: "Stock Bloqueado", blockedValueCol: "Valor Bloqueado", returnsStockCol: "Stock Devolución", returnsValueCol: "Valor Devolución", validating: "Validando...", sessionClosed: "Sesión cerrada.", readyToScan: "Listo para escanear", cameraError: "Error al iniciar cámara", scannerStopped: "Escáner detenido.", invalidQrFormat: "Formato de QR no reconocido.", codeAlreadyScanned: "Código ya escaneado.", processing: "Procesando...", validationSuccess: "Validación exitosa.", networkError: "Error de red", sessionError: "Error de sesión.", loadingData: "Cargando datos...", confirmWindowError: "No se pudo abrir la ventana de confirmación", allFieldsRequired: "Todos los campos visibles son obligatorios.", preparingData: "Preparando datos...", savingData: "Guardando movimiento y subiendo archivos...", processCompleted: "¡Proceso completado!", saveError: "Error al guardar", noDataToExport: "No hay datos para exportar.", noFilteredDataToExport: "El filtro actual no devuelve resultados para exportar.", processingSublocation: "Procesando sub-ubicación", recordsFound: "Se encontraron {count} registros.", searchHelpForPlant: "Ayuda para Búsqueda - Centro", searchHelpForStorage: "Ayuda para Búsqueda - Almacén", searchHelpForMoveType: "Ayuda para Búsqueda - Clase de Movimiento", searchHelpForSpecialStock: "Ayuda para Búsqueda - Stock Especial", plantCol: "Centro", plantNameCol: "Nombre Centro", storageCol: "Almacén", storageNameCol: "Nombre Almacén", moveTypeCol: "Clase Mov.", specialStockCol: "Stock Esp."
+            // General
+            loading: "Cargando...",
+            user: "Usuario",
+            logoutButton: "Logout",
+            continueButton: "Continuar",
+            cancelButton: "Cancelar",
+            clearButton: "Limpiar",
+            saveButton: "Guardar en SAP",
+            backButton: "Volver",
+            activateCameraButton: "Activar Cámara",
+            applyButton: "Aplicar",
+            selectAll: "Marcar todo",
+            deselectAll: "Desmarcar todo",
+            // Login Screen
+            loginTitle: "Login SAP",
+            sapEnvironmentLabel: "Entorno SAP",
+            devEnvironment: "Desarrollo (DEV)",
+            qasEnvironment: "Calidad (QAS)",
+            prdEnvironment: "Producción (PRD)",
+            clientLabel: "Mandante",
+            userLabel: "Usuario SAP",
+            passwordLabel: "Contraseña",
+            useSapRouterLabel: "Usar SAP Router",
+            guestLoginButton: "Login de Invitado",
+            // Mode Selection
+            selectModeTitle: "Seleccione un Modo",
+            labelReadingMode: "Lectura de Etiqueta (QR)",
+            sublocationQueryMode: "Consulta por Sub-Ubicación",
+            // Label Reading Program
+            mainContentTitle: "Captura de Movimientos (Lectura QR)",
+            headerDataTitle: "Datos de Cabecera",
+            moveTypeLabel: "Cl.Movimiento:",
+            specialStockLabel: "Stock Especial:",
+            plantLabel: "Centro:",
+            storageLocationLabel: "Almacén:",
+            headerTextLabel: "Texto Cabecera:",
+            postingDateLabel: "Fecha Contab.:",
+            reservationLabel: "Reserva",
+            lastQrLabel: "Último QR leído:",
+            // Sublocation Query Program
+            sublocationQueryTitle: "Consulta por Sub-Ubicación",
+            searchFiltersTitle: "Filtros de Búsqueda",
+            areaLabel: "Área:",
+            allLabel: "Todos",
+            scanSublocationQr: "Escanee el código QR de la Sub-Ubicación",
+            completeFiltersToScan: "Complete los filtros para escanear.",
+            searchResultsTitle: "Resultados de la Búsqueda",
+            filterPlaceholder: "Filtrar resultados...",
+            // Modals
+            searchHelpTitle: "Ayuda para Búsqueda",
+            layoutModalTitle: "Seleccionar Columnas Visibles",
+            additionalConfirmationTitle: "Confirmación Adicional",
+            completeFollowingData: "Por favor, complete los siguientes datos para finalizar el guardado.",
+            receiverLabel: "Receptor:",
+            dispatcherLabel: "Despachador:",
+            labelSizeLabel: "Tamaño de Etiqueta:",
+            selectSize: "Seleccione un tamaño...",
+            smallLabel: "S - Pequeña",
+            mediumLabel: "M - Mediana",
+            largeLabel: "L - Grande",
+            confirmAndSaveButton: "Confirmar y Guardar",
+            // Table Headers
+            docCol: "Documento", yearCol: "Año", posCol: "Pos.", materialCol: "Material", materialDescCol: "Texto Material", qtyCol: "Cantidad",
+            unitCol: "Unidad", batchCol: "Lote", certCol: "Certificado", docsCol: "Documentos", inspCol: "Inspección", itemTextCol: "Texto Pos.",
+            tagCol: "TAG", subLocCol: "Sub Ubicacion", areaCol: "Área", orderNoCol: "Nro. Pedido", wbsCol: "Elemento PEP", reservationCol: "Reserva",
+            salesOrderCol: "Pedido Cliente", salesOrderItemCol: "Pos. Pedido Cliente",
+            // Sublocation Table Headers
+            sublocationCol: "Sub Ubicación", countryCol: "Pais", uomCol: "Unidada de Medida", currencyCol: "Moneda", freeStockCol: "Stock Libre Utilizacion",
+            freeValueCol: "Valor Libre Utilizacion", transferStockCol: "Stock Traslado", transferValueCol: "Valor Traslado", qualityStockCol: "Stock Calidad",
+            qualityValueCol: "Valor Calidad", nonFreeStockCol: "Stock No Libre", nonFreeValueCol: "Valor No Libre", blockedStockCol: "Stock Bloqueado",
+            blockedValueCol: "Valor Bloqueado", returnsStockCol: "Stock Devolución", returnsValueCol: "Valor Devolución",
+            // Dynamic Messages
+            validating: "Validando...",
+            sessionClosed: "Sesión cerrada.",
+            readyToScan: "Listo para escanear",
+            cameraError: "Error al iniciar cámara",
+            scannerStopped: "Escáner detenido.",
+            invalidQrFormat: "Formato de QR no reconocido.",
+            codeAlreadyScanned: "Código ya escaneado.",
+            processing: "Procesando...",
+            validationSuccess: "Validación exitosa.",
+            networkError: "Error de red",
+            sessionError: "Error de sesión.",
+            loadingData: "Cargando datos...",
+            confirmWindowError: "No se pudo abrir la ventana de confirmación",
+            allFieldsRequired: "Todos los campos visibles son obligatorios.",
+            preparingData: "Preparando datos...",
+            savingData: "Guardando movimiento y subiendo archivos...",
+            processCompleted: "¡Proceso completado!",
+            saveError: "Error al guardar",
+            noDataToExport: "No hay datos para exportar.",
+            noFilteredDataToExport: "El filtro actual no devuelve resultados para exportar.",
+            processingSublocation: "Procesando sub-ubicación",
+            recordsFound: "Se encontraron {count} registros.",
+            // Traducciones de Ayuda de Búsqueda
+            searchHelpForPlant: "Ayuda para Búsqueda - Centro",
+            searchHelpForStorage: "Ayuda para Búsqueda - Almacén",
+            searchHelpForMoveType: "Ayuda para Búsqueda - Clase de Movimiento",
+            searchHelpForSpecialStock: "Ayuda para Búsqueda - Stock Especial",
+            plantCol: "Centro",
+            plantNameCol: "Nombre Centro",
+            storageCol: "Almacén",
+            storageNameCol: "Nombre Almacén",
+            moveTypeCol: "Clase Mov.",
+            specialStockCol: "Stock Esp."
         }
     };
+
     let currentLang = 'es';
+
     function setLanguage(lang) {
         currentLang = lang;
         document.querySelectorAll('[data-translate]').forEach(el => {
             const key = el.getAttribute('data-translate');
             if (translations[lang] && translations[lang][key]) {
-                if (el.placeholder) el.placeholder = translations[lang][key];
-                else el.textContent = translations[lang][key];
+                if (el.placeholder) {
+                    el.placeholder = translations[lang][key];
+                } else {
+                    el.textContent = translations[lang][key];
+                }
             }
         });
         document.documentElement.lang = lang;
+        // Re-renderizar cabeceras de la tabla de sub-ubicación
         const sublocationTable = document.getElementById('sublocationTable');
         if (sublocationTable) {
             const thead = sublocationTable.querySelector('thead');
@@ -514,7 +716,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 else if (columnKey === 'LGORT') translationKey = 'storageLocationLabel';
                 else if (columnKey === 'CHARG') translationKey = 'batchCol';
                 else if (columnKey === 'SOBKZ') translationKey = 'specialStockLabel';
-                else if (columnKey === 'KZBWS') translationKey = 'Val. Stock Esp.';
+                else if (columnKey === 'KZBWS') translationKey = 'Val. Stock Esp.'; // TODO: Add to translations
                 else if (columnKey === 'PS_PSP_PNR') translationKey = 'wbsCol';
                 else if (columnKey === 'ZZUBICACION') translationKey = 'tagCol';
                 else if (columnKey === 'ZZSUB_UBICACION') translationKey = 'sublocationCol';
@@ -533,14 +735,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 else if (columnKey === 'WSPEM') translationKey = 'blockedValueCol';
                 else if (columnKey === 'RETME') translationKey = 'returnsStockCol';
                 else if (columnKey === 'WRETM') translationKey = 'returnsValueCol';
-                th.childNodes[0].nodeValue = getText(translationKey, th.childNodes[0].nodeValue.trim()) + ' ';
+
+                th.childNodes[0].nodeValue = getText(translationKey) + ' ';
             });
         }
     }
-    function getText(key, fallback = null) { return (translations[currentLang] && translations[currentLang][key]) || fallback || key; }
+
+    function getText(key, fallback = null) {
+        return (translations[currentLang] && translations[currentLang][key]) || fallback || key;
+    }
+
     const userLang = navigator.language.slice(0, 2).toLowerCase();
     setLanguage(userLang === 'es' ? 'es' : 'en');
-    
+
+    // --- VARIABLES GLOBALES ---
     let sapConnection = null;
     let html5QrCode = null;
     let html5QrCodeSublocation = null;
@@ -549,8 +757,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let isGuestMode = false;
     const scannedCodes = new Map();
     const SAP_ROUTER_STRING = "/H/50.234.28.124/H/";
-    const beepSound = new Audio(`${API_BASE_URL}/static/beep.mp3`);
-    const errorSound = new Audio(`${API_BASE_URL}/static/error.mp3`);
+    const beepSound = new Audio("{{ url_for('static', filename='beep.mp3') }}");
+    const errorSound = new Audio("{{ url_for('static', filename='error.mp3') }}");
     let sublocationData = [];
     let sortState = { column: null, direction: 'asc' };
     let currentSearchHelpTarget = null;
@@ -559,24 +767,30 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentLayoutConfig = {};
     let poItemsData = [];
 
+    // --- Referencias al DOM ---
     const spinner = document.getElementById('spinner-overlay');
     const loginSection = document.getElementById('loginSection');
     const modeSelectionSection = document.getElementById('modeSelectionSection');
     const mainContent = document.getElementById('mainContent');
     const sublocationContent = document.getElementById('sublocationContent');
     const ingresoContent = document.getElementById('ingresoContent');
+
     const loginButton = document.getElementById('loginButton');
     const guestLoginButton = document.getElementById('guestLoginButton');
     const continueButton = document.getElementById('continueButton');
     const logoutButtons = document.querySelectorAll('#logoutButton, #logoutButtonSub, #logoutButtonIngreso');
     const backButtons = document.querySelectorAll('#backButtonMain, #backButtonSub, #backButtonIngreso');
+
     const sapEnvSelect = document.getElementById('sapEnvSelect');
     const sapClientInput = document.getElementById('sapClientInput');
     const sapUserInput = document.getElementById('sapUserInput');
     const sapPassInput = document.getElementById('sapPassInput');
     const useSapRouter = document.getElementById('useSapRouter');
     const loginStatus = document.getElementById('loginStatus');
+
     const loggedInUserDisplays = document.querySelectorAll('#loggedInUserDisplay, #loggedInUserDisplaySub, #loggedInUserDisplayIngreso');
+
+    // DOM para programa de etiquetas
     const headerDataSection = document.getElementById('headerDataSection');
     const clMovimientoInput = document.getElementById('clMovimiento');
     const almacenInput = document.getElementById('almacen');
@@ -595,6 +809,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const readerMessageElement = document.querySelector('#reader .qr-message');
     const headerInputs = [clMovimientoInput, almacenInput, centroInput, fechaContabInput, specialStockIndicatorInput];
     const startScanButton = document.getElementById('startScanButton');
+
+    // DOM para programa de sub-ubicación
     const sublocationReader = document.getElementById('sublocationReader');
     const sublocationScanStatus = document.getElementById('sublocationScanStatus');
     const sublocationTableHead = document.getElementById('sublocationTableHead');
@@ -608,6 +824,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportToExcelButton = document.getElementById('exportToExcelButton');
     const startSublocationScanButton = document.getElementById('startSublocationScanButton');
     const layoutButtonSub = document.getElementById('layoutButtonSub');
+
+    // Referencias a la Modal
     const signatureModalElement = document.getElementById('signatureModal');
     const signatureModal = new bootstrap.Modal(signatureModalElement);
     const receptorSelect = document.getElementById('receptorSelect');
@@ -616,78 +834,123 @@ document.addEventListener('DOMContentLoaded', () => {
     const labelSizeContainer = document.getElementById('labelSizeContainer');
     const confirmSaveButton = document.getElementById('confirmSaveButton');
     const modalErrorMessage = document.getElementById('modal-error-message');
+
+    // Referencias a la Modal de Ayuda de Búsqueda
     const searchHelpModalElement = document.getElementById('searchHelpModal');
     const searchHelpModal = new bootstrap.Modal(searchHelpModalElement);
     const searchHelpModalLabel = document.getElementById('searchHelpModalLabel');
     const searchHelpFilter = document.getElementById('searchHelpFilter');
     const searchHelpTableHead = document.getElementById('searchHelpTableHead');
     const searchHelpTableBody = document.getElementById('searchHelpTableBody');
+
+    // Referencias a la Modal de Layout
     const layoutModalElement = document.getElementById('layoutModal');
     const layoutModal = new bootstrap.Modal(layoutModalElement);
     const layoutModalBody = document.getElementById('layoutModalBody');
     const applyLayoutButton = document.getElementById('applyLayoutButton');
+
+    // Referencias para Ingreso de material
     const ingresoNroPedidoInput = document.getElementById('ingresoNroPedido');
     const ingresoItemsTableBody = document.getElementById('ingresoItemsTableBody');
     const ingresoSaveButton = document.getElementById('ingresoSaveButton');
     const ingresoClearButton = document.getElementById('ingresoClearButton');
     const ingresoStatus = document.getElementById('ingresoStatus');
     const selectAllIngresoItemsCheckbox = document.getElementById('selectAllIngresoItemsCheckbox');
-    function showSpinner() { spinner.style.display = 'flex'; }
-    function hideSpinner() { spinner.style.display = 'none'; }
+
+    // --- FUNCIONES DEL SPINNER ---
+    function showSpinner() {
+        spinner.style.display = 'flex';
+    }
+    function hideSpinner() {
+        spinner.style.display = 'none';
+    }
     function playSound(type) {
         try {
             if (type === 'beep') beepSound.play();
             else if (type === 'error') errorSound.play();
         } catch(e) { console.error("Error playing sound:", e); }
     }
+
+    // --- REGISTRO DE EVENTOS ---
     loginButton.addEventListener('click', () => handleLogin(false));
     guestLoginButton.addEventListener('click', () => handleLogin(true));
     logoutButtons.forEach(btn => btn.addEventListener('click', handleLogout));
     continueButton.addEventListener('click', handleModeSelection);
     backButtons.forEach(btn => btn.addEventListener('click', goBackToModeSelection));
+
     headerInputs.forEach(input => input.addEventListener('input', handleHeaderChange));
     reservaCheckbox.addEventListener('change', toggleReservaColumn);
     resetButton.addEventListener('click', resetAll);
     saveButton.addEventListener('click', openSignatureModal);
     confirmSaveButton.addEventListener('click', handleConfirmSave);
-    [sublocationCentroInput, sublocationAlmacenInput].forEach(input => input.addEventListener('input', manageSublocationScannerState));
-    sublocationCentroInput.addEventListener('input', () => { sublocationAreaContainer.style.display = sublocationCentroInput.value.trim() === '4000' ? 'block' : 'none'; });
+
+    [sublocationCentroInput, sublocationAlmacenInput].forEach(input => {
+        input.addEventListener('input', manageSublocationScannerState);
+    });
+    sublocationCentroInput.addEventListener('input', () => {
+        if (sublocationCentroInput.value.trim() === '4000') {
+            sublocationAreaContainer.style.display = 'block';
+        } else {
+            sublocationAreaContainer.style.display = 'none';
+        }
+    });
     sublocationTableHead.addEventListener('click', handleSort);
     filterInput.addEventListener('input', filterAndRender);
     exportToExcelButton.addEventListener('click', exportToExcel);
     layoutButtonSub.addEventListener('click', () => openLayoutModal('sublocationTable', sublocationColumnVisibility, 'layoutModalTitle'));
     layoutButtonMseg.addEventListener('click', () => openLayoutModal('msegTable', msegColumnVisibility, 'layoutModalTitle'));
     applyLayoutButton.addEventListener('click', applyLayoutChanges);
+
     document.getElementById('searchCentro').addEventListener('click', () => openSearchHelp('centro', 'Z_SEARCH_HELP_WERKS', {}, 'searchHelpForPlant'));
     document.getElementById('searchAlmacen').addEventListener('click', () => openSearchHelp('almacen', 'Z_SEARCH_HELP_LGORT', { IV_WERKS: centroInput.value.trim() }, 'searchHelpForStorage'));
     document.getElementById('searchSublocationCentro').addEventListener('click', () => openSearchHelp('sublocationCentro', 'Z_SEARCH_HELP_WERKS', {}, 'searchHelpForPlant'));
     document.getElementById('searchSublocationAlmacen').addEventListener('click', () => openSearchHelp('sublocationAlmacen', 'Z_SEARCH_HELP_LGORT', { IV_WERKS: sublocationCentroInput.value.trim() }, 'searchHelpForStorage'));
     document.getElementById('searchClMovimiento').addEventListener('click', () => openSearchHelp('clMovimiento', 'local_cl_movimiento', {}, 'searchHelpForMoveType'));
     document.getElementById('searchSpecialStock').addEventListener('click', () => openSearchHelp('specialStockIndicator', 'local_stock_especial', {}, 'searchHelpForSpecialStock'));
+
     searchHelpTableBody.addEventListener('click', handleSearchHelpSelection);
     searchHelpFilter.addEventListener('input', filterSearchHelp);
     startScanButton.addEventListener('click', startScanner);
     startSublocationScanButton.addEventListener('click', startSublocationScanner);
-    msegTableBody.addEventListener('click', e => { if (e.target.classList.contains('select-file-btn')) e.target.nextElementSibling.click(); });
-    msegTableBody.addEventListener('change', e => {
-        if (e.target.classList.contains('file-input')) {
-            const fileInput = e.target, file = fileInput.files[0];
+
+    msegTableBody.addEventListener('click', function(e) {
+        if (e.target && e.target.classList.contains('select-file-btn')) {
+            const fileInput = e.target.nextElementSibling;
+            if (fileInput && fileInput.classList.contains('file-input')) {
+                fileInput.click();
+            }
+        }
+    });
+
+    msegTableBody.addEventListener('change', function(e) {
+        if (e.target && e.target.classList.contains('file-input')) {
+            const fileInput = e.target;
+            const file = fileInput.files[0];
             if (file) {
-                const key = fileInput.dataset.key, field = fileInput.dataset.field;
+                const key = fileInput.dataset.key;
+                const field = fileInput.dataset.field;
                 const displayNameInput = fileInput.parentElement.querySelector('.filename-display');
+
                 if (scannedCodes.has(key)) {
                     const sapData = scannedCodes.get(key);
                     sapData[field] = file;
                     sapData[`${field}_FILENAME`] = file.name;
                     scannedCodes.set(key, sapData);
                 }
-                if (displayNameInput) displayNameInput.value = file.name;
+
+                if (displayNameInput) {
+                    displayNameInput.value = file.name;
+                }
             }
         }
     });
-    msegTableBody.addEventListener('input', e => {
+
+    msegTableBody.addEventListener('input', (e) => {
         if (e.target.tagName === 'INPUT' && e.target.type === 'text') {
-            const key = e.target.dataset.key, field = e.target.dataset.field, value = e.target.value;
+            const key = e.target.dataset.key;
+            const field = e.target.dataset.field;
+            const value = e.target.value;
+
             if (key && field && scannedCodes.has(key)) {
                 const data = scannedCodes.get(key);
                 data[field] = value;
@@ -695,151 +958,238 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
     document.getElementById('searchPoButton').addEventListener('click', fetchPurchaseOrderItems);
     ingresoClearButton.addEventListener('click', () => clearIngresoForm(true));
     ingresoSaveButton.addEventListener('click', saveIngresoData);
     document.querySelectorAll('input[name="ingresoStockEspecial"]').forEach(radio => radio.addEventListener('change', updateIngresoTableVisibility));
+
     ingresoItemsTableBody.addEventListener('change', e => {
         if (e.target.classList.contains('item-checkbox')) {
             const checkedCount = ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked').length;
             ingresoSaveButton.disabled = checkedCount === 0;
-            selectAllIngresoItemsCheckbox.checked = ingresoItemsTableBody.querySelectorAll('.item-checkbox').length > 0 && ingresoItemsTableBody.querySelectorAll('.item-checkbox').length === checkedCount;
+            const totalCheckboxes = ingresoItemsTableBody.querySelectorAll('.item-checkbox').length;
+            selectAllIngresoItemsCheckbox.checked = totalCheckboxes > 0 && totalCheckboxes === checkedCount;
         }
     });
+
     selectAllIngresoItemsCheckbox.addEventListener('change', e => {
         const isChecked = e.target.checked;
         ingresoItemsTableBody.querySelectorAll('.item-checkbox').forEach(checkbox => checkbox.checked = isChecked);
         ingresoSaveButton.disabled = !isChecked || ingresoItemsTableBody.querySelectorAll('.item-checkbox').length === 0;
     });
 
+    // --- LÓGICA DE AYUDA DE BÚSQUEDA (MATCHCODE) ---
     async function openSearchHelp(targetInputId, rfcName, params, titleKey) {
         currentSearchHelpTarget = document.getElementById(targetInputId);
-        searchHelpModalLabel.textContent = getText(titleKey, `Ayuda para Búsqueda - ${targetInputId}`);
+        searchHelpModalLabel.textContent = getText(titleKey, `${getText('searchHelpTitle')} - ${targetInputId}`);
         searchHelpTableHead.innerHTML = '';
         searchHelpTableBody.innerHTML = `<tr><td colspan="2">${getText('loading')}</td></tr>`;
         searchHelpFilter.value = '';
         searchHelpModal.show();
+
         if (rfcName.startsWith('local_')) {
             let localData = [];
-            if (rfcName === 'local_cl_movimiento') localData = [{ 'CL_MOV': '101' }, { 'CL_MOV': '221' }, { 'CL_MOV': '231' }, { 'CL_MOV': '601' }];
-            else if (rfcName === 'local_stock_especial') localData = [{ 'STOCK_ESP': '' }, { 'STOCK_ESP': 'Q' }, { 'STOCK_ESP': 'E' }];
+            if (rfcName === 'local_cl_movimiento') {
+                localData = [{ 'CL_MOV': '101' }, { 'CL_MOV': '221' }, { 'CL_MOV': '231' }, { 'CL_MOV': '601' }];
+            } else if (rfcName === 'local_stock_especial') {
+                localData = [{ 'STOCK_ESP': '' }, { 'STOCK_ESP': 'Q' }, { 'STOCK_ESP': 'E' }];
+            }
             populateSearchHelpTable(localData);
             return;
         }
+
         showSpinner();
         try {
             const response = await fetch(`${API_BASE_URL}/getSearchHelpData`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ connection_params: sapConnection, rfc_name: rfcName, rfc_params: params, is_guest: isGuestMode })
+                body: JSON.stringify({
+                    connection_params: sapConnection,
+                    rfc_name: rfcName,
+                    rfc_params: params,
+                    is_guest: isGuestMode
+                })
             });
             const result = await response.json();
-            if (result.success) populateSearchHelpTable(result.data);
-            else searchHelpTableBody.innerHTML = `<tr><td colspan="2" class="text-danger">${result.error}</td></tr>`;
+            if (result.success) {
+                populateSearchHelpTable(result.data);
+            } else {
+                searchHelpTableBody.innerHTML = `<tr><td colspan="2" class="text-danger">${result.error}</td></tr>`;
+            }
         } catch (e) {
             searchHelpTableBody.innerHTML = `<tr><td colspan="2" class="text-danger">${getText('networkError')}: ${e.message}</td></tr>`;
         } finally {
             hideSpinner();
         }
     }
+
     function populateSearchHelpTable(data) {
         if (!data || data.length === 0) {
-            searchHelpTableBody.innerHTML = `<tr><td colspan="2">${getText('noDataFound', 'No se encontraron datos')}</td></tr>`;
+            searchHelpTableBody.innerHTML = `<tr><td colspan="2">${getText('noDataFound')}</td></tr>`;
             return;
         }
-        const headerTranslations = { 'WERKS': 'plantCol', 'NAME1': 'plantNameCol', 'LGORT': 'storageCol', 'LGOBE': 'storageNameCol', 'CL_MOV': 'moveTypeCol', 'STOCK_ESP': 'specialStockCol' };
+
+        const headerTranslations = {
+            'WERKS': 'plantCol',
+            'NAME1': 'plantNameCol',
+            'LGORT': 'storageCol',
+            'LGOBE': 'storageNameCol',
+            'CL_MOV': 'moveTypeCol',
+            'STOCK_ESP': 'specialStockCol'
+        };
+
         const allHeaders = Object.keys(data[0]);
+        const codeFields = ['WERKS', 'LGORT', 'CL_MOV', 'STOCK_ESP'];
+        const descFields = ['NAME1', 'LGOBE'];
+
         let orderedHeaders = [];
-        const codeHeader = allHeaders.find(h => ['WERKS', 'LGORT', 'CL_MOV', 'STOCK_ESP'].includes(h));
-        const descHeader = allHeaders.find(h => ['NAME1', 'LGOBE'].includes(h));
+        let codeHeader = allHeaders.find(h => codeFields.includes(h));
+        let descHeader = allHeaders.find(h => descFields.includes(h));
+
         if (codeHeader) orderedHeaders.push(codeHeader);
         if (descHeader) orderedHeaders.push(descHeader);
-        allHeaders.forEach(h => { if (!orderedHeaders.includes(h)) orderedHeaders.push(h); });
+
+        allHeaders.forEach(h => {
+            if (!orderedHeaders.includes(h)) {
+                orderedHeaders.push(h);
+            }
+        });
+
         searchHelpTableHead.innerHTML = `<tr>${orderedHeaders.map(h => `<th>${getText(headerTranslations[h], h)}</th>`).join('')}</tr>`;
+
         searchHelpTableBody.innerHTML = '';
         data.forEach(row => {
             const tr = document.createElement('tr');
             tr.style.cursor = 'pointer';
-            tr.dataset.returnValue = row[orderedHeaders[0]];
+            const returnValue = row[orderedHeaders[0]];
+            tr.dataset.returnValue = returnValue;
+
             tr.innerHTML = orderedHeaders.map(h => `<td>${row[h]}</td>`).join('');
             searchHelpTableBody.appendChild(tr);
         });
     }
+
     function handleSearchHelpSelection(e) {
         const row = e.target.closest('tr');
         if (!row || row.dataset.returnValue === undefined) return;
-        currentSearchHelpTarget.value = row.dataset.returnValue;
-        currentSearchHelpTarget.dispatchEvent(new Event('input'));
+
+        const value = row.dataset.returnValue;
+        if (currentSearchHelpTarget) {
+            currentSearchHelpTarget.value = value;
+            currentSearchHelpTarget.dispatchEvent(new Event('input'));
+        }
         searchHelpModal.hide();
     }
+
     function filterSearchHelp() {
         const filterText = searchHelpFilter.value.toLowerCase();
-        searchHelpTableBody.querySelectorAll('tr').forEach(row => {
-            row.style.display = row.textContent.toLowerCase().includes(filterText) ? '' : 'none';
-        });
+        const rows = searchHelpTableBody.getElementsByTagName('tr');
+        for (const row of rows) {
+            const cells = row.getElementsByTagName('td');
+            let found = false;
+            for (const cell of cells) {
+                if (cell.textContent.toLowerCase().includes(filterText)) {
+                    found = true;
+                    break;
+                }
+            }
+            row.style.display = found ? '' : 'none';
+        }
     }
+
+    // --- LÓGICA DE LOGIN Y SELECCIÓN DE MODO ---
     async function handleLogin(isGuest) {
         isGuestMode = isGuest;
         setLoginStatus(getText('validating'), "info");
         showSpinner();
+
         sapConnection = null;
+
         const selectedOption = sapEnvSelect.options[sapEnvSelect.selectedIndex];
+
         const connectionParamsForThisAttempt = {
             ashost: selectedOption.dataset.host,
             sysnr: selectedOption.dataset.sysnr,
             client: sapClientInput.value.trim(),
         };
-        if (useSapRouter.checked) connectionParamsForThisAttempt.saprouter = SAP_ROUTER_STRING;
+
+        if (useSapRouter.checked) {
+            connectionParamsForThisAttempt.saprouter = SAP_ROUTER_STRING;
+        }
+
         if (!isGuest) {
             connectionParamsForThisAttempt.user = sapUserInput.value.trim();
             connectionParamsForThisAttempt.passwd = sapPassInput.value.trim();
         }
-        const endpoint = isGuest ? '/validateGuestLogin' : '/validateLogin';
+
+        const endpoint = isGuest ? `${API_BASE_URL}/validateGuestLogin` : `${API_BASE_URL}/validateLogin`;
+
         try {
-            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ connection_params: connectionParamsForThisAttempt })
             });
-            if (!response.ok) throw new Error(`Error de Red/CORS: ${response.status}`);
             const result = await response.json();
+
             if (result.success) {
                 sapConnection = connectionParamsForThisAttempt;
                 const userToShow = isGuest ? (result.guest_user || 'Invitado') : connectionParamsForThisAttempt.user;
+
                 loginSection.style.display = 'none';
                 modeSelectionSection.style.display = 'block';
-                const userDisplayText = `${getText('user')}: ${userToShow} (${sapEnvSelect.value})`;
-                loggedInUserDisplays.forEach(el => el.textContent = userDisplayText);
+
+                // **CORRECCIÓN AQUÍ**: Usar el NodeList 'loggedInUserDisplays' para actualizar todos los spans
+                const displayText = `${getText('user')}: ${userToShow.toUpperCase()} (${sapEnvSelect.value})`;
+                loggedInUserDisplays.forEach(display => {
+                    display.textContent = displayText;
+                });
+
             } else {
-                throw new Error(result.error);
+                sapConnection = null;
+                setLoginStatus(`Error: ${result.error}`, 'error');
+                playSound('error');
             }
         } catch (e) {
             sapConnection = null;
-            setLoginStatus(`Error: ${e.message}`, 'error');
+            setLoginStatus(`${getText('networkError')}: ${e.message}`, 'error');
             playSound('error');
         } finally {
             hideSpinner();
         }
     }
+
     async function handleLogout() {
-        await stopAllScanners();
-        sapConnection = null; isGuestMode = false;
+        await stopAllScales();
+        sapConnection = null;
+        isGuestMode = false;
+
         mainContent.style.display = 'none';
         sublocationContent.style.display = 'none';
         ingresoContent.style.display = 'none';
         modeSelectionSection.style.display = 'none';
         loginSection.style.display = 'block';
+
         sapPassInput.value = '';
         setLoginStatus(getText('sessionClosed'), "info");
         clearAllScreens();
     }
+
     function handleModeSelection() {
         const selectedMode = document.querySelector('input[name="appMode"]:checked').value;
         modeSelectionSection.style.display = 'none';
+
+        // Ocultar todas las secciones primero para evitar solapamientos
+        mainContent.style.display = 'none';
+        sublocationContent.style.display = 'none';
+        ingresoContent.style.display = 'none';
+
         if (selectedMode === 'etiqueta') {
             mainContent.style.display = 'block';
-            if (isGuestMode) headerDataSection.style.display = 'none';
-            else {
+            if (isGuestMode) {
+                headerDataSection.style.display = 'none';
+            } else {
                 headerDataSection.style.display = 'block';
                 fechaContabInput.valueAsDate = new Date();
             }
@@ -854,6 +1204,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateIngresoTableVisibility();
         }
     }
+
     async function goBackToModeSelection() {
         await stopAllScanners();
         mainContent.style.display = 'none';
@@ -862,26 +1213,42 @@ document.addEventListener('DOMContentLoaded', () => {
         modeSelectionSection.style.display = 'block';
         clearAllScreens();
     }
+
     function setLoginStatus(message, type) {
         loginStatus.textContent = message;
         loginStatus.className = `mt-3 text-center message-${type}`;
     }
+
     async function stopAllScanners() {
-        if (html5QrCode && html5QrCode.isScanning) { try { await html5QrCode.stop(); } catch(e) {} }
-        if (html5QrCodeSublocation && html5QrCodeSublocation.isScanning) { try { await html5QrCodeSublocation.stop(); } catch(e) {} }
-        isScanning = false; isSublocationScanning = false;
-        document.getElementById('reader').style.display = 'none';
-        startScanButton.style.display = 'block';
+        if (html5QrCode && html5QrCode.isScanning) {
+            try { await html5QrCode.stop(); } catch(e) { console.error("Error stopping main scanner:", e); }
+        }
+        if (html5QrCodeSublocation && html5QrCodeSublocation.isScanning) {
+            try { await html5QrCodeSublocation.stop(); } catch(e) { console.error("Error stopping sublocation scanner:", e); }
+        }
+        isScanning = false;
+        isSublocationScanning = false;
+        if (document.getElementById('reader')) {
+            document.getElementById('reader').style.display = 'none';
+            startScanButton.style.display = 'block';
+        }
         setScanStatus(getText('scannerStopped'), "info");
-        document.getElementById('sublocationReader').style.display = 'none';
-        startSublocationScanButton.style.display = 'block';
-        sublocationScanStatus.textContent = '';
+        if (sublocationReader) {
+            sublocationReader.style.display = 'none';
+            startSublocationScanButton.style.display = 'block';
+            sublocationScanStatus.textContent = '';
+        }
     }
+
+    // --- LÓGICA PARA LECTURA DE ETIQUETA (PROGRAMA 1) ---
     function handleHeaderChange() {
-        if (!isGuestMode) toggleReservaCheckbox();
+        if (!isGuestMode) { toggleReservaCheckbox(); }
         manageScannerState();
     }
-    function areHeadersFilled() { return isGuestMode || (clMovimientoInput.value.trim() && almacenInput.value.trim() && centroInput.value.trim() && fechaContabInput.value); }
+    function areHeadersFilled() {
+        if (isGuestMode) { return true; }
+        return clMovimientoInput.value.trim() && almacenInput.value.trim() && centroInput.value.trim() && fechaContabInput.value;
+    }
     async function manageScannerState() {
         if (areHeadersFilled()) {
             startScanButton.disabled = false;
@@ -903,7 +1270,9 @@ document.addEventListener('DOMContentLoaded', () => {
         html5QrCode = new Html5Qrcode("reader");
         const config = { fps: 10, qrbox: { width: 250, height: 250 } };
         try {
-            await html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, () => {});
+            await html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, (errorMessage) => {
+                // console.log(`QR Code no match: ${errorMessage}`);
+            });
             setScanStatus(getText('readyToScan'), "success");
         } catch (err) {
             setScanStatus(`${getText('cameraError')}: ${err}`, "error");
@@ -914,8 +1283,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     async function stopScanner() {
         if (!isScanning || !html5QrCode) return;
-        try { await html5QrCode.stop(); } catch(err) {}
-        isScanning = false; 
+        try {
+            await html5QrCode.stop();
+        } catch(err) { /* Ignorar error */ }
+        isScanning = false;
         document.getElementById('reader').style.display = 'none';
         startScanButton.style.display = 'block';
         setScanStatus(getText('scannerStopped'), "info");
@@ -924,16 +1295,18 @@ document.addEventListener('DOMContentLoaded', () => {
         await stopScanner();
         let rfc_params;
         try {
-            if (decodedText.length === 18 && /^\d+$/.test(decodedText)) rfc_params = { documentNumber: decodedText.substring(0, 10), documentYear: decodedText.substring(10, 14), item: decodedText.substring(14, 18) };
-            else {
+            if (decodedText.length === 18 && /^\d+$/.test(decodedText)) {
+                rfc_params = { documentNumber: decodedText.substring(0, 10), documentYear: decodedText.substring(10, 14), item: decodedText.substring(14, 18) };
+            } else {
                 rfc_params = JSON.parse(decodedText);
-                if (!rfc_params.documentNumber || !rfc_params.documentYear || !rfc_params.item) throw new Error("JSON inválido.");
+                if (!rfc_params.documentNumber || !rfc_params.documentYear || !rfc_params.item) { throw new Error("JSON inválido."); }
             }
         } catch (e) {
             setScanStatus(getText('invalidQrFormat'), "error");
             playSound('error');
             return;
         }
+
         const key = `${rfc_params.documentNumber}-${rfc_params.documentYear}-${rfc_params.item}`;
         if (scannedCodes.has(key)) {
             setScanStatus(getText('codeAlreadyScanned'), "error");
@@ -945,7 +1318,11 @@ document.addEventListener('DOMContentLoaded', () => {
         await fetchMsegData(rfc_params);
     }
     async function fetchMsegData(rfc_params) {
-        if (!sapConnection) { setScanStatus(getText('sessionError'), "error"); playSound('error'); return; }
+        if (!sapConnection) {
+            setScanStatus(getText('sessionError'), "error");
+            playSound('error');
+            return;
+        }
         showSpinner();
         const payload = {
             connection_params: sapConnection,
@@ -961,50 +1338,84 @@ document.addEventListener('DOMContentLoaded', () => {
                 const key = `${rfc_params.documentNumber}-${rfc_params.documentYear}-${rfc_params.item}`;
                 scannedCodes.set(key, result.msegData);
                 renderTable();
-            } else { 
-                setScanStatus(result.error || "Error.", "error"); 
+            } else {
+                setScanStatus(result.error || "Error.", "error");
                 playSound('error');
             }
-        } catch (e) { 
-            setScanStatus(`${getText('networkError')}: ${e.message}`, "error"); 
+        } catch (e) {
+            setScanStatus(`${getText('networkError')}: ${e.message}`, "error");
             playSound('error');
         } finally {
             hideSpinner();
         }
     }
     function toggleReservaCheckbox() {
-        const clMov = clMovimientoInput.value.trim(), stock = specialStockIndicatorInput.value.trim().toUpperCase();
+        const clMov = clMovimientoInput.value.trim();
+        const stock = specialStockIndicatorInput.value.trim().toUpperCase();
         const showCheckbox = clMov === '221' && stock === 'Q';
         reservaCheckboxContainer.classList.toggle('visible', showCheckbox);
-        if (!showCheckbox) reservaCheckbox.checked = false; 
+        if (!showCheckbox) {
+            reservaCheckbox.checked = false;
+        }
         toggleReservaColumn();
     }
+
     function toggleReservaColumn() {
         const show = reservaCheckbox.checked;
-        document.querySelectorAll('.reserva-col, .reserva-cell').forEach(el => el.classList.toggle('d-none', !show));
+        document.querySelectorAll('.reserva-col, .reserva-cell').forEach(el => {
+            el.classList.toggle('d-none', !show);
+        });
         msegColumnVisibility['reservationCol'] = show;
         updateTableVisibility('msegTable', msegColumnVisibility);
     }
+
     function renderTable() {
         msegTableBody.innerHTML = '';
         scannedCodes.forEach((sapData, key) => {
             const [doc, year, item] = key.split('-');
             const tr = document.createElement("tr");
             const isReadOnly = isGuestMode ? 'readonly' : '';
+            const materialDisplay = (sapData.MATNR || '').replace(/^0+/, '');
+
             tr.innerHTML = `
-                <td class="cell-docCol">${doc}</td><td class="cell-yearCol">${year}</td><td class="cell-posCol">${item}</td>
-                <td class="cell-materialCol">${(sapData.MATNR || '').replace(/^0+/, '')}</td><td class="cell-materialDescCol">${sapData.MAKTX || ''}</td>
+                <td class="cell-docCol">${doc}</td>
+                <td class="cell-yearCol">${year}</td>
+                <td class="cell-posCol">${item}</td>
+                <td class="cell-materialCol">${materialDisplay}</td>
+                <td class="cell-materialDescCol">${sapData.MAKTX || ''}</td>
                 <td class="cell-qtyCol"><input type="text" class="form-control form-control-sm" value="${sapData.MENGE || '0'}" data-key="${key}" data-field="MENGE" ${isReadOnly}></td>
-                <td class="cell-unitCol">${sapData.MEINS || ''}</td><td class="cell-batchCol">${sapData.CHARG || ''}</td>
-                <td class="cell-certCol"><div class="input-group input-group-sm"><input type="text" class="form-control filename-display" value="${sapData.CERTIFICADO_FILENAME || ''}" readonly><button class="btn btn-outline-secondary select-file-btn" type="button" ${isReadOnly}>...</button><input type="file" class="file-input" data-key="${key}" data-field="CERTIFICADO" style="display: none;"></div></td>
-                <td class="cell-docsCol"><div class="input-group input-group-sm"><input type="text" class="form-control filename-display" value="${sapData.DOCUMENTO_FILENAME || ''}" readonly><button class="btn btn-outline-secondary select-file-btn" type="button" ${isReadOnly}>...</button><input type="file" class="file-input" data-key="${key}" data-field="DOCUMENTO" style="display: none;"></div></td>
-                <td class="cell-inspCol"><div class="input-group input-group-sm"><input type="text" class="form-control filename-display" value="${sapData.INSPECCION_FILENAME || ''}" readonly><button class="btn btn-outline-secondary select-file-btn" type="button" ${isReadOnly}>...</button><input type="file" class="file-input" data-key="${key}" data-field="INSPECCION" style="display: none;"></div></td>
+                <td class="cell-unitCol">${sapData.MEINS || ''}</td>
+                <td class="cell-batchCol">${sapData.CHARG || ''}</td>
+                <td class="cell-certCol">
+                    <div class="input-group input-group-sm">
+                        <input type="text" class="form-control filename-display" value="${sapData.CERTIFICADO_FILENAME || ''}" readonly>
+                        <button class="btn btn-outline-secondary select-file-btn" type="button" ${isReadOnly}>...</button>
+                        <input type="file" class="file-input" data-key="${key}" data-field="CERTIFICADO" style="display: none;">
+                    </div>
+                </td>
+                <td class="cell-docsCol">
+                    <div class="input-group input-group-sm">
+                        <input type="text" class="form-control filename-display" value="${sapData.DOCUMENTO_FILENAME || ''}" readonly>
+                        <button class="btn btn-outline-secondary select-file-btn" type="button" ${isReadOnly}>...</button>
+                        <input type="file" class="file-input" data-key="${key}" data-field="DOCUMENTO" style="display: none;">
+                    </div>
+                </td>
+                <td class="cell-inspCol">
+                    <div class="input-group input-group-sm">
+                        <input type="text" class="form-control filename-display" value="${sapData.INSPECCION_FILENAME || ''}" readonly>
+                        <button class="btn btn-outline-secondary select-file-btn" type="button" ${isReadOnly}>...</button>
+                        <input type="file" class="file-input" data-key="${key}" data-field="INSPECCION" style="display: none;">
+                    </div>
+                </td>
                 <td class="cell-itemTextCol"><input type="text" class="form-control form-control-sm" value="${sapData.SGTXT || ''}" data-key="${key}" data-field="SGTXT" ${isReadOnly}></td>
-                <td class="cell-tagCol">${sapData.TAG || ''}</td><td class="cell-subLocCol">${sapData.SUB_LOC || ''}</td>
-                <td class="cell-areaCol">${sapData.SUBMI || ''}</td><td class="cell-orderNoCol">${sapData.EBELN || ''}</td>
+                <td class="cell-tagCol">${sapData.TAG || ''}</td>
+                <td class="cell-subLocCol">${sapData.SUB_LOC || ''}</td>
+                <td class="cell-areaCol">${sapData.SUBMI || ''}</td>
+                <td class="cell-orderNoCol">${sapData.EBELN || ''}</td>
                 <td class="cell-wbsCol">${sapData.PS_PSP_PNR || ''}</td>
                 <td class="cell-reservationCol reserva-cell d-none"><input type="text" class="form-control form-control-sm" value="${sapData.RSNUM || ''}" data-key="${key}" data-field="RSNUM" ${isReadOnly}></td>
-                <td class="cell-salesOrderCol">${sapData.KDAUF || ''}</td><td class="cell-salesOrderItemCol">${sapData.KDPOS || ''}</td>
+                <td class="cell-salesOrderCol">${sapData.KDAUF || ''}</td>
+                <td class="cell-salesOrderItemCol">${sapData.KDPOS || ''}</td>
             `;
             msegTableBody.appendChild(tr);
         });
@@ -1016,29 +1427,54 @@ document.addEventListener('DOMContentLoaded', () => {
         receptorSelect.innerHTML = `<option value="">${getText('loading')}</option>`;
         despachadorSelect.innerHTML = `<option value="">${getText('loading')}</option>`;
         labelSizeSelect.value = '';
+
         const moveType = clMovimientoInput.value.trim();
-        labelSizeContainer.style.display = ['221', '231', '601'].includes(moveType) ? 'none' : 'block';
+        const hideLabelSizeFor = ['221', '231', '601'];
+        if (hideLabelSizeFor.includes(moveType)) {
+            labelSizeContainer.style.display = 'none';
+        } else {
+            labelSizeContainer.style.display = 'block';
+        }
+
         setScanStatus(getText('loadingData'), "info");
         showSpinner();
         try {
             const response = await fetch(`${API_BASE_URL}/getModalData`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ connection_params: sapConnection, centro: centroInput.value.trim(), is_guest: isGuestMode })
+                body: JSON.stringify({
+                    connection_params: sapConnection,
+                    centro: centroInput.value.trim(),
+                    is_guest: isGuestMode
+                })
             });
             const result = await response.json();
+
             if (result.success) {
                 receptorSelect.innerHTML = `<option value="">${getText('selectSize')}</option>`;
-                result.receptores.forEach(r => receptorSelect.add(new Option(r.RECEPTOR, r.RECEPTOR)));
+                result.receptores.forEach(r => {
+                    const option = new Option(r.RECEPTOR, r.RECEPTOR);
+                    receptorSelect.add(option);
+                });
+
                 if (result.currentUser && result.currentUser.fullName) {
                     const userFullName = result.currentUser.fullName;
-                    if (![...receptorSelect.options].some(o => o.value === userFullName)) {
-                        receptorSelect.add(new Option(userFullName, userFullName));
+                    const userExistsInList = result.receptores.some(r => r.RECEPTOR === userFullName);
+                    if (userExistsInList) {
+                        receptorSelect.value = userFullName;
+                    } else {
+                        const option = new Option(userFullName, userFullName);
+                        receptorSelect.add(option);
+                        receptorSelect.value = userFullName;
                     }
-                    receptorSelect.value = userFullName;
                 }
+
                 despachadorSelect.innerHTML = `<option value="">${getText('selectDispatcher')}</option>`;
-                result.despachadores.forEach(d => despachadorSelect.add(new Option(d.RECEPTOR, d.RECEPTOR)));
+                result.despachadores.forEach(d => {
+                    const option = new Option(d.RECEPTOR, d.RECEPTOR);
+                    despachadorSelect.add(option);
+                });
+
                 setScanStatus("", "");
                 signatureModal.show();
             } else {
@@ -1056,16 +1492,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function handleConfirmSave() {
         const isLabelSizeVisible = labelSizeContainer.style.display !== 'none';
+
         const signatureData = {
             receptor: receptorSelect.value,
             despachador: despachadorSelect.value,
             labelSize: isLabelSizeVisible ? labelSizeSelect.value : ''
         };
+
         if (!signatureData.receptor || !signatureData.despachador || (isLabelSizeVisible && !signatureData.labelSize)) {
             modalErrorMessage.textContent = getText('allFieldsRequired');
             modalErrorMessage.style.display = 'block';
             return;
         }
+
         modalErrorMessage.style.display = 'none';
         signatureModal.hide();
         saveData(signatureData);
@@ -1080,32 +1519,51 @@ document.addEventListener('DOMContentLoaded', () => {
             textoCabecera: textoCabeceraInput.value, fechaContab: fechaContabInput.value,
             specialStockIndicator: specialStockIndicatorInput.value, isReservaChecked: reservaCheckbox.checked
         };
-        const itemsForJson = Array.from(scannedCodes.values()).map(sapData => ({
-            documentNumber: sapData.MBLNR, documentYear: sapData.MJAHR, item: sapData.ZEILE,
-            ...sapData
-        }));
-        formData.append('json_data', JSON.stringify({
-            connection_params: sapConnection, header: headerData, items: itemsForJson, 
-            is_guest: isGuestMode, signature_data: signatureData
-        }));
+
+        const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => {
+            const [documentNumber, documentYear, item] = key.split('-');
+            return {
+                documentNumber, documentYear, item,
+                MATNR: sapData.MATNR, MAKTX: sapData.MAKTX, MENGE: sapData.MENGE, MEINS: sapData.MEINS,
+                CHARG: sapData.CHARG, SGTXT: sapData.SGTXT, TAG: sapData.ZZUBICACION, SUB_LOC: sapData.SUB_LOC,
+                SUBMI: sapData.SUBMI, EBELN: sapData.EBELN, PS_PSP_PNR: sapData.PS_PSP_PNR, KDAUF: sapData.KDAUF, KDPOS: sapData.KDPOS,
+                RSNUM: sapData.RSNUM
+            };
+        });
+
+        const jsonDataPayload = {
+            connection_params: sapConnection,
+            header: headerData,
+            items: itemsForJson,
+            is_guest: isGuestMode,
+            signature_data: signatureData
+        };
+        formData.append('json_data', JSON.stringify(jsonDataPayload));
+
         const fileMetadata = [];
         scannedCodes.forEach((sapData, key) => {
             ['CERTIFICADO', 'DOCUMENTO', 'INSPECCION'].forEach(field => {
                 if (sapData[field] instanceof File) {
                     formData.append('files[]', sapData[field]);
-                    fileMetadata.push({ key, field });
+                    fileMetadata.push({ key: key, field: field });
                 }
             });
         });
         formData.append('file_metadata', JSON.stringify(fileMetadata));
+
         setScanStatus(getText('savingData'), "info");
         try {
             const response = await fetch(`${API_BASE_URL}/saveDataToSap`, { method: "POST", body: formData });
             const result = await response.json();
+
             if (result.success) {
                 let finalMessage = `${getText('processCompleted')} Doc: ${result.sap_document_number}`;
-                if (result.warning) finalMessage += `\nAVISO: ${result.warning}`;
-                setScanStatus(finalMessage, result.warning ? "warning" : "success");
+                if (result.warning) {
+                    finalMessage += `\nAVISO: ${result.warning}`;
+                    setScanStatus(finalMessage, "warning");
+                } else {
+                    setScanStatus(finalMessage, "success");
+                }
                 playSound('beep');
                 alert(finalMessage);
                 await resetAll();
@@ -1127,63 +1585,115 @@ document.addEventListener('DOMContentLoaded', () => {
         manageScannerState();
     }
     function clearFormAndTable() {
-        msegTableBody.innerHTML = ''; scannedCodes.clear(); qrContentElement.textContent = '';
-        textoCabeceraInput.value = ''; reservaCheckbox.checked = false; 
-        setScanStatus("", ""); updateButtonsVisibility(); toggleReservaColumn();
+        msegTableBody.innerHTML = '';
+        scannedCodes.clear();
+        qrContentElement.textContent = '';
+        textoCabeceraInput.value = '';
+        reservaCheckbox.checked = false;
+        setScanStatus("", "");
+        updateButtonsVisibility();
+        toggleReservaColumn();
     }
     function updateButtonsVisibility() {
-        const show = msegTableBody.rows.length > 0;
-        resetButton.style.display = show ? 'inline-block' : 'none';
-        layoutButtonMseg.style.display = show ? 'inline-block' : 'none';
-        saveButton.style.display = show && !isGuestMode ? 'inline-block' : 'none';
+        const showButtons = msegTableBody.rows.length > 0;
+        resetButton.style.display = showButtons ? 'inline-block' : 'none';
+        layoutButtonMseg.style.display = showButtons ? 'inline-block' : 'none';
+        const showSave = showButtons && !isGuestMode;
+        saveButton.style.display = showSave ? 'inline-block' : 'none';
     }
     function setScanStatus(message, type) {
         scanStatusElement.textContent = message;
         scanStatusElement.className = `lead text-center message-${type}`;
     }
+
+    // --- NUEVA LÓGICA PARA CONSULTA POR SUB-UBICACIÓN Y LAYOUTS ---
     function initializeColumnVisibility(tableId) {
-        let visibilityObject = {};
+        const visibilityObject = {};
         document.querySelectorAll(`#${tableId} thead th`).forEach(th => {
-            if (th.dataset.column) visibilityObject[th.dataset.column] = !th.classList.contains('d-none');
+            const columnKey = th.dataset.column;
+            if (columnKey) {
+                visibilityObject[columnKey] = !th.classList.contains('d-none');
+            }
         });
         return visibilityObject;
     }
+
     function openLayoutModal(tableId, visibilityObject, titleKey) {
         currentLayoutConfig = { tableId, visibilityObject };
-        const layoutModalLabel = document.getElementById('layoutModalLabel');
-        const layoutModalBody = document.getElementById('layoutModalBody');
         layoutModalLabel.textContent = getText(titleKey);
-        layoutModalBody.innerHTML = `<div class="d-flex justify-content-end mb-2"><button type="button" class="btn btn-link btn-sm" id="selectAllLayoutBtn">${getText('selectAll')}</button><button type="button" class="btn btn-link btn-sm" id="deselectAllLayoutBtn">${getText('deselectAll')}</button></div><div id="layoutCheckboxesContainer"></div>`;
-        const checkboxesContainer = document.getElementById('layoutCheckboxesContainer');
-        document.querySelectorAll(`#${tableId} thead th`).forEach(th => {
+        layoutModalBody.innerHTML = ''; // Clear previous content
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'd-flex justify-content-end mb-2';
+        buttonContainer.innerHTML = `
+            <button type="button" class="btn btn-link btn-sm" id="selectAllLayoutBtn">${getText('selectAll')}</button>
+            <button type="button" class="btn btn-link btn-sm" id="deselectAllLayoutBtn">${getText('deselectAll')}</button>
+        `;
+        layoutModalBody.appendChild(buttonContainer);
+
+        const checkboxesContainer = document.createElement('div');
+        checkboxesContainer.id = 'layoutCheckboxesContainer';
+        layoutModalBody.appendChild(checkboxesContainer);
+
+        const headers = document.querySelectorAll(`#${tableId} thead th`);
+        headers.forEach(th => {
             const columnKey = th.dataset.column;
             if (!columnKey) return;
+
             const labelText = th.dataset.translate ? getText(th.dataset.translate) : th.childNodes[0].nodeValue.trim();
-            checkboxesContainer.insertAdjacentHTML('beforeend', `<div class="form-check"><input class="form-check-input" type="checkbox" value="${columnKey}" id="check-${columnKey}" ${visibilityObject[columnKey] ? 'checked' : ''}><label class="form-check-label" for="check-${columnKey}">${labelText}</label></div>`);
+            const isVisible = visibilityObject[columnKey];
+
+            const formCheck = document.createElement('div');
+            formCheck.className = 'form-check';
+            formCheck.innerHTML = `
+                <input class="form-check-input" type="checkbox" value="${columnKey}" id="check-${columnKey}" ${isVisible ? 'checked' : ''}>
+                <label class="form-check-label" for="check-${columnKey}">
+                    ${labelText}
+                </label>
+            `;
+            checkboxesContainer.appendChild(formCheck);
         });
-        document.getElementById('selectAllLayoutBtn').addEventListener('click', () => checkboxesContainer.querySelectorAll('input').forEach(chk => chk.checked = true));
-        document.getElementById('deselectAllLayoutBtn').addEventListener('click', () => checkboxesContainer.querySelectorAll('input').forEach(chk => chk.checked = false));
-        new bootstrap.Modal(document.getElementById('layoutModal')).show();
+
+        document.getElementById('selectAllLayoutBtn').addEventListener('click', () => {
+            checkboxesContainer.querySelectorAll('.form-check-input').forEach(chk => chk.checked = true);
+        });
+
+        document.getElementById('deselectAllLayoutBtn').addEventListener('click', () => {
+            checkboxesContainer.querySelectorAll('.form-check-input').forEach(chk => chk.checked = false);
+        });
+
+        layoutModal.show();
     }
+
     function applyLayoutChanges() {
         const { tableId, visibilityObject } = currentLayoutConfig;
-        document.getElementById('layoutModalBody').querySelectorAll('input').forEach(chk => {
+        const checkboxes = layoutModalBody.querySelectorAll('.form-check-input');
+        checkboxes.forEach(chk => {
             visibilityObject[chk.value] = chk.checked;
         });
         updateTableVisibility(tableId, visibilityObject);
-        bootstrap.Modal.getInstance(document.getElementById('layoutModal')).hide();
+        layoutModal.hide();
     }
+
     function updateTableVisibility(tableId, visibilityObject) {
         for (const columnKey in visibilityObject) {
-            document.querySelectorAll(`#${tableId} [data-column="${columnKey}"], #${tableId} .cell-${columnKey}`).forEach(cell => {
-                if (columnKey === 'reservationCol' && !reservaCheckbox.checked) return;
-                cell.classList.toggle('d-none', !visibilityObject[columnKey]);
+            const isVisible = visibilityObject[columnKey];
+            const cells = document.querySelectorAll(`#${tableId} [data-column="${columnKey}"], #${tableId} .cell-${columnKey}`);
+            cells.forEach(cell => {
+                // Special handling for reserva column to respect its own logic
+                if (columnKey === 'reservationCol' && !reservaCheckbox.checked) {
+                    return;
+                }
+                cell.classList.toggle('d-none', !isVisible);
             });
         }
     }
-    function areSublocationFiltersFilled() { return sublocationCentroInput.value.trim() && sublocationAlmacenInput.value.trim(); }
+
+    function areSublocationFiltersFilled() {
+        return sublocationCentroInput.value.trim() && sublocationAlmacenInput.value.trim();
+    }
+
     async function manageSublocationScannerState() {
-        const sublocationReaderMessage = document.querySelector('#sublocationReader .qr-message');
         if (areSublocationFiltersFilled()) {
             startSublocationScanButton.disabled = false;
             sublocationReaderMessage.textContent = '';
@@ -1195,38 +1705,47 @@ document.addEventListener('DOMContentLoaded', () => {
             sublocationReaderMessage.style.display = 'block';
         }
     }
+
     async function startSublocationScanner() {
         if (isSublocationScanning) return;
         isSublocationScanning = true;
-        document.querySelector('#sublocationReader .qr-message').style.display = 'none';
-        document.getElementById('sublocationReader').style.display = 'block';
+        sublocationReaderMessage.style.display = 'none';
+        sublocationReader.style.display = 'block';
         startSublocationScanButton.style.display = 'none';
         sublocationScanStatus.textContent = getText('readyToScan');
         sublocationScanStatus.className = "lead mt-2 message-success";
         html5QrCodeSublocation = new Html5Qrcode("sublocationReader");
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
         try {
-            await html5QrCodeSublocation.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onSublocationScanSuccess, () => {});
+            await html5QrCodeSublocation.start({ facingMode: "environment" }, config, onSublocationScanSuccess, (errorMessage) => {
+                // console.log(`QR Code no match: ${errorMessage}`);
+            });
         } catch (err) {
             sublocationScanStatus.textContent = `${getText('cameraError')}: ${err}`;
             sublocationScanStatus.className = "lead mt-2 message-error";
             isSublocationScanning = false;
-            document.getElementById('sublocationReader').style.display = 'none';
+            sublocationReader.style.display = 'none';
             startSublocationScanButton.style.display = 'block';
         }
     }
+
     async function stopSublocationScanner() {
         if (!isSublocationScanning || !html5QrCodeSublocation) return;
-        try { await html5QrCodeSublocation.stop(); } catch(err) {}
+        try {
+            await html5QrCodeSublocation.stop();
+        } catch(err) { /* Ignorar error al detener */ }
         isSublocationScanning = false;
-        document.getElementById('sublocationReader').style.display = 'none';
+        sublocationReader.style.display = 'none';
         startSublocationScanButton.style.display = 'block';
     }
+
     async function onSublocationScanSuccess(decodedText) {
         if (!decodedText) return;
         await stopSublocationScanner();
         sublocationQrContent.textContent = decodedText;
         sublocationScanStatus.textContent = `${getText('processingSublocation')}: ${decodedText}...`;
         sublocationScanStatus.className = "lead mt-2";
+
         const selectedArea = document.querySelector('input[name="sublocationArea"]:checked').value;
         showSpinner();
         try {
@@ -1234,18 +1753,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    connection_params: sapConnection, centro: sublocationCentroInput.value.trim(),
-                    almacen: sublocationAlmacenInput.value.trim(), sublocation: decodedText,
-                    area: selectedArea, is_guest: isGuestMode
+                    connection_params: sapConnection,
+                    centro: sublocationCentroInput.value.trim(),
+                    almacen: sublocationAlmacenInput.value.trim(),
+                    sublocation: decodedText,
+                    area: (sublocationCentroInput.value.trim() === '4000') ? selectedArea : null,
+                    is_guest: isGuestMode
                 })
             });
             const result = await response.json();
+
             if (result.success) {
-                sublocationData = result.data;
-                sortState = { column: null, direction: 'asc' };
+                sublocationData = result.data; // Guardar los datos originales
+                sortState = { column: null, direction: 'asc' }; // Resetear ordenamiento
                 sublocationScanStatus.textContent = getText('recordsFound').replace('{count}', sublocationData.length);
                 sublocationScanStatus.className = "lead mt-2 message-success";
-                filterAndRender();
+                filterAndRender(); // Usar la nueva función para renderizar
                 playSound('beep');
             } else {
                 throw new Error(result.error);
@@ -1259,57 +1782,112 @@ document.addEventListener('DOMContentLoaded', () => {
             hideSpinner();
         }
     }
+
     function filterAndRender() {
         const filterText = filterInput.value.toLowerCase();
-        const filteredData = sublocationData.filter(item => Object.values(item).some(val => String(val).toLowerCase().includes(filterText)));
+
+        const filteredData = sublocationData.filter(item => {
+            if (!filterText) return true;
+            return Object.values(item).some(val =>
+                String(val).toLowerCase().includes(filterText)
+            );
+        });
+
         renderSublocationTable(filteredData);
     }
+
     function renderSublocationTable(data) {
         sublocationTableBody.innerHTML = '';
         exportToExcelButton.disabled = !data || data.length === 0;
+
         if (!data || data.length === 0) {
-            sublocationTableBody.innerHTML = `<tr><td colspan="${Object.keys(sublocationColumnVisibility).length}" class="text-center">${getText('noDataFound', 'No hay datos')}</td></tr>`;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td colspan="${Object.keys(sublocationColumnVisibility).length}" class="text-center">${getText('noDataFound', 'No data found')}</td>`;
+            sublocationTableBody.appendChild(tr);
             return;
         }
+
         const headers = document.querySelectorAll('#sublocationTableHead th');
+
         data.forEach(item => {
             const tr = document.createElement('tr');
             headers.forEach(th => {
                 const columnKey = th.dataset.column;
-                if (columnKey) tr.insertAdjacentHTML('beforeend', `<td class="cell-${columnKey}">${item[columnKey] || ''}</td>`);
+                if (columnKey) {
+                    const td = document.createElement('td');
+                    td.className = `cell-${columnKey}`;
+                    td.textContent = item[columnKey] || '';
+                    tr.appendChild(td);
+                }
             });
             sublocationTableBody.appendChild(tr);
         });
+
         updateSortArrows();
         updateTableVisibility('sublocationTable', sublocationColumnVisibility);
     }
+
     function handleSort(e) {
         const header = e.target.closest('th');
-        if (!header || !header.dataset.column) return;
+        if (!header) return;
+
         const column = header.dataset.column;
-        if (sortState.column === column) sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
-        else { sortState.column = column; sortState.direction = 'asc'; }
+        if (!column) return;
+
+        if (sortState.column === column) {
+            sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            sortState.column = column;
+            sortState.direction = 'asc';
+        }
+
         sortData();
     }
+
     function sortData() {
         const { column, direction } = sortState;
         if (!column) return;
-        const dataToSort = [...sublocationData.filter(item => Object.values(item).some(val => String(val).toLowerCase().includes(filterInput.value.toLowerCase())))];
+
+        const filterText = filterInput.value.toLowerCase();
+        const dataToSort = sublocationData.filter(item => {
+            if (!filterText) return true;
+            return Object.values(item).some(val =>
+                String(val).toLowerCase().includes(filterText)
+            );
+        });
+
         dataToSort.sort((a, b) => {
-            let valA = a[column], valB = b[column];
-            const numA = parseFloat(valA), numB = parseFloat(valB);
-            if (!isNaN(numA) && !isNaN(numB)) { valA = numA; valB = numB; }
-            else { valA = String(valA).toLowerCase(); valB = String(valB).toLowerCase(); }
-            if (valA < valB) return direction === 'asc' ? -1 : 1;
-            if (valA > valB) return direction === 'asc' ? 1 : -1;
+            let valA = a[column];
+            let valB = b[column];
+
+            const numA = parseFloat(valA);
+            const numB = parseFloat(valB);
+
+            if (!isNaN(numA) && !isNaN(numB)) {
+                valA = numA;
+                valB = numB;
+            } else {
+                valA = String(valA).toLowerCase();
+                valB = String(valB).toLowerCase();
+            }
+
+            if (valA < valB) {
+                return direction === 'asc' ? -1 : 1;
+            }
+            if (valA > valB) {
+                return direction === 'asc' ? 1 : -1;
+            }
             return 0;
         });
+
         renderSublocationTable(dataToSort);
     }
+
     function updateSortArrows() {
-        document.querySelectorAll('#sublocationTable thead th .sort-arrow').forEach(arrow => {
-            const header = arrow.parentElement;
-            if (header.dataset.column === sortState.column) {
+        document.querySelectorAll('#sublocationTable thead th').forEach(th => {
+            const arrow = th.querySelector('.sort-arrow');
+            if (!arrow) return;
+            if (th.dataset.column === sortState.column) {
                 arrow.innerHTML = sortState.direction === 'asc' ? '&#9650;' : '&#9660;';
                 arrow.style.opacity = '1';
             } else {
@@ -1318,47 +1896,97 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
     function exportToExcel() {
-        const dataToExport = sublocationData.filter(item => Object.values(item).some(val => String(val).toLowerCase().includes(filterInput.value.toLowerCase())));
-        if (dataToExport.length === 0) { alert(getText('noDataToExport')); return; }
-        const visibleHeaders = [], visibleColumnKeys = [];
+        if (sublocationData.length === 0) {
+            alert(getText('noDataToExport'));
+            return;
+        }
+
+        const filterText = filterInput.value.toLowerCase();
+        const dataToExport = sublocationData.filter(item => {
+            if (!filterText) return true;
+            return Object.values(item).some(val =>
+                String(val).toLowerCase().includes(filterText)
+            );
+        });
+
+        if (dataToExport.length === 0) {
+            alert(getText('noFilteredDataToExport'));
+            return;
+        }
+
+        const visibleHeaders = [];
+        const visibleColumnKeys = [];
+
         document.querySelectorAll("#sublocationTableHead th").forEach(th => {
-            if (th.dataset.column && sublocationColumnVisibility[th.dataset.column]) {
-                visibleHeaders.push(th.textContent.replace(/[▲▼]/g, '').trim());
-                visibleColumnKeys.push(th.dataset.column);
+            const columnKey = th.dataset.column;
+            if (columnKey && sublocationColumnVisibility[columnKey]) {
+                visibleHeaders.push(th.textContent.replace(' ▲', '').replace(' ▼', '').trim());
+                visibleColumnKeys.push(columnKey);
             }
         });
+
         const dataWithVisibleHeaders = dataToExport.map(row => {
-            let newRow = {};
-            visibleHeaders.forEach((header, index) => newRow[header] = row[visibleColumnKeys[index]]);
+            const newRow = {};
+            visibleHeaders.forEach((header, index) => {
+                const columnKey = visibleColumnKeys[index];
+                newRow[header] = row[columnKey];
+            });
             return newRow;
         });
+
         const worksheet = XLSX.utils.json_to_sheet(dataWithVisibleHeaders);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Consulta");
-        XLSX.writeFile(workbook, `Consulta_Sububicacion_${new Date().toISOString().slice(0, 10)}.xlsx`);
+
+        const today = new Date().toISOString().slice(0, 10);
+        XLSX.writeFile(workbook, `Consulta_Sububicacion_${today}.xlsx`);
     }
+
     function clearAllScreens() {
-        msegTableBody.innerHTML = ''; scannedCodes.clear(); qrContentElement.textContent = '';
-        clMovimientoInput.value = ''; specialStockIndicatorInput.value = ''; centroInput.value = '';
-        almacenInput.value = ''; textoCabeceraInput.value = ''; reservaCheckbox.checked = false; 
-        setScanStatus("", ""); updateButtonsVisibility(); toggleReservaColumn();
-        sublocationCentroInput.value = ''; sublocationAlmacenInput.value = ''; sublocationQrContent.textContent = '';
-        sublocationTableBody.innerHTML = ''; sublocationScanStatus.textContent = ''; filterInput.value = '';
-        if (document.getElementById('areaTodos')) document.getElementById('areaTodos').checked = true;
+        // Limpiar pantalla de lectura de etiquetas
+        msegTableBody.innerHTML = '';
+        scannedCodes.clear();
+        qrContentElement.textContent = '';
+        clMovimientoInput.value = '';
+        specialStockIndicatorInput.value = '';
+        centroInput.value = '';
+        almacenInput.value = '';
+        textoCabeceraInput.value = '';
+        reservaCheckbox.checked = false;
+        setScanStatus("", "");
+        updateButtonsVisibility();
+        toggleReservaColumn();
+
+        // Limpiar pantalla de consulta de sub-ubicación
+        sublocationCentroInput.value = '';
+        sublocationAlmacenInput.value = '';
+        sublocationQrContent.textContent = '';
+        sublocationTableBody.innerHTML = '';
+        sublocationScanStatus.textContent = '';
+        filterInput.value = '';
+        document.getElementById('areaTodos').checked = true;
         sublocationAreaContainer.style.display = 'none';
-        sublocationData = []; sortState = { column: null, direction: 'asc' }; updateSortArrows(); exportToExcelButton.disabled = true;
+        sublocationData = []; // Limpiar datos almacenados
+        sortState = { column: null, direction: 'asc' }; // Resetear ordenamiento
+        updateSortArrows();
+        exportToExcelButton.disabled = true;
+
+        // Limpiar pantalla de ingreso de material
+        clearIngresoForm(true);
+
+        // Reset layouts
         msegColumnVisibility = initializeColumnVisibility('msegTable');
         sublocationColumnVisibility = initializeColumnVisibility('sublocationTable');
         updateTableVisibility('msegTable', msegColumnVisibility);
         updateTableVisibility('sublocationTable', sublocationColumnVisibility);
-        clearIngresoForm(true);
     }
-    
-    function updateIngresoTableVisibility() {
+
+ function updateIngresoTableVisibility() {
         const stockType = document.querySelector('input[name="ingresoStockEspecial"]:checked').value;
-        document.querySelectorAll('.wbs-col').forEach(el => el.style.display = stockType === 'Q' ? '' : 'none');
-        document.querySelectorAll('.so-col').forEach(el => el.style.display = stockType === 'E' ? '' : 'none');
+        document.querySelectorAll('#ingresoItemsTable .wbs-col').forEach(el => el.style.display = stockType === 'Q' ? '' : 'none');
+        document.querySelectorAll('#ingresoItemsTable .so-col').forEach(el => el.style.display = stockType === 'E' ? '' : 'none');
     }
 
     async function fetchPurchaseOrderItems() {
@@ -1494,12 +2122,14 @@ document.addEventListener('DOMContentLoaded', () => {
         ingresoStatus.className = `mt-3 text-center message-${type}`;
     }
 
+    // **CORRECCIÓN AQUÍ**: Código de inicialización ordenado y sin redundancia
+    // Initialize tooltips and layouts
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
     msegColumnVisibility = initializeColumnVisibility('msegTable');
     sublocationColumnVisibility = initializeColumnVisibility('sublocationTable');
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 });
 </script>
 </body>
 </html>
-
