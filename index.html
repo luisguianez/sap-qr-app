@@ -139,28 +139,28 @@
                                 <button class="btn btn-outline-secondary" type="button" id="searchClMovimiento"><i class="bi bi-search"></i></button>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-2">
                             <label for="specialStockIndicator" data-translate="specialStockLabel">Stock Especial:</label>
                              <div class="input-group">
                                 <input type="text" class="form-control" id="specialStockIndicator">
                                 <button class="btn btn-outline-secondary" type="button" id="searchSpecialStock"><i class="bi bi-search"></i></button>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-2">
                             <label for="centro" data-translate="plantLabel">Centro:</label>
                             <div class="input-group">
                                 <input type="text" class="form-control" id="centro">
                                 <button class="btn btn-outline-secondary" type="button" id="searchCentro"><i class="bi bi-search"></i></button>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-2">
                             <label for="almacen" data-translate="storageLocationLabel">Almacén:</label>
                             <div class="input-group">
                                 <input type="text" class="form-control" id="almacen">
                                 <button class="btn btn-outline-secondary" type="button" id="searchAlmacen"><i class="bi bi-search"></i></button>
                             </div>
                         </div>
-                        <div class="col-md-8"><label for="textoCabecera" data-translate="headerTextLabel">Texto Cabecera:</label><input type="text" class="form-control" id="textoCabecera"></div>
+                        <div class="col-md-8"><label for="textoCabecera" data-translate="headerTextLabel">Texto Cabecera:</label><input type="text" class="form-control" id="textoCabecera"  maxlength="25"></div>
                         <div class="col-md-6"><label for="fechaContab" data-translate="postingDateLabel">Fecha Contab.:</label><input type="date" class="form-control" id="fechaContab"></div>
                         <div class="col-md-6 checkbox-container" id="reservaCheckboxContainer">
                             <div class="form-check pt-4"><input class="form-check-input" type="checkbox" id="reservaCheckbox"><label class="form-check-label" for="reservaCheckbox" data-translate="reservationLabel">Reserva</label></div>
@@ -173,6 +173,7 @@
                 <p id="qr-content" class="form-control-plaintext border p-2 bg-light rounded mb-2"></p>
                 <div id="reader" style="display: none;"><span class="qr-message p-3"></span></div>
                 <button id="startScanButton" class="btn btn-primary mt-2" data-translate="activateCameraButton">Activar Cámara</button>
+                <button id="stopScanButton" class="btn btn-danger mt-2" style="display: none;">Detener Cámara</button>
                 <p id="scan-status" class="lead mt-2"></p>
             </div>
         </div>
@@ -188,7 +189,7 @@
                     <th data-column="yearCol" data-translate="yearCol">Año</th>
                     <th data-column="posCol" data-translate="posCol">Pos.</th>
                     <th data-column="materialCol" data-translate="materialCol">Material</th>
-                    <th data-column="materialDescCol" data-translate="materialDescCol">Texto Material</th>
+                    <th data-column="materialDescCol" data-translate="materialDescCol"  style="min-width: 230px;">Texto Material</th>
                     <th data-column="qtyCol" data-translate="qtyCol">Cantidad</th>
                     <th data-column="unitCol" data-translate="unitCol">Unidad</th>
                     <th data-column="batchCol" data-translate="batchCol">Lote</th>
@@ -198,6 +199,7 @@
                     <th data-column="itemTextCol" style="min-width: 150px;" data-translate="itemTextCol">Texto Pos.</th>
                     <th data-column="tagCol" data-translate="tagCol">TAG</th>
                     <th data-column="subLocCol" data-translate="subLocCol">Sub Ubicacion</th>
+                    <th data-column="TextPosicion" data-translate="TextoPosicion">Texto Posición</th>
                     <th data-column="areaCol" style="min-width: 150px;" data-translate="areaCol">Área</th>
                     <th data-column="orderNoCol" data-translate="orderNoCol">Nro. Pedido</th>
                     <th data-column="wbsCol" data-translate="wbsCol">Elemento PEP</th>
@@ -258,6 +260,7 @@
                     <p id="sublocationQrContent" class="form-control-plaintext border p-2 bg-light rounded mb-2"></p>
                     <div id="sublocationReader" style="display: none;"><span class="qr-message p-3"></span></div>
                     <button id="startSublocationScanButton" class="btn btn-primary mt-2" data-translate="activateCameraButton">Activar Cámara</button>
+                    <button id="stopSublocationScanButton" class="btn btn-danger mt-2" style="display: none;">Detener Cámara</button>
                     <p id="sublocationScanStatus" class="lead mt-2"></p>
                 </div>
             </div>
@@ -308,73 +311,78 @@
     </div>
 
 <div id="ingresoContent" style="display: none;">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="mb-0">Ingreso de Materiales por Pedido</h2>
-            <div>
-                <button id="backButtonIngreso" class="btn btn-secondary me-2">Volver</button>
-                <span id="loggedInUserDisplayIngreso" class="badge bg-success me-3"></span>
-                <button id="logoutButtonIngreso" class="btn btn-danger">Logout</button>
-            </div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0" data-translate="ingresoTitle">Ingreso de Materiales por Pedido</h2>
+        <div>
+            <button id="backButtonIngreso" class="btn btn-secondary me-2" data-translate="backButton">Volver</button>
+            <span id="loggedInUserDisplayIngreso" class="badge bg-success me-3"></span>
+            <button id="logoutButtonIngreso" class="btn btn-danger" data-translate="logoutButton">Logout</button>
         </div>
-        <div class="card">
-            <div class="card-body">
-                <h4 class="mb-3">Datos de Cabecera</h4>
-                <div class="row g-3 p-3 border rounded bg-light mb-4">
-                    <div class="col-md-3">
-                        <label for="ingresoNroPedido" class="form-label">Nro de Pedido</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="ingresoNroPedido">
-                            <button class="btn btn-primary" type="button" id="searchPoButton">Buscar Pedido</button>
-                        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <h4 class="mb-3" data-translate="headerDataTitle">Datos de Cabecera</h4>
+            <div class="row g-3 p-3 border rounded bg-light mb-4">
+                <div class="col-12 col-sm-6 col-md-3">
+                    <label for="ingresoNroPedido" class="form-label" data-translate="poNumberLabel">Nro de Pedido</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="ingresoNroPedido">
+                        <button class="btn btn-primary" type="button" id="searchPoButton" data-translate="searchPOButton">Buscar Pedido</button>
                     </div>
-                    <div class="col-md-2"><label for="ingresoTipoMovimiento" class="form-label">Tipo de Movimiento</label><input type="text" class="form-control" id="ingresoTipoMovimiento" value="101" readonly></div>
-                    <div class="col-md-4">
-                        <label class="form-label">Indicador de Stock Especial</label>
-                        <div>
-                            <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="ingresoStockEspecial" id="stockSin" value="" checked><label class="form-check-label" for="stockSin">Sin Indicador</label></div>
-                            <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="ingresoStockEspecial" id="stockQ" value="Q"><label class="form-check-label" for="stockQ">Q</label></div>
-                            <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="ingresoStockEspecial" id="stockE" value="E"><label class="form-check-label" for="stockE">E</label></div>
-                        </div>
+                </div>
+                <div class="col-md-2"><label for="ingresoTipoMovimiento" class="form-label" data-translate="moveTypeLabel">Tipo de Movimiento</label><input type="text" class="form-control" id="ingresoTipoMovimiento" value="101" readonly></div>
+                <div class="col-md-4">
+                    <label class="form-label" data-translate="specialStockLabel">Indicador de Stock Especial</label>
+                    <div>
+                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="ingresoStockEspecial" id="stockSin" value="" checked><label class="form-check-label" for="stockSin" data-translate="noIndicatorLabel">Sin Indicador</label></div>
+                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="ingresoStockEspecial" id="stockQ" value="Q"><label class="form-check-label" for="stockQ">Q</label></div>
+                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="ingresoStockEspecial" id="stockE" value="E"><label class="form-check-label" for="stockE">E</label></div>
                     </div>
-                    <div class="col-md-3 d-flex align-items-end"><div class="form-check"><input class="form-check-input" type="checkbox" id="ingresoItemAdopted"><label class="form-check-label" for="ingresoItemAdopted">Item Adopted</label></div></div>
-                    <div class="col-md-3"><label for="ingresoFechaDoc" class="form-label">Fecha de Documento</label><input type="date" class="form-control" id="ingresoFechaDoc"></div>
-                    <div class="col-md-3"><label for="ingresoFechaCont" class="form-label">Fecha de Contabilización</label><input type="date" class="form-control" id="ingresoFechaCont"></div>
-                    <div class="col-md-3"><label for="ingresoMaterialSlip" class="form-label">Material Slip</label><input type="text" class="form-control" id="ingresoMaterialSlip"></div>
-                    <div class="col-md-3"><label for="ingresoTextoCabecera" class="form-label">Texto de Cabecera</label><input type="text" class="form-control" id="ingresoTextoCabecera"></div>
                 </div>
-                <h4 class="mb-3 mt-4">Posiciones del Pedido</h4>
-                <div class="table-responsive">
-                    <table id="ingresoItemsTable" class="table table-bordered table-sm">
-                        <thead>
-                            <tr>
-                                <th><input type="checkbox" id="selectAllIngresoItemsCheckbox"></th>
-                                <th>Pos.</th>
-                                <th>Material</th>
-                                <th>Descripción</th>
-                                <th class="wbs-col">Elemento PEP (WBS)</th>
-                                <th class="so-col">Pedido Venta</th>
-                                <th class="so-col">Pos. Ped. Venta</th>
-                                <th>Planta</th>
-                                <th>Almacén</th>
-                                <th>Cantidad</th>
-                                <th>UM</th>
-                                <th>Lote</th>
-                                <th>Sub-Ubicación</th>
-                                <th>Certificado</th>
-                                <th>Documentos</th>
-                                <th>Inspección</th>
-                            </tr>
-                        </thead>
-                        <tbody id="ingresoItemsTableBody"></tbody>
-                    </table>
-                </div>
-                <hr>
-                <div class="text-center">
-                    <button id="ingresoClearButton" class="btn btn-warning me-2">Limpiar</button>
-                    <button id="ingresoSaveButton" class="btn btn-success" disabled>Guardar en SAP</button>
-                </div>
-                 <p id="ingresoStatus" class="mt-3 text-center"></p>
+                <div class="col-md-3 d-flex align-items-end"><div class="form-check"><input class="form-check-input" type="checkbox" id="ingresoItemAdopted"><label class="form-check-label" for="ingresoItemAdopted" data-translate="itemAdoptedLabel">Item Adopted</label></div></div>
+                <div class="col-md-3"><label for="ingresoFechaDoc" class="form-label" data-translate="docDateLabel">Fecha de Documento</label><input type="date" class="form-control" id="ingresoFechaDoc"></div>
+                <div class="col-md-3"><label for="ingresoFechaCont" class="form-label" data-translate="postingDateLabel">Fecha de Contabilización</label><input type="date" class="form-control" id="ingresoFechaCont"></div>
+                <div class="col-md-3"><label for="ingresoMaterialSlip" class="form-label" data-translate="materialSlipLabel">Material Slip</label><input type="text" class="form-control" id="ingresoMaterialSlip"></div>
+                <div class="col-md-3"><label for="ingresoTextoCabecera" class="form-label" data-translate="headerTextLabel">Texto de Cabecera</label><input type="text" class="form-control" id="ingresoTextoCabecera"  maxlength="25"></div>
             </div>
+            <h4 class="mb-3 mt-4" data-translate="poItemsTitle">Posiciones del Pedido</h4>
+            <div class="table-responsive">
+                <table id="ingresoItemsTable" class="table table-bordered table-sm">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="selectAllIngresoItemsCheckbox"></th>
+                            <th data-translate="posCol">Pos.</th>
+                            <th data-translate="materialCol">Material</th>
+                            <th data-translate="materialDescCol">Descripción</th>
+                            <th class="wbs-col" data-translate="wbsCol">Elemento PEP (WBS)</th>
+                            <th class="so-col" data-translate="salesOrderHeader">Pedido Venta</th>
+                            <th class="so-col" data-translate="salesOrderItemHeader">Pos. Ped. Venta</th>
+                            <th data-translate="plantLabel">Planta</th>
+                            <th data-translate="storageLocationLabel">Almacén</th>
+                            <th data-translate="qtyCol">Cantidad</th>
+                            <th data-translate="unitCol">UM</th>
+                            <th data-translate="batchCol" style="min-width: 100px;">Lote</th>
+                            <th data-translate="sublocationHeader" style="min-width: 150px;">Sub-Ubicación</th>
+                            <th style="min-width: 160px;" data-translate="tagCol">TAG</th>
+                            <th style="min-width: 80px;" data-translate="countryHeader">País</th>
+                            <th style="min-width: 200px;" data-translate="itemTextHeader">Texto Posición</th>
+                            <th data-translate="certCol">Certificado</th>
+                            <th data-translate="docsCol">Documentos</th>
+                            <th data-translate="inspCol">Inspección</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ingresoItemsTableBody"></tbody>
+                </table>
+            </div>
+            <hr>
+            <div class="text-center">
+                <button id="ingresoClearButton" class="btn btn-warning me-2" data-translate="clearButton">Limpiar</button>
+                <button id="ingresoSaveButton" class="btn btn-success" disabled data-translate="saveButton">Guardar en SAP</button>
+                <button id="printLabelsButton" class="btn btn-info" style="display: none;">
+                    <i class="bi bi-printer"></i> <span data-translate="printLabelsButton"  hidden>Imprimir Etiquetas</span>
+                </button>
+            </div>
+             <p id="ingresoStatus" class="mt-3 text-center"></p>
         </div>
     </div>
 </div>
@@ -459,18 +467,33 @@
     </div>
 </div>
 
+<div class="modal fade" id="longTextModal" tabindex="-1" aria-labelledby="longTextModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="longTextModalLabel">Texto Extendido del Material</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <pre id="longTextModalBody" style="white-space: pre-wrap; word-wrap: break-word;"></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
- // *** AJUSTE CLAVE: URL BASE PARA EL BACKEND EN PYTHON ***
     const API_BASE_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
-        ? '' // Usa rutas relativas para el entorno local (ej. /validateLogin)
-        : 'https://api.lndsap.com'; // Usa la URL completa para producción
+        ? ''
+        : 'https://api.lndsap.com';
 
-    // --- LÓGICA DE TRADUCCIÓN ---
     const translations = {
         en: {
             // General
@@ -577,7 +600,28 @@ document.addEventListener('DOMContentLoaded', () => {
             storageCol: "Stor. Location",
             storageNameCol: "Location Name",
             moveTypeCol: "Move. Type",
-            specialStockCol: "Special Stock"
+            specialStockCol: "Special Stock",
+            // Material Receipt by PO
+            ingresoTitle: "Purchase Order Goods Receipt",
+            poNumberLabel: "Purchase Order No.",
+            searchPOButton: "Search PO",
+            noIndicatorLabel: "No Indicator",
+            itemAdoptedLabel: "Item Adopted",
+            docDateLabel: "Document Date",
+            materialSlipLabel: "Material Slip",
+            poItemsTitle: "Purchase Order Items",
+            salesOrderHeader: "Sales Order",
+            salesOrderItemHeader: "SO Item",
+            sublocationHeader: "Sublocation",
+            countryHeader: "Country",
+            itemTextHeader: "Item Text",
+            printLabelsButton: "Print Labels",
+            searchingPO: "Searching PO",
+            itemsLoaded: "items loaded.",
+            noItemsFound: "No items found.",
+            savingError: "Error while saving",
+            successDocCreated: "Success! Document {doc_number} created.",
+            labelsGenerated: "Labels generated. You can now clear the form."
         },
         es: {
             // General
@@ -684,7 +728,28 @@ document.addEventListener('DOMContentLoaded', () => {
             storageCol: "Almacén",
             storageNameCol: "Nombre Almacén",
             moveTypeCol: "Clase Mov.",
-            specialStockCol: "Stock Esp."
+            specialStockCol: "Stock Esp.",
+            // Ingreso de Materiales por Pedido
+            ingresoTitle: "Ingreso de Materiales por Pedido",
+            poNumberLabel: "Nro de Pedido",
+            searchPOButton: "Buscar Pedido",
+            noIndicatorLabel: "Sin Indicador",
+            itemAdoptedLabel: "Item Adopted",
+            docDateLabel: "Fecha de Documento",
+            materialSlipLabel: "Material Slip",
+            poItemsTitle: "Posiciones del Pedido",
+            salesOrderHeader: "Pedido Venta",
+            salesOrderItemHeader: "Pos. Ped. Venta",
+            sublocationHeader: "Sub-Ubicación",
+            countryHeader: "País",
+            itemTextHeader: "Texto Posición",
+            printLabelsButton: "Imprimir Etiquetas",
+            searchingPO: "Buscando pedido",
+            itemsLoaded: "posiciones cargadas.",
+            noItemsFound: "No se encontraron posiciones.",
+            savingError: "Error al guardar",
+            successDocCreated: "¡Éxito! Documento {doc_number} creado.",
+            labelsGenerated: "Etiquetas generadas. Puede limpiar el formulario."
         }
     };
 
@@ -703,7 +768,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         document.documentElement.lang = lang;
-        // Re-renderizar cabeceras de la tabla de sub-ubicación
         const sublocationTable = document.getElementById('sublocationTable');
         if (sublocationTable) {
             const thead = sublocationTable.querySelector('thead');
@@ -716,7 +780,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 else if (columnKey === 'LGORT') translationKey = 'storageLocationLabel';
                 else if (columnKey === 'CHARG') translationKey = 'batchCol';
                 else if (columnKey === 'SOBKZ') translationKey = 'specialStockLabel';
-                else if (columnKey === 'KZBWS') translationKey = 'Val. Stock Esp.'; // TODO: Add to translations
+                else if (columnKey === 'KZBWS') translationKey = 'Val. Stock Esp.';
                 else if (columnKey === 'PS_PSP_PNR') translationKey = 'wbsCol';
                 else if (columnKey === 'ZZUBICACION') translationKey = 'tagCol';
                 else if (columnKey === 'ZZSUB_UBICACION') translationKey = 'sublocationCol';
@@ -766,6 +830,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let sublocationColumnVisibility = {};
     let currentLayoutConfig = {};
     let poItemsData = [];
+    let currentSaveHandler = null;
+    let currentSearchHelpTargetRowInput = null;
+    let lastSavedIngresoData = null;
 
     // --- Referencias al DOM ---
     const spinner = document.getElementById('spinner-overlay');
@@ -774,23 +841,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainContent = document.getElementById('mainContent');
     const sublocationContent = document.getElementById('sublocationContent');
     const ingresoContent = document.getElementById('ingresoContent');
-
     const loginButton = document.getElementById('loginButton');
     const guestLoginButton = document.getElementById('guestLoginButton');
     const continueButton = document.getElementById('continueButton');
     const logoutButtons = document.querySelectorAll('#logoutButton, #logoutButtonSub, #logoutButtonIngreso');
     const backButtons = document.querySelectorAll('#backButtonMain, #backButtonSub, #backButtonIngreso');
-
     const sapEnvSelect = document.getElementById('sapEnvSelect');
     const sapClientInput = document.getElementById('sapClientInput');
     const sapUserInput = document.getElementById('sapUserInput');
     const sapPassInput = document.getElementById('sapPassInput');
     const useSapRouter = document.getElementById('useSapRouter');
     const loginStatus = document.getElementById('loginStatus');
-
     const loggedInUserDisplays = document.querySelectorAll('#loggedInUserDisplay, #loggedInUserDisplaySub, #loggedInUserDisplayIngreso');
-
-    // DOM para programa de etiquetas
     const headerDataSection = document.getElementById('headerDataSection');
     const clMovimientoInput = document.getElementById('clMovimiento');
     const almacenInput = document.getElementById('almacen');
@@ -809,8 +871,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const readerMessageElement = document.querySelector('#reader .qr-message');
     const headerInputs = [clMovimientoInput, almacenInput, centroInput, fechaContabInput, specialStockIndicatorInput];
     const startScanButton = document.getElementById('startScanButton');
-
-    // DOM para programa de sub-ubicación
+    const stopScanButton = document.getElementById('stopScanButton');
     const sublocationReader = document.getElementById('sublocationReader');
     const sublocationScanStatus = document.getElementById('sublocationScanStatus');
     const sublocationTableHead = document.getElementById('sublocationTableHead');
@@ -823,9 +884,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterInput = document.getElementById('filterInput');
     const exportToExcelButton = document.getElementById('exportToExcelButton');
     const startSublocationScanButton = document.getElementById('startSublocationScanButton');
+    const stopSublocationScanButton = document.getElementById('stopSublocationScanButton');
     const layoutButtonSub = document.getElementById('layoutButtonSub');
-
-    // Referencias a la Modal
     const signatureModalElement = document.getElementById('signatureModal');
     const signatureModal = new bootstrap.Modal(signatureModalElement);
     const receptorSelect = document.getElementById('receptorSelect');
@@ -834,36 +894,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const labelSizeContainer = document.getElementById('labelSizeContainer');
     const confirmSaveButton = document.getElementById('confirmSaveButton');
     const modalErrorMessage = document.getElementById('modal-error-message');
-
-    // Referencias a la Modal de Ayuda de Búsqueda
     const searchHelpModalElement = document.getElementById('searchHelpModal');
     const searchHelpModal = new bootstrap.Modal(searchHelpModalElement);
     const searchHelpModalLabel = document.getElementById('searchHelpModalLabel');
     const searchHelpFilter = document.getElementById('searchHelpFilter');
     const searchHelpTableHead = document.getElementById('searchHelpTableHead');
     const searchHelpTableBody = document.getElementById('searchHelpTableBody');
-
-    // Referencias a la Modal de Layout
     const layoutModalElement = document.getElementById('layoutModal');
     const layoutModal = new bootstrap.Modal(layoutModalElement);
     const layoutModalBody = document.getElementById('layoutModalBody');
     const applyLayoutButton = document.getElementById('applyLayoutButton');
-
-    // Referencias para Ingreso de material
     const ingresoNroPedidoInput = document.getElementById('ingresoNroPedido');
     const ingresoItemsTableBody = document.getElementById('ingresoItemsTableBody');
     const ingresoSaveButton = document.getElementById('ingresoSaveButton');
     const ingresoClearButton = document.getElementById('ingresoClearButton');
     const ingresoStatus = document.getElementById('ingresoStatus');
     const selectAllIngresoItemsCheckbox = document.getElementById('selectAllIngresoItemsCheckbox');
+    const printLabelsButton = document.getElementById('printLabelsButton');
+    const longTextModal = new bootstrap.Modal(document.getElementById('longTextModal'));
 
     // --- FUNCIONES DEL SPINNER ---
-    function showSpinner() {
-        spinner.style.display = 'flex';
-    }
-    function hideSpinner() {
-        spinner.style.display = 'none';
-    }
+    function showSpinner() { spinner.style.display = 'flex'; }
+    function hideSpinner() { spinner.style.display = 'none'; }
     function playSound(type) {
         try {
             if (type === 'beep') beepSound.play();
@@ -877,16 +929,12 @@ document.addEventListener('DOMContentLoaded', () => {
     logoutButtons.forEach(btn => btn.addEventListener('click', handleLogout));
     continueButton.addEventListener('click', handleModeSelection);
     backButtons.forEach(btn => btn.addEventListener('click', goBackToModeSelection));
-
     headerInputs.forEach(input => input.addEventListener('input', handleHeaderChange));
     reservaCheckbox.addEventListener('change', toggleReservaColumn);
     resetButton.addEventListener('click', resetAll);
     saveButton.addEventListener('click', openSignatureModal);
     confirmSaveButton.addEventListener('click', handleConfirmSave);
-
-    [sublocationCentroInput, sublocationAlmacenInput].forEach(input => {
-        input.addEventListener('input', manageSublocationScannerState);
-    });
+    [sublocationCentroInput, sublocationAlmacenInput].forEach(input => input.addEventListener('input', manageSublocationScannerState));
     sublocationCentroInput.addEventListener('input', () => {
         if (sublocationCentroInput.value.trim() === '4000') {
             sublocationAreaContainer.style.display = 'block';
@@ -900,19 +948,18 @@ document.addEventListener('DOMContentLoaded', () => {
     layoutButtonSub.addEventListener('click', () => openLayoutModal('sublocationTable', sublocationColumnVisibility, 'layoutModalTitle'));
     layoutButtonMseg.addEventListener('click', () => openLayoutModal('msegTable', msegColumnVisibility, 'layoutModalTitle'));
     applyLayoutButton.addEventListener('click', applyLayoutChanges);
-
     document.getElementById('searchCentro').addEventListener('click', () => openSearchHelp('centro', 'Z_SEARCH_HELP_WERKS', {}, 'searchHelpForPlant'));
     document.getElementById('searchAlmacen').addEventListener('click', () => openSearchHelp('almacen', 'Z_SEARCH_HELP_LGORT', { IV_WERKS: centroInput.value.trim() }, 'searchHelpForStorage'));
     document.getElementById('searchSublocationCentro').addEventListener('click', () => openSearchHelp('sublocationCentro', 'Z_SEARCH_HELP_WERKS', {}, 'searchHelpForPlant'));
     document.getElementById('searchSublocationAlmacen').addEventListener('click', () => openSearchHelp('sublocationAlmacen', 'Z_SEARCH_HELP_LGORT', { IV_WERKS: sublocationCentroInput.value.trim() }, 'searchHelpForStorage'));
     document.getElementById('searchClMovimiento').addEventListener('click', () => openSearchHelp('clMovimiento', 'local_cl_movimiento', {}, 'searchHelpForMoveType'));
     document.getElementById('searchSpecialStock').addEventListener('click', () => openSearchHelp('specialStockIndicator', 'local_stock_especial', {}, 'searchHelpForSpecialStock'));
-
     searchHelpTableBody.addEventListener('click', handleSearchHelpSelection);
     searchHelpFilter.addEventListener('input', filterSearchHelp);
     startScanButton.addEventListener('click', startScanner);
+    stopScanButton.addEventListener('click', stopScanner);
     startSublocationScanButton.addEventListener('click', startSublocationScanner);
-
+    stopSublocationScanButton.addEventListener('click', stopSublocationScanner);
     msegTableBody.addEventListener('click', function(e) {
         if (e.target && e.target.classList.contains('select-file-btn')) {
             const fileInput = e.target.nextElementSibling;
@@ -921,7 +968,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-
     msegTableBody.addEventListener('change', function(e) {
         if (e.target && e.target.classList.contains('file-input')) {
             const fileInput = e.target;
@@ -930,27 +976,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 const key = fileInput.dataset.key;
                 const field = fileInput.dataset.field;
                 const displayNameInput = fileInput.parentElement.querySelector('.filename-display');
-
                 if (scannedCodes.has(key)) {
                     const sapData = scannedCodes.get(key);
                     sapData[field] = file;
                     sapData[`${field}_FILENAME`] = file.name;
                     scannedCodes.set(key, sapData);
                 }
-
                 if (displayNameInput) {
                     displayNameInput.value = file.name;
                 }
             }
         }
     });
-
     msegTableBody.addEventListener('input', (e) => {
         if (e.target.tagName === 'INPUT' && e.target.type === 'text') {
             const key = e.target.dataset.key;
             const field = e.target.dataset.field;
             const value = e.target.value;
-
             if (key && field && scannedCodes.has(key)) {
                 const data = scannedCodes.get(key);
                 data[field] = value;
@@ -958,12 +1000,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-
     document.getElementById('searchPoButton').addEventListener('click', fetchPurchaseOrderItems);
     ingresoClearButton.addEventListener('click', () => clearIngresoForm(true));
-    ingresoSaveButton.addEventListener('click', saveIngresoData);
+    ingresoSaveButton.addEventListener('click', openIngresoSignatureModal);
     document.querySelectorAll('input[name="ingresoStockEspecial"]').forEach(radio => radio.addEventListener('change', updateIngresoTableVisibility));
-
     ingresoItemsTableBody.addEventListener('change', e => {
         if (e.target.classList.contains('item-checkbox')) {
             const checkedCount = ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked').length;
@@ -972,22 +1012,97 @@ document.addEventListener('DOMContentLoaded', () => {
             selectAllIngresoItemsCheckbox.checked = totalCheckboxes > 0 && totalCheckboxes === checkedCount;
         }
     });
-
     selectAllIngresoItemsCheckbox.addEventListener('change', e => {
         const isChecked = e.target.checked;
         ingresoItemsTableBody.querySelectorAll('.item-checkbox').forEach(checkbox => checkbox.checked = isChecked);
         ingresoSaveButton.disabled = !isChecked || ingresoItemsTableBody.querySelectorAll('.item-checkbox').length === 0;
     });
+    ingresoItemsTableBody.addEventListener('click', (e) => {
+        const searchButton = e.target.closest('.search-btn');
+        if (!searchButton) return;
+        const searchType = searchButton.dataset.searchType;
+        const currentRow = searchButton.closest('tr');
+        const pos = currentRow.dataset.pos;
+        const originalItem = poItemsData.find(d => d.EBELP === pos);
+        if (searchType === 'lote') {
+            const material = originalItem.MATNR;
+            const planta = originalItem.WERKS;
+            const targetInput = currentRow.querySelector('input[name="lote"]');
+            if (!material || !planta) {
+                alert('Se requiere Material y Planta en la posición para buscar el lote.');
+                return;
+            }
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_BATCH', { IV_MATNR: material, IV_WERKS: planta }, 'Ayuda de Búsqueda - Lotes');
+        } 
+        else if (searchType === 'sublocation') {
+            const planta = originalItem.WERKS;
+            const almacen = currentRow.querySelector('input[name="almacen"]').value;
+            const targetInput = currentRow.querySelector('input[name="sublocation"]');
+            if (!planta || !almacen) {
+                alert('Se requiere Planta y Almacén para buscar la sub-ubicación.');
+                return;
+            }
+            const config = {
+                display: {'ZZ_SUB_UBIC': 'Sub Ubicacion', 'DESCRIPCION': 'Descripcion'},
+                order: ['ZZ_SUB_UBIC', 'DESCRIPCION'],
+                returnColumn: 'ZZ_SUB_UBIC'
+            };
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_SUBLOCATION', { IV_WERKS: planta, IV_LGORT: almacen }, 'Ayuda de Búsqueda - Sub Ubicaciones', config);
+        }
+        else if (searchType === 'almacen') {
+            const planta = originalItem.WERKS;
+            const targetInput = currentRow.querySelector('input[name="almacen"]');
+            if (!planta) {
+                alert('Se requiere la Planta para buscar el almacén.');
+                return;
+            }
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_LGORT', { IV_WERKS: planta }, 'Ayuda de Búsqueda - Almacén');
+        }
+        else if (searchType === 'tag') {
+            const planta = originalItem.WERKS;
+            const targetInput = currentRow.querySelector('input[name="tag"]');
+            if (!planta) {
+                alert('Se requiere la Planta para buscar el TAG.');
+                return;
+            }
+            const config = {
+                display: {'ZZUBICACION': 'TAG', 'DESCRIPCION': 'Descripcion'},
+                order: ['ZZUBICACION', 'DESCRIPCION'],
+                returnColumn: 'ZZUBICACION'
+            };
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_TAG', { IV_WERKS: planta }, 'Ayuda de Búsqueda - TAG', config);
+        }
+        else if (searchType === 'pais') {
+            const targetInput = currentRow.querySelector('input[name="pais"]');
+            const config = {
+                display: {'ZZ_PAIS': 'Pais', 'DESCRIPCION': 'Descripcion'},
+                order: ['ZZ_PAIS', 'DESCRIPCION'],
+                returnColumn: 'ZZ_PAIS'
+            };
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_COUNTRY', {}, 'Ayuda de Búsqueda - País', config);
+        }
+    });
+    printLabelsButton.addEventListener('click', handlePrintLabels);
+    ingresoItemsTableBody.addEventListener('dblclick', (e) => {
+        const descCell = e.target.closest('.material-description-cell');
+        if (!descCell) return;
+        const currentRow = descCell.closest('tr');
+        const pos = currentRow.dataset.pos;
+        const originalItem = poItemsData.find(d => d.EBELP === pos);
+        const poNumber = ingresoNroPedidoInput.value;
+        if (originalItem && originalItem.MATNR) {
+        fetchAndShowLongText(originalItem.MATNR);
+    }
+    });
 
     // --- LÓGICA DE AYUDA DE BÚSQUEDA (MATCHCODE) ---
-    async function openSearchHelp(targetInputId, rfcName, params, titleKey) {
+    async function openSearchHelp(targetInputId, rfcName, params, titleKey, columnConfig = null) {
         currentSearchHelpTarget = document.getElementById(targetInputId);
         searchHelpModalLabel.textContent = getText(titleKey, `${getText('searchHelpTitle')} - ${targetInputId}`);
         searchHelpTableHead.innerHTML = '';
         searchHelpTableBody.innerHTML = `<tr><td colspan="2">${getText('loading')}</td></tr>`;
         searchHelpFilter.value = '';
         searchHelpModal.show();
-
         if (rfcName.startsWith('local_')) {
             let localData = [];
             if (rfcName === 'local_cl_movimiento') {
@@ -995,10 +1110,9 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (rfcName === 'local_stock_especial') {
                 localData = [{ 'STOCK_ESP': '' }, { 'STOCK_ESP': 'Q' }, { 'STOCK_ESP': 'E' }];
             }
-            populateSearchHelpTable(localData);
+            populateSearchHelpTable(localData, columnConfig);
             return;
         }
-
         showSpinner();
         try {
             const response = await fetch(`${API_BASE_URL}/getSearchHelpData`, {
@@ -1013,7 +1127,39 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const result = await response.json();
             if (result.success) {
-                populateSearchHelpTable(result.data);
+                populateSearchHelpTable(result.data, columnConfig);
+            } else {
+                searchHelpTableBody.innerHTML = `<tr><td colspan="2" class="text-danger">${result.error}</td></tr>`;
+            }
+        } catch (e) {
+            searchHelpTableBody.innerHTML = `<tr><td colspan="2" class="text-danger">${getText('networkError')}: ${e.message}</td></tr>`;
+        } finally {
+            hideSpinner();
+        }
+    }
+    
+    async function openSearchHelpForRow(targetInput, rfcName, params, title, columnConfig = null) {
+        currentSearchHelpTargetRowInput = targetInput;
+        searchHelpModalLabel.textContent = title;
+        searchHelpTableHead.innerHTML = '';
+        searchHelpTableBody.innerHTML = `<tr><td colspan="2">${getText('loading')}</td></tr>`;
+        searchHelpFilter.value = '';
+        searchHelpModal.show();
+        showSpinner();
+        try {
+            const response = await fetch(`${API_BASE_URL}/getSearchHelpData`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    connection_params: sapConnection,
+                    rfc_name: rfcName,
+                    rfc_params: params,
+                    is_guest: isGuestMode
+                })
+            });
+            const result = await response.json();
+            if (result.success) {
+                populateSearchHelpTable(result.data, columnConfig);
             } else {
                 searchHelpTableBody.innerHTML = `<tr><td colspan="2" class="text-danger">${result.error}</td></tr>`;
             }
@@ -1024,58 +1170,69 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function populateSearchHelpTable(data) {
+    function populateSearchHelpTable(data, columnConfig = null) {
         if (!data || data.length === 0) {
             searchHelpTableBody.innerHTML = `<tr><td colspan="2">${getText('noDataFound')}</td></tr>`;
             return;
         }
-
-        const headerTranslations = {
-            'WERKS': 'plantCol',
-            'NAME1': 'plantNameCol',
-            'LGORT': 'storageCol',
-            'LGOBE': 'storageNameCol',
-            'CL_MOV': 'moveTypeCol',
-            'STOCK_ESP': 'specialStockCol'
-        };
-
-        const allHeaders = Object.keys(data[0]);
-        const codeFields = ['WERKS', 'LGORT', 'CL_MOV', 'STOCK_ESP'];
-        const descFields = ['NAME1', 'LGOBE'];
-
-        let orderedHeaders = [];
-        let codeHeader = allHeaders.find(h => codeFields.includes(h));
-        let descHeader = allHeaders.find(h => descFields.includes(h));
-
-        if (codeHeader) orderedHeaders.push(codeHeader);
-        if (descHeader) orderedHeaders.push(descHeader);
-
-        allHeaders.forEach(h => {
-            if (!orderedHeaders.includes(h)) {
-                orderedHeaders.push(h);
-            }
-        });
-
-        searchHelpTableHead.innerHTML = `<tr>${orderedHeaders.map(h => `<th>${getText(headerTranslations[h], h)}</th>`).join('')}</tr>`;
-
-        searchHelpTableBody.innerHTML = '';
-        data.forEach(row => {
-            const tr = document.createElement('tr');
-            tr.style.cursor = 'pointer';
-            const returnValue = row[orderedHeaders[0]];
-            tr.dataset.returnValue = returnValue;
-
-            tr.innerHTML = orderedHeaders.map(h => `<td>${row[h]}</td>`).join('');
-            searchHelpTableBody.appendChild(tr);
-        });
+        if (columnConfig) {
+            const columnDisplayNames = columnConfig.display;
+            const columnOrder = columnConfig.order;
+            const returnColumn = columnConfig.returnColumn;
+            searchHelpTableHead.innerHTML = `<tr>${columnOrder.map(key => `<th>${columnDisplayNames[key]}</th>`).join('')}</tr>`;
+            searchHelpTableBody.innerHTML = '';
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.style.cursor = 'pointer';
+                tr.dataset.returnValue = row[returnColumn];
+                let rowHtml = '';
+                columnOrder.forEach(key => {
+                    rowHtml += `<td>${row[key] || ''}</td>`;
+                });
+                tr.innerHTML = rowHtml;
+                searchHelpTableBody.appendChild(tr);
+            });
+        } else {
+            const headerTranslations = {
+                'WERKS': 'plantCol', 'NAME1': 'plantNameCol', 'LGORT': 'storageCol', 'LGOBE': 'storageNameCol',
+                'CL_MOV': 'moveTypeCol', 'STOCK_ESP': 'specialStockCol'
+            };
+            const allHeaders = Object.keys(data[0]);
+            const codeFields = ['WERKS', 'LGORT', 'CL_MOV', 'STOCK_ESP'];
+            const descFields = ['NAME1', 'LGOBE'];
+            let orderedHeaders = [];
+            let codeHeader = allHeaders.find(h => codeFields.includes(h));
+            let descHeader = allHeaders.find(h => descFields.includes(h));
+            if (codeHeader) orderedHeaders.push(codeHeader);
+            if (descHeader) orderedHeaders.push(descHeader);
+            allHeaders.forEach(h => {
+                if (!orderedHeaders.includes(h)) {
+                    orderedHeaders.push(h);
+                }
+            });
+            searchHelpTableHead.innerHTML = `<tr>${orderedHeaders.map(h => `<th>${getText(headerTranslations[h], h)}</th>`).join('')}</tr>`;
+            searchHelpTableBody.innerHTML = '';
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.style.cursor = 'pointer';
+                const returnValue = row[orderedHeaders[0]];
+                tr.dataset.returnValue = returnValue;
+                tr.innerHTML = orderedHeaders.map(h => `<td>${row[h]}</td>`).join('');
+                searchHelpTableBody.appendChild(tr);
+            });
+        }
     }
 
     function handleSearchHelpSelection(e) {
         const row = e.target.closest('tr');
         if (!row || row.dataset.returnValue === undefined) return;
-
         const value = row.dataset.returnValue;
-        if (currentSearchHelpTarget) {
+        if (currentSearchHelpTargetRowInput) {
+            currentSearchHelpTargetRowInput.value = value;
+            currentSearchHelpTargetRowInput.dispatchEvent(new Event('input'));
+            currentSearchHelpTargetRowInput = null;
+        } 
+        else if (currentSearchHelpTarget) {
             currentSearchHelpTarget.value = value;
             currentSearchHelpTarget.dispatchEvent(new Event('input'));
         }
@@ -1098,33 +1255,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- LÓGICA DE LOGIN Y SELECCIÓN DE MODO ---
     async function handleLogin(isGuest) {
         isGuestMode = isGuest;
         setLoginStatus(getText('validating'), "info");
         showSpinner();
-
         sapConnection = null;
-
         const selectedOption = sapEnvSelect.options[sapEnvSelect.selectedIndex];
-
         const connectionParamsForThisAttempt = {
             ashost: selectedOption.dataset.host,
             sysnr: selectedOption.dataset.sysnr,
             client: sapClientInput.value.trim(),
         };
-
         if (useSapRouter.checked) {
             connectionParamsForThisAttempt.saprouter = SAP_ROUTER_STRING;
         }
-
         if (!isGuest) {
             connectionParamsForThisAttempt.user = sapUserInput.value.trim();
             connectionParamsForThisAttempt.passwd = sapPassInput.value.trim();
         }
-
         const endpoint = isGuest ? `${API_BASE_URL}/validateGuestLogin` : `${API_BASE_URL}/validateLogin`;
-
         try {
             const response = await fetch(endpoint, {
                 method: 'POST',
@@ -1132,20 +1281,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ connection_params: connectionParamsForThisAttempt })
             });
             const result = await response.json();
-
             if (result.success) {
                 sapConnection = connectionParamsForThisAttempt;
                 const userToShow = isGuest ? (result.guest_user || 'Invitado') : connectionParamsForThisAttempt.user;
-
                 loginSection.style.display = 'none';
                 modeSelectionSection.style.display = 'block';
-
-                // **CORRECCIÓN AQUÍ**: Usar el NodeList 'loggedInUserDisplays' para actualizar todos los spans
                 const displayText = `${getText('user')}: ${userToShow.toUpperCase()} (${sapEnvSelect.value})`;
                 loggedInUserDisplays.forEach(display => {
                     display.textContent = displayText;
                 });
-
             } else {
                 sapConnection = null;
                 setLoginStatus(`Error: ${result.error}`, 'error');
@@ -1161,16 +1305,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function handleLogout() {
-        await stopAllScales();
+        await stopAllScanners();
         sapConnection = null;
         isGuestMode = false;
-
         mainContent.style.display = 'none';
         sublocationContent.style.display = 'none';
         ingresoContent.style.display = 'none';
         modeSelectionSection.style.display = 'none';
         loginSection.style.display = 'block';
-
         sapPassInput.value = '';
         setLoginStatus(getText('sessionClosed'), "info");
         clearAllScreens();
@@ -1179,12 +1321,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleModeSelection() {
         const selectedMode = document.querySelector('input[name="appMode"]:checked').value;
         modeSelectionSection.style.display = 'none';
-
-        // Ocultar todas las secciones primero para evitar solapamientos
         mainContent.style.display = 'none';
         sublocationContent.style.display = 'none';
         ingresoContent.style.display = 'none';
-
         if (selectedMode === 'etiqueta') {
             mainContent.style.display = 'block';
             if (isGuestMode) {
@@ -1240,7 +1379,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- LÓGICA PARA LECTURA DE ETIQUETA (PROGRAMA 1) ---
     function handleHeaderChange() {
         if (!isGuestMode) { toggleReservaCheckbox(); }
         manageScannerState();
@@ -1267,18 +1405,18 @@ document.addEventListener('DOMContentLoaded', () => {
         readerMessageElement.style.display = 'none';
         document.getElementById('reader').style.display = 'block';
         startScanButton.style.display = 'none';
+        stopScanButton.style.display = 'inline-block'; 
         html5QrCode = new Html5Qrcode("reader");
         const config = { fps: 10, qrbox: { width: 250, height: 250 } };
         try {
-            await html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, (errorMessage) => {
-                // console.log(`QR Code no match: ${errorMessage}`);
-            });
+            await html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, (errorMessage) => {});
             setScanStatus(getText('readyToScan'), "success");
         } catch (err) {
             setScanStatus(`${getText('cameraError')}: ${err}`, "error");
             isScanning = false;
             document.getElementById('reader').style.display = 'none';
             startScanButton.style.display = 'block';
+             stopScanButton.style.display = 'none';
         }
     }
     async function stopScanner() {
@@ -1289,6 +1427,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isScanning = false;
         document.getElementById('reader').style.display = 'none';
         startScanButton.style.display = 'block';
+        stopScanButton.style.display = 'none'; 
         setScanStatus(getText('scannerStopped'), "info");
     }
     async function onScanSuccess(decodedText) {
@@ -1299,10 +1438,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 rfc_params = { documentNumber: decodedText.substring(0, 10), documentYear: decodedText.substring(10, 14), item: decodedText.substring(14, 18) };
             } else {
                 rfc_params = JSON.parse(decodedText);
-                if (!rfc_params.documentNumber || !rfc_params.documentYear || !rfc_params.item) { throw new Error("JSON inválido."); }
+            }
+            if (!rfc_params.documentNumber || !rfc_params.documentYear || !rfc_params.item) {
+                throw new Error("El QR no contiene los datos necesarios (documento, año, posición).");
             }
         } catch (e) {
-            setScanStatus(getText('invalidQrFormat'), "error");
+            setScanStatus(`${getText('invalidQrFormat')} ${e.message}`, "error");
             playSound('error');
             return;
         }
@@ -1359,7 +1500,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         toggleReservaColumn();
     }
-
     function toggleReservaColumn() {
         const show = reservaCheckbox.checked;
         document.querySelectorAll('.reserva-col, .reserva-cell').forEach(el => {
@@ -1368,7 +1508,6 @@ document.addEventListener('DOMContentLoaded', () => {
         msegColumnVisibility['reservationCol'] = show;
         updateTableVisibility('msegTable', msegColumnVisibility);
     }
-
     function renderTable() {
         msegTableBody.innerHTML = '';
         scannedCodes.forEach((sapData, key) => {
@@ -1376,7 +1515,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const tr = document.createElement("tr");
             const isReadOnly = isGuestMode ? 'readonly' : '';
             const materialDisplay = (sapData.MATNR || '').replace(/^0+/, '');
-
             tr.innerHTML = `
                 <td class="cell-docCol">${doc}</td>
                 <td class="cell-yearCol">${year}</td>
@@ -1423,19 +1561,15 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTableVisibility('msegTable', msegColumnVisibility);
     }
     async function openSignatureModal() {
+        currentSaveHandler = saveData;
+        despachadorSelect.parentElement.style.display = 'block';
         modalErrorMessage.style.display = 'none';
         receptorSelect.innerHTML = `<option value="">${getText('loading')}</option>`;
         despachadorSelect.innerHTML = `<option value="">${getText('loading')}</option>`;
         labelSizeSelect.value = '';
-
         const moveType = clMovimientoInput.value.trim();
         const hideLabelSizeFor = ['221', '231', '601'];
-        if (hideLabelSizeFor.includes(moveType)) {
-            labelSizeContainer.style.display = 'none';
-        } else {
-            labelSizeContainer.style.display = 'block';
-        }
-
+        labelSizeContainer.style.display = hideLabelSizeFor.includes(moveType) ? 'none' : 'block';
         setScanStatus(getText('loadingData'), "info");
         showSpinner();
         try {
@@ -1449,14 +1583,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
             });
             const result = await response.json();
-
             if (result.success) {
                 receptorSelect.innerHTML = `<option value="">${getText('selectSize')}</option>`;
                 result.receptores.forEach(r => {
                     const option = new Option(r.RECEPTOR, r.RECEPTOR);
                     receptorSelect.add(option);
                 });
-
                 if (result.currentUser && result.currentUser.fullName) {
                     const userFullName = result.currentUser.fullName;
                     const userExistsInList = result.receptores.some(r => r.RECEPTOR === userFullName);
@@ -1468,13 +1600,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         receptorSelect.value = userFullName;
                     }
                 }
-
                 despachadorSelect.innerHTML = `<option value="">${getText('selectDispatcher')}</option>`;
                 result.despachadores.forEach(d => {
                     const option = new Option(d.RECEPTOR, d.RECEPTOR);
                     despachadorSelect.add(option);
                 });
-
                 setScanStatus("", "");
                 signatureModal.show();
             } else {
@@ -1490,24 +1620,90 @@ document.addEventListener('DOMContentLoaded', () => {
             hideSpinner();
         }
     }
+    async function openIngresoSignatureModal() {
+        const selectedItems = ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked');
+        if (selectedItems.length === 0) {
+            alert('Debe seleccionar al menos una posición para guardar.');
+            return;
+        }
+        const firstSelectedRow = selectedItems[0].closest('tr');
+        const pos = firstSelectedRow.dataset.pos;
+        const originalItem = poItemsData.find(d => d.EBELP === pos);
+        const centroParaModal = originalItem ? originalItem.WERKS : '';
+        if (!centroParaModal) {
+             alert('No se pudo determinar el Centro para cargar los datos del modal.');
+             return;
+        }
+        despachadorSelect.parentElement.style.display = 'none';
+        labelSizeContainer.style.display = 'block';
+        currentSaveHandler = saveIngresoData;
+        modalErrorMessage.style.display = 'none';
+        receptorSelect.innerHTML = `<option value="">${getText('loading')}</option>`;
+        labelSizeSelect.value = '';
+        setIngresoStatus(getText('loadingData'), "info");
+        showSpinner();
+        try {
+            const response = await fetch(`${API_BASE_URL}/getModalData`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    connection_params: sapConnection,
+                    centro: centroParaModal,
+                    is_guest: isGuestMode
+                })
+            });
+            const result = await response.json();
+            if (result.success) {
+                receptorSelect.innerHTML = `<option value="">Seleccione un receptor...</option>`;
+                result.receptores.forEach(r => {
+                    const option = new Option(r.RECEPTOR, r.RECEPTOR);
+                    receptorSelect.add(option);
+                });
+                if (result.currentUser && result.currentUser.fullName) {
+                    const userFullName = result.currentUser.fullName;
+                    if (result.receptores.some(r => r.RECEPTOR === userFullName)) {
+                        receptorSelect.value = userFullName;
+                    }
+                }
+                setIngresoStatus("", "");
+                signatureModal.show();
+            } else {
+                setIngresoStatus(`${getText('loadingData')}: ${result.error}`, "error");
+                playSound('error');
+                alert(`${getText('confirmWindowError')}:\n${result.error}`);
+            }
+        } catch (e) {
+            setIngresoStatus(`${getText('networkError')}: ${e.message}`, "error");
+            playSound('error');
+            alert(`${getText('confirmWindowError')}.`);
+        } finally {
+            hideSpinner();
+        }
+    }
     function handleConfirmSave() {
         const isLabelSizeVisible = labelSizeContainer.style.display !== 'none';
-
+        const isDespachadorVisible = despachadorSelect.parentElement.style.display !== 'none';
         const signatureData = {
             receptor: receptorSelect.value,
-            despachador: despachadorSelect.value,
+            despachador: isDespachadorVisible ? despachadorSelect.value : '',
             labelSize: isLabelSizeVisible ? labelSizeSelect.value : ''
         };
-
-        if (!signatureData.receptor || !signatureData.despachador || (isLabelSizeVisible && !signatureData.labelSize)) {
+        let isValid = true;
+        if (!signatureData.receptor) isValid = false;
+        if (isDespachadorVisible && !signatureData.despachador) isValid = false;
+        if (isLabelSizeVisible && !signatureData.labelSize) isValid = false;
+        if (!isValid) {
             modalErrorMessage.textContent = getText('allFieldsRequired');
             modalErrorMessage.style.display = 'block';
             return;
         }
-
         modalErrorMessage.style.display = 'none';
         signatureModal.hide();
-        saveData(signatureData);
+        if (typeof currentSaveHandler === 'function') {
+            currentSaveHandler(signatureData);
+        } else {
+            console.error("Error: No se ha definido un manejador de guardado.");
+        }
     }
     async function saveData(signatureData) {
         if (isGuestMode || !sapConnection) { alert("Acción no permitida."); return; }
@@ -1519,7 +1715,6 @@ document.addEventListener('DOMContentLoaded', () => {
             textoCabecera: textoCabeceraInput.value, fechaContab: fechaContabInput.value,
             specialStockIndicator: specialStockIndicatorInput.value, isReservaChecked: reservaCheckbox.checked
         };
-
         const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => {
             const [documentNumber, documentYear, item] = key.split('-');
             return {
@@ -1530,7 +1725,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 RSNUM: sapData.RSNUM
             };
         });
-
         const jsonDataPayload = {
             connection_params: sapConnection,
             header: headerData,
@@ -1539,7 +1733,6 @@ document.addEventListener('DOMContentLoaded', () => {
             signature_data: signatureData
         };
         formData.append('json_data', JSON.stringify(jsonDataPayload));
-
         const fileMetadata = [];
         scannedCodes.forEach((sapData, key) => {
             ['CERTIFICADO', 'DOCUMENTO', 'INSPECCION'].forEach(field => {
@@ -1550,12 +1743,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
         formData.append('file_metadata', JSON.stringify(fileMetadata));
-
         setScanStatus(getText('savingData'), "info");
         try {
             const response = await fetch(`${API_BASE_URL}/saveDataToSap`, { method: "POST", body: formData });
             const result = await response.json();
-
             if (result.success) {
                 let finalMessage = `${getText('processCompleted')} Doc: ${result.sap_document_number}`;
                 if (result.warning) {
@@ -1605,8 +1796,6 @@ document.addEventListener('DOMContentLoaded', () => {
         scanStatusElement.textContent = message;
         scanStatusElement.className = `lead text-center message-${type}`;
     }
-
-    // --- NUEVA LÓGICA PARA CONSULTA POR SUB-UBICACIÓN Y LAYOUTS ---
     function initializeColumnVisibility(tableId) {
         const visibilityObject = {};
         document.querySelectorAll(`#${tableId} thead th`).forEach(th => {
@@ -1617,12 +1806,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         return visibilityObject;
     }
-
     function openLayoutModal(tableId, visibilityObject, titleKey) {
         currentLayoutConfig = { tableId, visibilityObject };
         layoutModalLabel.textContent = getText(titleKey);
-        layoutModalBody.innerHTML = ''; // Clear previous content
-
+        layoutModalBody.innerHTML = '';
         const buttonContainer = document.createElement('div');
         buttonContainer.className = 'd-flex justify-content-end mb-2';
         buttonContainer.innerHTML = `
@@ -1630,19 +1817,15 @@ document.addEventListener('DOMContentLoaded', () => {
             <button type="button" class="btn btn-link btn-sm" id="deselectAllLayoutBtn">${getText('deselectAll')}</button>
         `;
         layoutModalBody.appendChild(buttonContainer);
-
         const checkboxesContainer = document.createElement('div');
         checkboxesContainer.id = 'layoutCheckboxesContainer';
         layoutModalBody.appendChild(checkboxesContainer);
-
         const headers = document.querySelectorAll(`#${tableId} thead th`);
         headers.forEach(th => {
             const columnKey = th.dataset.column;
             if (!columnKey) return;
-
             const labelText = th.dataset.translate ? getText(th.dataset.translate) : th.childNodes[0].nodeValue.trim();
             const isVisible = visibilityObject[columnKey];
-
             const formCheck = document.createElement('div');
             formCheck.className = 'form-check';
             formCheck.innerHTML = `
@@ -1653,18 +1836,14 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             checkboxesContainer.appendChild(formCheck);
         });
-
         document.getElementById('selectAllLayoutBtn').addEventListener('click', () => {
             checkboxesContainer.querySelectorAll('.form-check-input').forEach(chk => chk.checked = true);
         });
-
         document.getElementById('deselectAllLayoutBtn').addEventListener('click', () => {
             checkboxesContainer.querySelectorAll('.form-check-input').forEach(chk => chk.checked = false);
         });
-
         layoutModal.show();
     }
-
     function applyLayoutChanges() {
         const { tableId, visibilityObject } = currentLayoutConfig;
         const checkboxes = layoutModalBody.querySelectorAll('.form-check-input');
@@ -1674,13 +1853,11 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTableVisibility(tableId, visibilityObject);
         layoutModal.hide();
     }
-
     function updateTableVisibility(tableId, visibilityObject) {
         for (const columnKey in visibilityObject) {
             const isVisible = visibilityObject[columnKey];
             const cells = document.querySelectorAll(`#${tableId} [data-column="${columnKey}"], #${tableId} .cell-${columnKey}`);
             cells.forEach(cell => {
-                // Special handling for reserva column to respect its own logic
                 if (columnKey === 'reservationCol' && !reservaCheckbox.checked) {
                     return;
                 }
@@ -1688,11 +1865,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
-
     function areSublocationFiltersFilled() {
         return sublocationCentroInput.value.trim() && sublocationAlmacenInput.value.trim();
     }
-
     async function manageSublocationScannerState() {
         if (areSublocationFiltersFilled()) {
             startSublocationScanButton.disabled = false;
@@ -1705,30 +1880,28 @@ document.addEventListener('DOMContentLoaded', () => {
             sublocationReaderMessage.style.display = 'block';
         }
     }
-
     async function startSublocationScanner() {
         if (isSublocationScanning) return;
         isSublocationScanning = true;
         sublocationReaderMessage.style.display = 'none';
         sublocationReader.style.display = 'block';
         startSublocationScanButton.style.display = 'none';
+        stopSublocationScanButton.style.display = 'inline-block';
         sublocationScanStatus.textContent = getText('readyToScan');
         sublocationScanStatus.className = "lead mt-2 message-success";
         html5QrCodeSublocation = new Html5Qrcode("sublocationReader");
         const config = { fps: 10, qrbox: { width: 250, height: 250 } };
         try {
-            await html5QrCodeSublocation.start({ facingMode: "environment" }, config, onSublocationScanSuccess, (errorMessage) => {
-                // console.log(`QR Code no match: ${errorMessage}`);
-            });
+            await html5QrCodeSublocation.start({ facingMode: "environment" }, config, onSublocationScanSuccess, (errorMessage) => {});
         } catch (err) {
             sublocationScanStatus.textContent = `${getText('cameraError')}: ${err}`;
             sublocationScanStatus.className = "lead mt-2 message-error";
             isSublocationScanning = false;
             sublocationReader.style.display = 'none';
             startSublocationScanButton.style.display = 'block';
+            stopSublocationScanButton.style.display = 'none';
         }
     }
-
     async function stopSublocationScanner() {
         if (!isSublocationScanning || !html5QrCodeSublocation) return;
         try {
@@ -1737,15 +1910,14 @@ document.addEventListener('DOMContentLoaded', () => {
         isSublocationScanning = false;
         sublocationReader.style.display = 'none';
         startSublocationScanButton.style.display = 'block';
+        stopSublocationScanButton.style.display = 'none';
     }
-
     async function onSublocationScanSuccess(decodedText) {
         if (!decodedText) return;
         await stopSublocationScanner();
         sublocationQrContent.textContent = decodedText;
         sublocationScanStatus.textContent = `${getText('processingSublocation')}: ${decodedText}...`;
         sublocationScanStatus.className = "lead mt-2";
-
         const selectedArea = document.querySelector('input[name="sublocationArea"]:checked').value;
         showSpinner();
         try {
@@ -1762,13 +1934,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
             });
             const result = await response.json();
-
             if (result.success) {
-                sublocationData = result.data; // Guardar los datos originales
-                sortState = { column: null, direction: 'asc' }; // Resetear ordenamiento
+                sublocationData = result.data;
+                sortState = { column: null, direction: 'asc' };
                 sublocationScanStatus.textContent = getText('recordsFound').replace('{count}', sublocationData.length);
                 sublocationScanStatus.className = "lead mt-2 message-success";
-                filterAndRender(); // Usar la nueva función para renderizar
+                filterAndRender();
                 playSound('beep');
             } else {
                 throw new Error(result.error);
@@ -1782,33 +1953,26 @@ document.addEventListener('DOMContentLoaded', () => {
             hideSpinner();
         }
     }
-
     function filterAndRender() {
         const filterText = filterInput.value.toLowerCase();
-
         const filteredData = sublocationData.filter(item => {
             if (!filterText) return true;
             return Object.values(item).some(val =>
                 String(val).toLowerCase().includes(filterText)
             );
         });
-
         renderSublocationTable(filteredData);
     }
-
     function renderSublocationTable(data) {
         sublocationTableBody.innerHTML = '';
         exportToExcelButton.disabled = !data || data.length === 0;
-
         if (!data || data.length === 0) {
             const tr = document.createElement('tr');
             tr.innerHTML = `<td colspan="${Object.keys(sublocationColumnVisibility).length}" class="text-center">${getText('noDataFound', 'No data found')}</td>`;
             sublocationTableBody.appendChild(tr);
             return;
         }
-
         const headers = document.querySelectorAll('#sublocationTableHead th');
-
         data.forEach(item => {
             const tr = document.createElement('tr');
             headers.forEach(th => {
@@ -1822,32 +1986,25 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             sublocationTableBody.appendChild(tr);
         });
-
         updateSortArrows();
         updateTableVisibility('sublocationTable', sublocationColumnVisibility);
     }
-
     function handleSort(e) {
         const header = e.target.closest('th');
         if (!header) return;
-
         const column = header.dataset.column;
         if (!column) return;
-
         if (sortState.column === column) {
             sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
         } else {
             sortState.column = column;
             sortState.direction = 'asc';
         }
-
         sortData();
     }
-
     function sortData() {
         const { column, direction } = sortState;
         if (!column) return;
-
         const filterText = filterInput.value.toLowerCase();
         const dataToSort = sublocationData.filter(item => {
             if (!filterText) return true;
@@ -1855,14 +2012,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 String(val).toLowerCase().includes(filterText)
             );
         });
-
         dataToSort.sort((a, b) => {
             let valA = a[column];
             let valB = b[column];
-
             const numA = parseFloat(valA);
             const numB = parseFloat(valB);
-
             if (!isNaN(numA) && !isNaN(numB)) {
                 valA = numA;
                 valB = numB;
@@ -1870,7 +2024,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 valA = String(valA).toLowerCase();
                 valB = String(valB).toLowerCase();
             }
-
             if (valA < valB) {
                 return direction === 'asc' ? -1 : 1;
             }
@@ -1879,10 +2032,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return 0;
         });
-
         renderSublocationTable(dataToSort);
     }
-
     function updateSortArrows() {
         document.querySelectorAll('#sublocationTable thead th').forEach(th => {
             const arrow = th.querySelector('.sort-arrow');
@@ -1896,13 +2047,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
     function exportToExcel() {
         if (sublocationData.length === 0) {
             alert(getText('noDataToExport'));
             return;
         }
-
         const filterText = filterInput.value.toLowerCase();
         const dataToExport = sublocationData.filter(item => {
             if (!filterText) return true;
@@ -1910,15 +2059,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 String(val).toLowerCase().includes(filterText)
             );
         });
-
         if (dataToExport.length === 0) {
             alert(getText('noFilteredDataToExport'));
             return;
         }
-
         const visibleHeaders = [];
         const visibleColumnKeys = [];
-
         document.querySelectorAll("#sublocationTableHead th").forEach(th => {
             const columnKey = th.dataset.column;
             if (columnKey && sublocationColumnVisibility[columnKey]) {
@@ -1926,7 +2072,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 visibleColumnKeys.push(columnKey);
             }
         });
-
         const dataWithVisibleHeaders = dataToExport.map(row => {
             const newRow = {};
             visibleHeaders.forEach((header, index) => {
@@ -1935,17 +2080,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             return newRow;
         });
-
         const worksheet = XLSX.utils.json_to_sheet(dataWithVisibleHeaders);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Consulta");
-
         const today = new Date().toISOString().slice(0, 10);
         XLSX.writeFile(workbook, `Consulta_Sububicacion_${today}.xlsx`);
     }
-
     function clearAllScreens() {
-        // Limpiar pantalla de lectura de etiquetas
         msegTableBody.innerHTML = '';
         scannedCodes.clear();
         qrContentElement.textContent = '';
@@ -1958,8 +2099,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setScanStatus("", "");
         updateButtonsVisibility();
         toggleReservaColumn();
-
-        // Limpiar pantalla de consulta de sub-ubicación
         sublocationCentroInput.value = '';
         sublocationAlmacenInput.value = '';
         sublocationQrContent.textContent = '';
@@ -1968,31 +2107,25 @@ document.addEventListener('DOMContentLoaded', () => {
         filterInput.value = '';
         document.getElementById('areaTodos').checked = true;
         sublocationAreaContainer.style.display = 'none';
-        sublocationData = []; // Limpiar datos almacenados
-        sortState = { column: null, direction: 'asc' }; // Resetear ordenamiento
+        sublocationData = [];
+        sortState = { column: null, direction: 'asc' };
         updateSortArrows();
         exportToExcelButton.disabled = true;
-
-        // Limpiar pantalla de ingreso de material
         clearIngresoForm(true);
-
-        // Reset layouts
         msegColumnVisibility = initializeColumnVisibility('msegTable');
         sublocationColumnVisibility = initializeColumnVisibility('sublocationTable');
         updateTableVisibility('msegTable', msegColumnVisibility);
         updateTableVisibility('sublocationTable', sublocationColumnVisibility);
     }
-
- function updateIngresoTableVisibility() {
+    function updateIngresoTableVisibility() {
         const stockType = document.querySelector('input[name="ingresoStockEspecial"]:checked').value;
         document.querySelectorAll('#ingresoItemsTable .wbs-col').forEach(el => el.style.display = stockType === 'Q' ? '' : 'none');
         document.querySelectorAll('#ingresoItemsTable .so-col').forEach(el => el.style.display = stockType === 'E' ? '' : 'none');
     }
-
     async function fetchPurchaseOrderItems() {
         const poNumber = ingresoNroPedidoInput.value.trim();
         if (!poNumber) { clearIngresoForm(false); return; }
-        setIngresoStatus(`Buscando pedido ${poNumber}...`, 'info');
+        setIngresoStatus(`${getText('searchingPO')} ${poNumber}...`, 'info');
         showSpinner();
         try {
             const response = await fetch(`${API_BASE_URL}/getPurchaseOrderItems`, {
@@ -2004,7 +2137,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success && result.items) {
                 poItemsData = result.items;
                 renderIngresoItemsTable(result.items);
-                setIngresoStatus(result.items.length > 0 ? `${result.items.length} posiciones cargadas.` : 'No se encontraron posiciones.', 'success');
+                setIngresoStatus(result.items.length > 0 ? `${result.items.length} ${getText('itemsLoaded')}` : getText('noItemsFound'), 'success');
                 ingresoSaveButton.disabled = true;
                 playSound('beep');
             } else {
@@ -2018,22 +2151,57 @@ document.addEventListener('DOMContentLoaded', () => {
             hideSpinner();
         }
     }
+    
     function renderIngresoItemsTable(items) {
         ingresoItemsTableBody.innerHTML = '';
         selectAllIngresoItemsCheckbox.checked = false;
         items.forEach(item => {
             const tr = document.createElement('tr');
             tr.dataset.pos = item.EBELP;
+            const posSinCeros = parseInt(item.EBELP, 10);
+            const materialSinCeros = (item.MATNR || '').replace(/^0+/, '');
             tr.innerHTML = `
                 <td><input type="checkbox" class="form-check-input item-checkbox"></td>
-                <td>${item.EBELP}</td><td>${item.MATNR}</td><td>${item.TXZ01}</td>
-                <td class="wbs-col">${item.PS_PSP_PNR_D || ''}</td><td class="so-col">${item.KDAUF || ''}</td>
-                <td class="so-col">${item.KDPOS || ''}</td><td>${item.WERKS}</td>
-                <td><input type="text" class="form-control form-control-sm" name="almacen" value="${item.LGORT || ''}"></td>
+                <td>${posSinCeros}</td>
+                <td>${materialSinCeros}</td>
+                <td class="material-description-cell" style="cursor: pointer;">${item.TXZ01}</td>
+                <td class="wbs-col">${item.PS_PSP_PNR_D || ''}</td>
+                <td class="so-col">${item.KDAUF || ''}</td>
+                <td class="so-col">${item.KDPOS || ''}</td>
+                <td>${item.WERKS}</td>
+                <td>
+                    <div class="input-group input-group-sm">
+                        <input type="text" class="form-control form-control-sm" name="almacen" value="${item.LGORT || ''}">
+                        <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="almacen"><i class="bi bi-search"></i></button>
+                    </div>
+                </td>
                 <td><input type="number" class="form-control form-control-sm" name="cantidad" value="${item.MENGE || 0}"></td>
                 <td>${item.MEINS}</td>
-                <td><input type="text" class="form-control form-control-sm" name="lote"></td>
-                <td><input type="text" class="form-control form-control-sm" name="sublocation"></td>
+                <td>
+                    <div class="input-group input-group-sm">
+                        <input type="text" class="form-control" name="lote">
+                        <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="lote"><i class="bi bi-search"></i></button>
+                    </div>
+                </td>
+                <td>
+                    <div class="input-group input-group-sm">
+                        <input type="text" class="form-control" name="sublocation">
+                        <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="sublocation"><i class="bi bi-search"></i></button>
+                    </div>
+                </td>
+                <td>
+                    <div class="input-group input-group-sm">
+                        <input type="text" class="form-control" name="tag">
+                        <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="tag"><i class="bi bi-search"></i></button>
+                    </div>
+                </td>
+                <td>
+                    <div class="input-group input-group-sm">
+                        <input type="text" class="form-control" name="pais">
+                        <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="pais"><i class="bi bi-search"></i></button>
+                    </div>
+                </td>
+                <td><input type="text" class="form-control form-control-sm" name="sgtxt"></td>
                 <td><input type="file" class="form-control form-control-sm" name="certificado"></td>
                 <td><input type="file" class="form-control form-control-sm" name="documentos"></td>
                 <td><input type="file" class="form-control form-control-sm" name="inspeccion"></td>
@@ -2042,7 +2210,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         updateIngresoTableVisibility();
     }
-    async function saveIngresoData() {
+
+    async function saveIngresoData(signatureData) {
         const selectedItems = [];
         ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
             const tr = checkbox.closest('tr');
@@ -2050,17 +2219,26 @@ document.addEventListener('DOMContentLoaded', () => {
             const originalItem = poItemsData.find(d => d.EBELP === pos);
             if (originalItem) {
                 selectedItems.push({
-                    posicion: pos, material: originalItem.MATNR, plant: originalItem.WERKS, um: originalItem.MEINS,
-                    almacen: tr.querySelector('[name="almacen"]').value, cantidad: tr.querySelector('[name="cantidad"]').value,
-                    lote: tr.querySelector('[name="lote"]').value, sublocation: tr.querySelector('[name="sublocation"]').value
+                    posicion: pos,
+                    material: originalItem.MATNR,
+                    plant: originalItem.WERKS,
+                    um: originalItem.MEINS,
+                    almacen: tr.querySelector('[name="almacen"]').value,
+                    cantidad: tr.querySelector('[name="cantidad"]').value,
+                    lote: tr.querySelector('[name="lote"]').value,
+                    sublocation: tr.querySelector('[name="sublocation"]').value,
+                    tag: tr.querySelector('[name="tag"]').value,
+                    pais: tr.querySelector('[name="pais"]').value,
+                    sgtxt: tr.querySelector('[name="sgtxt"]').value
                 });
             }
         });
         if (selectedItems.length === 0) { alert('Debe seleccionar al menos una posición.'); return; }
-        setIngresoStatus('Preparando datos...', 'info');
+        
+        setIngresoStatus(getText('preparingData'), 'info');
         showSpinner();
         const headerData = {
-            nro_pedido: ingresoNroPedidoInput.value,
+            nro_pedido: document.getElementById('ingresoNroPedido').value,
             tipo_movimiento: document.getElementById('ingresoTipoMovimiento').value,
             stock_especial: document.querySelector('input[name="ingresoStockEspecial"]:checked').value,
             fecha_doc: document.getElementById('ingresoFechaDoc').value,
@@ -2071,7 +2249,8 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         const formData = new FormData();
         formData.append('json_data', JSON.stringify({
-            connection_params: sapConnection, is_guest: isGuestMode, header: headerData, items: selectedItems
+            connection_params: sapConnection, is_guest: isGuestMode, header: headerData, items: selectedItems,
+            signature_data: signatureData
         }));
         const fileMetadata = [];
         ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
@@ -2085,27 +2264,79 @@ document.addEventListener('DOMContentLoaded', () => {
             if (inspFile) { formData.append('files[]', inspFile); fileMetadata.push({ posicion: pos, field: 'inspeccion', filename: inspFile.name }); }
         });
         formData.append('file_metadata', JSON.stringify(fileMetadata));
+        
         try {
             const response = await fetch(`${API_BASE_URL}/saveIngreso`, { method: 'POST', body: formData });
             const result = await response.json();
             if (result.success) {
-                let msg = `¡Éxito! Documento ${result.doc_number} creado.`;
+                let msg = getText('successDocCreated').replace('{doc_number}', result.doc_number);
                 if(result.warning) msg += `\n\nADVERTENCIA:\n${result.warning}`;
+                
                 setIngresoStatus(msg, result.warning ? 'warning' : 'success');
                 playSound('beep');
                 alert(msg);
-                clearIngresoForm(true);
+
+                lastSavedIngresoData = {
+                    doc_number: result.doc_number,
+                    doc_year: headerData.fecha_cont.substring(0, 4),
+                    items: selectedItems
+                };
+
+                ingresoSaveButton.style.display = 'none';
+                printLabelsButton.style.display = 'inline-block';
+                
+                document.querySelectorAll('#ingresoContent input, #ingresoContent button').forEach(el => {
+                    if(el.id !== 'ingresoClearButton' && el.id !== 'printLabelsButton' && el.id !== 'backButtonIngreso' && el.id !== 'logoutButtonIngreso') {
+                        el.disabled = true;
+                    }
+                });
+
             } else {
                 throw new Error(result.error);
             }
-        } catch(err) {
-            setIngresoStatus(`Error al guardar: ${err.message}`, 'error');
+        } catch (err) {
+            setIngresoStatus(`${getText('savingError')}: ${err.message}`, 'error');
             playSound('error');
-            alert(`Error al guardar: ${err.message}`);
+            alert(`${getText('savingError')}: ${err.message}`);
         } finally {
             hideSpinner();
         }
     }
+
+    async function handlePrintLabels() {
+        if (!lastSavedIngresoData) {
+            alert("No hay datos del último guardado para imprimir.");
+            return;
+        }
+        setIngresoStatus(getText('generatingLabels', 'Generando etiquetas...'), 'info');
+        showSpinner();
+        try {
+            const response = await fetch(`${API_BASE_URL}/printIngresoLabels`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    connection_params: sapConnection,
+                    print_data: lastSavedIngresoData
+                })
+            });
+            const result = await response.json();
+            if (result.success && result.pdf_data) {
+                const pdfBlob = new Blob([Uint8Array.from(atob(result.pdf_data), c => c.charCodeAt(0))], { type: 'application/pdf' });
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+                window.open(pdfUrl, '_blank');
+                setIngresoStatus(getText('labelsGenerated'), 'success');
+            } else {
+                throw new Error(result.error || "No se recibieron datos del PDF desde el servidor.");
+            }
+        } catch (err) {
+            setIngresoStatus(`${getText('printingError', 'Error al imprimir')}: ${err.message}`, 'error');
+            playSound('error');
+            alert(`${getText('printingError', 'Error al generar etiquetas')}: ${err.message}`);
+        } finally {
+            hideSpinner();
+        }
+    }
+
     function clearIngresoForm(clearAll = true) {
         if(clearAll) {
             ingresoNroPedidoInput.value = '';
@@ -2116,14 +2347,49 @@ document.addEventListener('DOMContentLoaded', () => {
         setIngresoStatus('', 'info');
         selectAllIngresoItemsCheckbox.checked = false;
         updateIngresoTableVisibility();
+        ingresoSaveButton.style.display = 'inline-block';
+        printLabelsButton.style.display = 'none';
+        lastSavedIngresoData = null;
+        document.querySelectorAll('#ingresoContent input, #ingresoContent button').forEach(el => {
+            el.disabled = false;
+        });
+        ingresoSaveButton.disabled = true;
     }
+
     function setIngresoStatus(message, type) {
         ingresoStatus.textContent = message;
         ingresoStatus.className = `mt-3 text-center message-${type}`;
     }
+    
+    async function fetchAndShowLongText(materialNumber) {
+        const modalBody = document.getElementById('longTextModalBody');
+        modalBody.textContent = getText('loading', 'Cargando...');
+        longTextModal.show();
+        showSpinner();
+        try {
+            const response = await fetch(`${API_BASE_URL}/getLongText`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    connection_params: sapConnection,
+                    material_number: materialNumber,
+                    lang: currentLang
+                })
+            });
+            const result = await response.json();
+            if (result.success) {
+                modalBody.textContent = result.long_text || 'No se encontró texto extendido.';
+            } else {
+                throw new Error(result.error);
+            }
+        } catch (err) {
+            modalBody.textContent = `Error al cargar el texto: ${err.message}`;
+            playSound('error');
+        } finally {
+            hideSpinner();
+        }
+    }
 
-    // **CORRECCIÓN AQUÍ**: Código de inicialización ordenado y sin redundancia
-    // Initialize tooltips and layouts
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
