@@ -107,7 +107,7 @@
                         </div>
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="radio" name="appMode" id="modeIngreso" value="ingreso">
-                            <label class="form-check-label" for="modeIngreso">Ingreso de Materiales por Pedido</label>
+                            <label class="form-check-label" for="modeIngreso" data-translate="goodsReceiptMode">Ingreso de Materiales por Pedido</label>
                         </div>
                         <div class="d-grid gap-2 mt-4">
                             <button id="continueButton" class="btn btn-primary" data-translate="continueButton">Continuar</button>
@@ -173,7 +173,7 @@
                 <p id="qr-content" class="form-control-plaintext border p-2 bg-light rounded mb-2"></p>
                 <div id="reader" style="display: none;"><span class="qr-message p-3"></span></div>
                 <button id="startScanButton" class="btn btn-primary mt-2" data-translate="activateCameraButton">Activar Cámara</button>
-                <button id="stopScanButton" class="btn btn-danger mt-2" style="display: none;">Detener Cámara</button>
+                <button id="stopScanButton" class="btn btn-danger mt-2" style="display: none;" data-translate="stopCameraButton">Detener Cámara</button>
                 <p id="scan-status" class="lead mt-2"></p>
             </div>
         </div>
@@ -199,7 +199,6 @@
                     <th data-column="itemTextCol" style="min-width: 150px;" data-translate="itemTextCol">Texto Pos.</th>
                     <th data-column="tagCol" data-translate="tagCol">TAG</th>
                     <th data-column="subLocCol" data-translate="subLocCol">Sub Ubicacion</th>
-                    <th data-column="TextPosicion" data-translate="TextoPosicion">Texto Posición</th>
                     <th data-column="areaCol" style="min-width: 150px;" data-translate="areaCol">Área</th>
                     <th data-column="orderNoCol" data-translate="orderNoCol">Nro. Pedido</th>
                     <th data-column="wbsCol" data-translate="wbsCol">Elemento PEP</th>
@@ -260,7 +259,7 @@
                     <p id="sublocationQrContent" class="form-control-plaintext border p-2 bg-light rounded mb-2"></p>
                     <div id="sublocationReader" style="display: none;"><span class="qr-message p-3"></span></div>
                     <button id="startSublocationScanButton" class="btn btn-primary mt-2" data-translate="activateCameraButton">Activar Cámara</button>
-                    <button id="stopSublocationScanButton" class="btn btn-danger mt-2" style="display: none;">Detener Cámara</button>
+                    <button id="stopSublocationScanButton" class="btn btn-danger mt-2" style="display: none;" data-translate="stopCameraButton">Detener Cámara</button>
                     <p id="sublocationScanStatus" class="lead mt-2"></p>
                 </div>
             </div>
@@ -325,10 +324,13 @@
             <div class="row g-3 p-3 border rounded bg-light mb-4">
                 <div class="col-12 col-sm-6 col-md-3">
                     <label for="ingresoNroPedido" class="form-label" data-translate="poNumberLabel">Nro de Pedido</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="ingresoNroPedido">
-                        <button class="btn btn-primary" type="button" id="searchPoButton" data-translate="searchPOButton">Buscar Pedido</button>
-                    </div>
+          <div class="input-group">
+    <input type="text" class="form-control" id="ingresoNroPedido">
+    <button class="btn btn-primary" type="button" id="searchPoButton">
+        <i class="bi bi-search"></i>
+        <span class="d-none d-sm-inline" data-translate="searchPOButton"> Buscar Pedido</span>
+    </button>
+</div>
                 </div>
                 <div class="col-md-2"><label for="ingresoTipoMovimiento" class="form-label" data-translate="moveTypeLabel">Tipo de Movimiento</label><input type="text" class="form-control" id="ingresoTipoMovimiento" value="101" readonly></div>
                 <div class="col-md-4">
@@ -506,6 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
             saveButton: "Save to SAP",
             backButton: "Back",
             activateCameraButton: "Activate Camera",
+            stopCameraButton: "Stop Camera",
             applyButton: "Apply",
             selectAll: "Select All",
             deselectAll: "Deselect All",
@@ -524,6 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
             selectModeTitle: "Select a Mode",
             labelReadingMode: "Label Reading (QR)",
             sublocationQueryMode: "Query by Sublocation",
+            goodsReceiptMode: "Goods Receipt by Purchase Order",
             // Label Reading Program
             mainContentTitle: "Movement Capture (QR Reading)",
             headerDataTitle: "Header Data",
@@ -634,6 +638,7 @@ document.addEventListener('DOMContentLoaded', () => {
             saveButton: "Guardar en SAP",
             backButton: "Volver",
             activateCameraButton: "Activar Cámara",
+            stopCameraButton: "Detener Cámara",
             applyButton: "Aplicar",
             selectAll: "Marcar todo",
             deselectAll: "Desmarcar todo",
@@ -652,6 +657,7 @@ document.addEventListener('DOMContentLoaded', () => {
             selectModeTitle: "Seleccione un Modo",
             labelReadingMode: "Lectura de Etiqueta (QR)",
             sublocationQueryMode: "Consulta por Sub-Ubicación",
+            goodsReceiptMode: "Ingreso de Materiales por Pedido",
             // Label Reading Program
             mainContentTitle: "Captura de Movimientos (Lectura QR)",
             headerDataTitle: "Datos de Cabecera",
@@ -1082,6 +1088,15 @@ document.addEventListener('DOMContentLoaded', () => {
             openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_COUNTRY', {}, 'Ayuda de Búsqueda - País', config);
         }
     });
+
+       // CONVIERTE A MAYÚSCULAS EL CAMPO LOTE EN TIEMPO REAL
+    ingresoItemsTableBody.addEventListener('input', (e) => {
+        // Se asegura de que el cambio solo aplique a los campos con el nombre 'lote'
+        if (e.target && e.target.getAttribute('name') === 'lote') {
+            e.target.value = e.target.value.toUpperCase();
+        }
+    });
+
     printLabelsButton.addEventListener('click', handlePrintLabels);
     ingresoItemsTableBody.addEventListener('dblclick', (e) => {
         const descCell = e.target.closest('.material-description-cell');
@@ -2399,4 +2414,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
