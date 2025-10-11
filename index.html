@@ -30,7 +30,7 @@
             transform: translateY(-50%);
             opacity: 0.5;
         }
-        .reserva-col, .reserva-cell, .wbs-col, .so-col {
+        .reserva-col, .reserva-cell, .so-col {
             display: none;
         }
         #spinner-overlay {
@@ -198,7 +198,7 @@
                     <th data-column="inspCol" style="min-width: 200px;" data-translate="inspCol">Inspección</th>
                     <th data-column="itemTextCol" style="min-width: 150px;" data-translate="itemTextCol">Texto Pos.</th>
                     <th data-column="tagCol" data-translate="tagCol">TAG</th>
-                    <th data-column="subLocCol" data-translate="subLocCol">Sub Ubicacion</th>
+                    <th data-column="subLocCol" data-translate="subLocCol" style="min-width: 180px;">Sub Ubicacion</th>
                     <th data-column="areaCol" style="min-width: 150px;" data-translate="areaCol">Área</th>
                     <th data-column="orderNoCol" data-translate="orderNoCol">Nro. Pedido</th>
                     <th data-column="wbsCol" data-translate="wbsCol">Elemento PEP</th>
@@ -322,7 +322,7 @@
         <div class="card-body">
             <h4 class="mb-3" data-translate="headerDataTitle">Datos de Cabecera</h4>
             <div class="row g-3 p-3 border rounded bg-light mb-4">
-                <div class="col-12 col-sm-6 col-md-3">
+                <div style="width: 350px;">
                     <label for="ingresoNroPedido" class="form-label" data-translate="poNumberLabel">Nro de Pedido</label>
           <div class="input-group">
     <input type="text" class="form-control" id="ingresoNroPedido">
@@ -381,7 +381,7 @@
                 <button id="ingresoClearButton" class="btn btn-warning me-2" data-translate="clearButton">Limpiar</button>
                 <button id="ingresoSaveButton" class="btn btn-success" disabled data-translate="saveButton">Guardar en SAP</button>
                 <button id="printLabelsButton" class="btn btn-info" style="display: none;">
-                    <i class="bi bi-printer"></i> <span data-translate="printLabelsButton"  hidden>Imprimir Etiquetas</span>
+                    <i class="bi bi-printer"></i> <span data-translate="printLabelsButton">Imprimir Etiquetas</span>
                 </button>
             </div>
              <p id="ingresoStatus" class="mt-3 text-center"></p>
@@ -1006,6 +1006,39 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
+msegTableBody.addEventListener('click', (e) => {
+    const searchButton = e.target.closest('.search-btn');
+    if (!searchButton) return;
+
+    // Obtenemos el tipo de búsqueda y la fila actual
+    const searchType = searchButton.dataset.searchType;
+    const currentRow = searchButton.closest('tr');
+    
+    if (searchType === 'sublocation_qr') {
+        // Obtenemos el campo de texto de la sub-ubicación en esta fila
+        const targetInput = currentRow.querySelector('input[data-field="SUB_LOC"]');
+        
+        // Obtenemos el centro y almacén de los campos de cabecera de la pantalla QR
+        const planta = centroInput.value.trim();
+        const almacen = almacenInput.value.trim();
+
+        if (!planta || !almacen) {
+            alert('Se requiere Planta y Almacén en los datos de cabecera para buscar la sub-ubicación.');
+            return;
+        }
+
+        // Reutilizamos la misma configuración y llamada que en el otro modo
+        const config = {
+            display: {'ZZ_SUB_UBIC': 'Sub Ubicacion', 'DESCRIPCION': 'Descripcion'},
+            order: ['ZZ_SUB_UBIC', 'DESCRIPCION'],
+            returnColumn: 'ZZ_SUB_UBIC'
+        };
+        
+        openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_SUBLOCATION', { IV_WERKS: planta, IV_LGORT: almacen }, 'Ayuda de Búsqueda - Sub Ubicaciones', config);
+    }
+});
+
     document.getElementById('searchPoButton').addEventListener('click', fetchPurchaseOrderItems);
     ingresoClearButton.addEventListener('click', () => clearIngresoForm(true));
     ingresoSaveButton.addEventListener('click', openIngresoSignatureModal);
@@ -1089,6 +1122,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+        clMovimientoInput.addEventListener('input', () => {
+        // Si ya hay códigos escaneados en la tabla...
+        if (scannedCodes.size > 0) {
+            // ...vuelve a dibujar la tabla para aplicar el cambio.
+            renderTable();
+        }
+    });
+
        // CONVIERTE A MAYÚSCULAS EL CAMPO LOTE EN TIEMPO REAL
     ingresoItemsTableBody.addEventListener('input', (e) => {
         // Se asegura de que el cambio solo aplique a los campos con el nombre 'lote'
@@ -1121,7 +1162,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (rfcName.startsWith('local_')) {
             let localData = [];
             if (rfcName === 'local_cl_movimiento') {
-                localData = [{ 'CL_MOV': '101' }, { 'CL_MOV': '221' }, { 'CL_MOV': '231' }, { 'CL_MOV': '601' }];
+                localData = [{ 'CL_MOV': '101' }, { 'CL_MOV': '221' }, { 'CL_MOV': '231' }, { 'CL_MOV': '601' },  { 'CL_MOV': '311' }];
             } else if (rfcName === 'local_stock_especial') {
                 localData = [{ 'STOCK_ESP': '' }, { 'STOCK_ESP': 'Q' }, { 'STOCK_ESP': 'E' }];
             }
@@ -1483,7 +1524,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const payload = {
             connection_params: sapConnection,
             rfc_params: { ...rfc_params, moveType: clMovimientoInput.value, specialStockIndicator: specialStockIndicatorInput.value },
-            is_guest: isGuestMode
+            is_guest: isGuestMode,
+            centro: centroInput.value.trim()
         };
         try {
             const response = await fetch(`${API_BASE_URL}/getMsegData`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
@@ -1524,57 +1566,79 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTableVisibility('msegTable', msegColumnVisibility);
     }
     function renderTable() {
-        msegTableBody.innerHTML = '';
-        scannedCodes.forEach((sapData, key) => {
-            const [doc, year, item] = key.split('-');
-            const tr = document.createElement("tr");
-            const isReadOnly = isGuestMode ? 'readonly' : '';
-            const materialDisplay = (sapData.MATNR || '').replace(/^0+/, '');
-            tr.innerHTML = `
-                <td class="cell-docCol">${doc}</td>
-                <td class="cell-yearCol">${year}</td>
-                <td class="cell-posCol">${item}</td>
-                <td class="cell-materialCol">${materialDisplay}</td>
-                <td class="cell-materialDescCol">${sapData.MAKTX || ''}</td>
-                <td class="cell-qtyCol"><input type="text" class="form-control form-control-sm" value="${sapData.MENGE || '0'}" data-key="${key}" data-field="MENGE" ${isReadOnly}></td>
-                <td class="cell-unitCol">${sapData.MEINS || ''}</td>
-                <td class="cell-batchCol">${sapData.CHARG || ''}</td>
-                <td class="cell-certCol">
+msegTableBody.innerHTML = '';
+    
+    const currentMoveType = clMovimientoInput.value.trim();
+
+    scannedCodes.forEach((sapData, key) => {
+        const [doc, year, item] = key.split('-');
+        const tr = document.createElement("tr");
+        tr.dataset.key = key; // <-- Añadimos el key a la fila para encontrarlo fácilmente
+        const isReadOnly = isGuestMode ? 'readonly' : '';
+        const materialDisplay = (sapData.MATNR || '').replace(/^0+/, '');
+
+        // Lógica para decidir si la celda es editable y tiene matchcode
+        let sublocationCellHtml = '';
+        if (currentMoveType === '101') {
+            // Si es 101, creamos un campo de texto con su botón de búsqueda
+            sublocationCellHtml = `
+                <td class="cell-subLocCol">
                     <div class="input-group input-group-sm">
-                        <input type="text" class="form-control filename-display" value="${sapData.CERTIFICADO_FILENAME || ''}" readonly>
-                        <button class="btn btn-outline-secondary select-file-btn" type="button" ${isReadOnly}>...</button>
-                        <input type="file" class="file-input" data-key="${key}" data-field="CERTIFICADO" style="display: none;">
+                        <input type="text" class="form-control form-control-sm" value="${sapData.SUB_LOC || ''}" data-key="${key}" data-field="SUB_LOC">
+                        <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="sublocation_qr"><i class="bi bi-search"></i></button>
                     </div>
-                </td>
-                <td class="cell-docsCol">
-                    <div class="input-group input-group-sm">
-                        <input type="text" class="form-control filename-display" value="${sapData.DOCUMENTO_FILENAME || ''}" readonly>
-                        <button class="btn btn-outline-secondary select-file-btn" type="button" ${isReadOnly}>...</button>
-                        <input type="file" class="file-input" data-key="${key}" data-field="DOCUMENTO" style="display: none;">
-                    </div>
-                </td>
-                <td class="cell-inspCol">
-                    <div class="input-group input-group-sm">
-                        <input type="text" class="form-control filename-display" value="${sapData.INSPECCION_FILENAME || ''}" readonly>
-                        <button class="btn btn-outline-secondary select-file-btn" type="button" ${isReadOnly}>...</button>
-                        <input type="file" class="file-input" data-key="${key}" data-field="INSPECCION" style="display: none;">
-                    </div>
-                </td>
-                <td class="cell-itemTextCol"><input type="text" class="form-control form-control-sm" value="${sapData.SGTXT || ''}" data-key="${key}" data-field="SGTXT" ${isReadOnly}></td>
-                <td class="cell-tagCol">${sapData.TAG || ''}</td>
-                <td class="cell-subLocCol">${sapData.SUB_LOC || ''}</td>
-                <td class="cell-areaCol">${sapData.SUBMI || ''}</td>
-                <td class="cell-orderNoCol">${sapData.EBELN || ''}</td>
-                <td class="cell-wbsCol">${sapData.PS_PSP_PNR || ''}</td>
-                <td class="cell-reservationCol reserva-cell d-none"><input type="text" class="form-control form-control-sm" value="${sapData.RSNUM || ''}" data-key="${key}" data-field="RSNUM" ${isReadOnly}></td>
-                <td class="cell-salesOrderCol">${sapData.KDAUF || ''}</td>
-                <td class="cell-salesOrderItemCol">${sapData.KDPOS || ''}</td>
-            `;
-            msegTableBody.appendChild(tr);
-        });
-        updateButtonsVisibility();
-        updateTableVisibility('msegTable', msegColumnVisibility);
-    }
+                </td>`;
+        } else {
+            // Para cualquier otro movimiento, creamos una celda <td> normal
+            sublocationCellHtml = `<td class="cell-subLocCol">${sapData.SUB_LOC || ''}</td>`;
+        }
+
+        // Construimos la fila completa
+        tr.innerHTML = `
+            <td class="cell-docCol">${doc}</td>
+            <td class="cell-yearCol">${year}</td>
+            <td class="cell-posCol">${item}</td>
+            <td class="cell-materialCol">${materialDisplay}</td>
+            <td class="cell-materialDescCol">${sapData.MAKTX || ''}</td>
+            <td class="cell-qtyCol"><input type="text" class="form-control form-control-sm" value="${sapData.MENGE || '0'}" data-key="${key}" data-field="MENGE" ${isReadOnly}></td>
+            <td class="cell-unitCol">${sapData.MEINS || ''}</td>
+            <td class="cell-batchCol">${sapData.CHARG || ''}</td>
+            <td class="cell-certCol">
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control filename-display" value="${sapData.CERTIFICADO_FILENAME || ''}" readonly>
+                    <button class="btn btn-outline-secondary select-file-btn" type="button" ${isReadOnly}>...</button>
+                    <input type="file" class="file-input" data-key="${key}" data-field="CERTIFICADO" style="display: none;">
+                </div>
+            </td>
+            <td class="cell-docsCol">
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control filename-display" value="${sapData.DOCUMENTO_FILENAME || ''}" readonly>
+                    <button class="btn btn-outline-secondary select-file-btn" type="button" ${isReadOnly}>...</button>
+                    <input type="file" class="file-input" data-key="${key}" data-field="DOCUMENTO" style="display: none;">
+                </div>
+            </td>
+            <td class="cell-inspCol">
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control filename-display" value="${sapData.INSPECCION_FILENAME || ''}" readonly>
+                    <button class="btn btn-outline-secondary select-file-btn" type="button" ${isReadOnly}>...</button>
+                    <input type="file" class="file-input" data-key="${key}" data-field="INSPECCION" style="display: none;">
+                </div>
+            </td>
+            <td class="cell-itemTextCol"><input type="text" class="form-control form-control-sm" value="${sapData.SGTXT || ''}" data-key="${key}" data-field="SGTXT" ${isReadOnly}></td>
+            <td class="cell-tagCol">${sapData.TAG || ''}</td>
+            ${sublocationCellHtml}
+            <td class="cell-areaCol">${sapData.SUBMI || ''}</td>
+            <td class="cell-orderNoCol">${sapData.EBELN || ''}</td>
+            <td class="cell-wbsCol">${sapData.PS_PSP_PNR || ''}</td>
+            <td class="cell-reservationCol reserva-cell d-none"><input type="text" class="form-control form-control-sm" value="${sapData.RSNUM || ''}" data-key="${key}" data-field="RSNUM" ${isReadOnly}></td>
+            <td class="cell-salesOrderCol">${sapData.KDAUF || ''}</td>
+            <td class="cell-salesOrderItemCol">${sapData.KDPOS || ''}</td>
+        `;
+        msegTableBody.appendChild(tr);
+    });
+    updateButtonsVisibility();
+    updateTableVisibility('msegTable', msegColumnVisibility);
+}
     async function openSignatureModal() {
         currentSaveHandler = saveData;
         despachadorSelect.parentElement.style.display = 'block';
@@ -1583,7 +1647,7 @@ document.addEventListener('DOMContentLoaded', () => {
         despachadorSelect.innerHTML = `<option value="">${getText('loading')}</option>`;
         labelSizeSelect.value = '';
         const moveType = clMovimientoInput.value.trim();
-        const hideLabelSizeFor = ['221', '231', '601'];
+        const hideLabelSizeFor = ['221', '231', '601', '311'];
         labelSizeContainer.style.display = hideLabelSizeFor.includes(moveType) ? 'none' : 'block';
         setScanStatus(getText('loadingData'), "info");
         showSpinner();
@@ -1674,12 +1738,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     const option = new Option(r.RECEPTOR, r.RECEPTOR);
                     receptorSelect.add(option);
                 });
-                if (result.currentUser && result.currentUser.fullName) {
-                    const userFullName = result.currentUser.fullName;
-                    if (result.receptores.some(r => r.RECEPTOR === userFullName)) {
-                        receptorSelect.value = userFullName;
-                    }
+            if (result.currentUser && result.currentUser.fullName) {
+                const userFullName = result.currentUser.fullName;
+                const userExistsInList = result.receptores.some(r => r.RECEPTOR === userFullName);
+
+                if (userExistsInList) {
+                    // Si el usuario existe en la lista, lo seleccionamos.
+                    receptorSelect.value = userFullName;
+                } else {
+                    // Si NO existe, lo añadimos a la lista y luego lo seleccionamos.
+                    const option = new Option(userFullName, userFullName);
+                    receptorSelect.add(option);
+                    receptorSelect.value = userFullName;
                 }
+            }
                 setIngresoStatus("", "");
                 signatureModal.show();
             } else {
