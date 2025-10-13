@@ -1151,6 +1151,26 @@ msegTableBody.addEventListener('click', (e) => {
     }
     });
 
+    msegTableBody.addEventListener('dblclick', (e) => {
+    // Busca la celda de descripción del material a la que se le hizo clic
+    const descCell = e.target.closest('.cell-materialDescCol');
+    if (!descCell) return; // Si no se hizo clic en la celda correcta, no hace nada
+
+    // Encuentra la fila (tr) completa
+    const currentRow = descCell.closest('tr');
+    const key = currentRow.dataset.key; // Obtiene la clave única de la fila (ej: "doc-año-pos")
+
+    // Si la clave existe, busca los datos en el mapa 'scannedCodes'
+    if (key && scannedCodes.has(key)) {
+        const sapData = scannedCodes.get(key); // Obtiene el objeto con todos los datos de esa fila
+        
+        // Si tenemos los datos y el número de material, llamamos a la función existente
+        if (sapData && sapData.MATNR) {
+            fetchAndShowLongText(sapData.MATNR);
+        }
+    }
+});
+
     // --- LÓGICA DE AYUDA DE BÚSQUEDA (MATCHCODE) ---
     async function openSearchHelp(targetInputId, rfcName, params, titleKey, columnConfig = null) {
         currentSearchHelpTarget = document.getElementById(targetInputId);
@@ -1599,7 +1619,7 @@ msegTableBody.innerHTML = '';
             <td class="cell-yearCol">${year}</td>
             <td class="cell-posCol">${item}</td>
             <td class="cell-materialCol">${materialDisplay}</td>
-            <td class="cell-materialDescCol">${sapData.MAKTX || ''}</td>
+            <td class="cell-materialDescCol" style="cursor: pointer;">${sapData.MAKTX || ''}</td>
             <td class="cell-qtyCol"><input type="text" class="form-control form-control-sm" value="${sapData.MENGE || '0'}" data-key="${key}" data-field="MENGE" ${isReadOnly}></td>
             <td class="cell-unitCol">${sapData.MEINS || ''}</td>
             <td class="cell-batchCol">${sapData.CHARG || ''}</td>
@@ -1802,16 +1822,47 @@ msegTableBody.innerHTML = '';
             textoCabecera: textoCabeceraInput.value, fechaContab: fechaContabInput.value,
             specialStockIndicator: specialStockIndicatorInput.value, isReservaChecked: reservaCheckbox.checked
         };
-        const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => {
-            const [documentNumber, documentYear, item] = key.split('-');
-            return {
-                documentNumber, documentYear, item,
-                MATNR: sapData.MATNR, MAKTX: sapData.MAKTX, MENGE: sapData.MENGE, MEINS: sapData.MEINS,
-                CHARG: sapData.CHARG, SGTXT: sapData.SGTXT, TAG: sapData.ZZUBICACION, SUB_LOC: sapData.SUB_LOC,
-                SUBMI: sapData.SUBMI, EBELN: sapData.EBELN, PS_PSP_PNR: sapData.PS_PSP_PNR, KDAUF: sapData.KDAUF, KDPOS: sapData.KDPOS,
-                RSNUM: sapData.RSNUM
-            };
-        });
+const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => {
+    const [documentNumber, documentYear, item] = key.split('-');
+
+    // Buscamos la fila correspondiente en la tabla para leer los datos actuales
+    const row = msegTableBody.querySelector(`tr[data-key="${key}"]`);
+
+    let subLocValue = sapData.SUB_LOC; // Valor por defecto
+
+    // Si la fila existe, leemos los valores directamente de los inputs
+    if (row) {
+        const mengeInput = row.querySelector('input[data-field="MENGE"]');
+        const sgtxtInput = row.querySelector('input[data-field="SGTXT"]');
+        const subLocInput = row.querySelector('input[data-field="SUB_LOC"]');
+        const rsnumInput = row.querySelector('input[data-field="RSNUM"]');
+
+        // Actualizamos los datos del objeto 'sapData' con los valores actuales de la tabla
+        // Esto asegura que cualquier cambio se capture
+        if (mengeInput) sapData.MENGE = mengeInput.value;
+        if (sgtxtInput) sapData.SGTXT = sgtxtInput.value;
+        if (subLocInput) sapData.SUB_LOC = subLocInput.value; // <-- Aquí capturamos la sub-ubicación editada
+        if (rsnumInput) sapData.RSNUM = rsnumInput.value;
+    }
+
+    return {
+        documentNumber, documentYear, item,
+        MATNR: sapData.MATNR,
+        MAKTX: sapData.MAKTX,
+        MENGE: sapData.MENGE, // Se usa el valor actualizado
+        MEINS: sapData.MEINS,
+        CHARG: sapData.CHARG,
+        SGTXT: sapData.SGTXT, // Se usa el valor actualizado
+        TAG: sapData.TAG, // Corregido para usar 'TAG' que sí existe en el objeto
+        SUB_LOC: sapData.SUB_LOC, // Se usa el valor actualizado
+        SUBMI: sapData.SUBMI,
+        EBELN: sapData.EBELN,
+        PS_PSP_PNR: sapData.PS_PSP_PNR,
+        KDAUF: sapData.KDAUF,
+        KDPOS: sapData.KDPOS,
+        RSNUM: sapData.RSNUM // Se usa el valor actualizado
+    };
+});
         const jsonDataPayload = {
             connection_params: sapConnection,
             header: headerData,
