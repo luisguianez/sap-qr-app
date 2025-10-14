@@ -201,6 +201,7 @@
                     <th data-column="subLocCol" data-translate="subLocCol" style="min-width: 180px;">Sub Ubicacion</th>
                     <th data-column="areaCol" style="min-width: 150px;" data-translate="areaCol">Área</th>
                     <th data-column="orderNoCol" data-translate="orderNoCol">Nro. Pedido</th>
+                    <th data-column="orderNo2Col" class="d-none" data-translate="orderNo2Col">Pedido 2</th>
                     <th data-column="wbsCol" data-translate="wbsCol">Elemento PEP</th>
                     <th data-column="reservationCol" class="reserva-col d-none" data-translate="reservationCol">Reserva</th>
                     <th data-column="salesOrderCol" data-translate="salesOrderCol">Pedido Cliente</th>
@@ -564,7 +565,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Table Headers
             docCol: "Document", yearCol: "Year", posCol: "Item", materialCol: "Material", materialDescCol: "Material Text", qtyCol: "Quantity",
             unitCol: "Unit", batchCol: "Batch", certCol: "Certificate", docsCol: "Documents", inspCol: "Inspection", itemTextCol: "Item Text",
-            tagCol: "TAG", subLocCol: "Sublocation", areaCol: "Area", orderNoCol: "Order No.", wbsCol: "WBS Element", reservationCol: "Reservation",
+            tagCol: "TAG", subLocCol: "Sublocation", areaCol: "Area", orderNoCol: "Order No.", orderNo2Col: "Order No. 2",wbsCol: "WBS Element", reservationCol: "Reservation",
             salesOrderCol: "Sales Order", salesOrderItemCol: "SO Item",
             // Sublocation Table Headers
             sublocationCol: "Sublocation", countryCol: "Country", uomCol: "Unit of Measure", currencyCol: "Currency", freeStockCol: "Free Stock",
@@ -694,7 +695,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Table Headers
             docCol: "Documento", yearCol: "Año", posCol: "Pos.", materialCol: "Material", materialDescCol: "Texto Material", qtyCol: "Cantidad",
             unitCol: "Unidad", batchCol: "Lote", certCol: "Certificado", docsCol: "Documentos", inspCol: "Inspección", itemTextCol: "Texto Pos.",
-            tagCol: "TAG", subLocCol: "Sub Ubicacion", areaCol: "Área", orderNoCol: "Nro. Pedido", wbsCol: "Elemento PEP", reservationCol: "Reserva",
+            tagCol: "TAG", subLocCol: "Sub Ubicacion", areaCol: "Área", orderNoCol: "Nro. Pedido", orderNo2Col: "Nro. Pedido 2", wbsCol: "Elemento PEP", reservationCol: "Reserva",
             salesOrderCol: "Pedido Cliente", salesOrderItemCol: "Pos. Pedido Cliente",
             // Sublocation Table Headers
             sublocationCol: "Sub Ubicación", countryCol: "Pais", uomCol: "Unidada de Medida", currencyCol: "Moneda", freeStockCol: "Stock Libre Utilizacion",
@@ -1458,6 +1459,7 @@ msegTableBody.addEventListener('click', (e) => {
     function handleHeaderChange() {
         if (!isGuestMode) { toggleReservaCheckbox(); }
         manageScannerState();
+        toggleSpecialColumnsVisibility();
     }
     function areHeadersFilled() {
         if (isGuestMode) { return true; }
@@ -1649,6 +1651,7 @@ msegTableBody.innerHTML = '';
             ${sublocationCellHtml}
             <td class="cell-areaCol">${sapData.SUBMI || ''}</td>
             <td class="cell-orderNoCol">${sapData.EBELN || ''}</td>
+            <td class="cell-orderNo2Col d-none">${sapData.EBELN2 || ''}</td>
             <td class="cell-wbsCol">${sapData.PS_PSP_PNR || ''}</td>
             <td class="cell-reservationCol reserva-cell d-none"><input type="text" class="form-control form-control-sm" value="${sapData.RSNUM || ''}" data-key="${key}" data-field="RSNUM" ${isReadOnly}></td>
             <td class="cell-salesOrderCol">${sapData.KDAUF || ''}</td>
@@ -1658,20 +1661,36 @@ msegTableBody.innerHTML = '';
     });
     updateButtonsVisibility();
     updateTableVisibility('msegTable', msegColumnVisibility);
+    toggleSpecialColumnsVisibility();
 }
-    async function openSignatureModal() {
-        currentSaveHandler = saveData;
+async function openSignatureModal() {
+    currentSaveHandler = saveData;
+    modalErrorMessage.style.display = 'none';
+    receptorSelect.innerHTML = `<option value="">${getText('loading')}</option>`;
+    despachadorSelect.innerHTML = `<option value="">${getText('loading')}</option>`;
+    labelSizeSelect.value = '';
+
+    // --- Lógica condicional para mostrar/ocultar campos ---
+    const moveType = clMovimientoInput.value.trim();
+    const centro = centroInput.value.trim();
+
+    // Verificamos la condición especial: Movimiento 101 y Centro 4000
+    if (moveType === '101' && centro === '4000') {
+        // Si se cumple, OCULTAMOS el Despachador y el Tamaño de Etiqueta
+        despachadorSelect.parentElement.style.display = 'none';
+        labelSizeContainer.style.display = 'none';
+    } else {
+        // Para cualquier otro caso, restauramos el comportamiento original
         despachadorSelect.parentElement.style.display = 'block';
-        modalErrorMessage.style.display = 'none';
-        receptorSelect.innerHTML = `<option value="">${getText('loading')}</option>`;
-        despachadorSelect.innerHTML = `<option value="">${getText('loading')}</option>`;
-        labelSizeSelect.value = '';
-        const moveType = clMovimientoInput.value.trim();
+        
+        // Mantenemos la lógica original para el tamaño de la etiqueta
         const hideLabelSizeFor = ['221', '231', '601', '311'];
         labelSizeContainer.style.display = hideLabelSizeFor.includes(moveType) ? 'none' : 'block';
-        setScanStatus(getText('loadingData'), "info");
-        showSpinner();
-        try {
+    }
+
+    setScanStatus(getText('loadingData'), "info");
+    showSpinner();
+    try {
             const response = await fetch(`${API_BASE_URL}/getModalData`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1912,6 +1931,7 @@ const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => 
         await stopScanner();
         clearFormAndTable();
         manageScannerState();
+        toggleSpecialColumnsVisibility();
     }
     function clearFormAndTable() {
         msegTableBody.innerHTML = '';
@@ -1991,6 +2011,21 @@ const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => 
         updateTableVisibility(tableId, visibilityObject);
         layoutModal.hide();
     }
+
+function toggleSpecialColumnsVisibility() {
+    const moveType = clMovimientoInput.value.trim();
+    const centro = centroInput.value.trim();
+    const shouldShow = (moveType === '101' && centro === '4000');
+
+    // Seleccionamos todas las cabeceras y celdas de las columnas que queremos controlar
+    const wbsElements = document.querySelectorAll('[data-column="wbsCol"], .cell-wbsCol');
+    const orderNo2Elements = document.querySelectorAll('[data-column="orderNo2Col"], .cell-orderNo2Col');
+
+    // Usamos toggle para añadir o quitar la clase 'd-none' según la condición
+    wbsElements.forEach(el => el.classList.toggle('d-none', !shouldShow));
+    orderNo2Elements.forEach(el => el.classList.toggle('d-none', !shouldShow));
+}
+
     function updateTableVisibility(tableId, visibilityObject) {
         for (const columnKey in visibilityObject) {
             const isVisible = visibilityObject[columnKey];
