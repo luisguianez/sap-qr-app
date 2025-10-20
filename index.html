@@ -44,6 +44,11 @@
             display: none;
             justify-content: center;
             align-items: center;
+        
+        input[readonly] {
+        background-color: #b1b1b1;
+        cursor: not-allowed;
+        }
         }
     </style>
 </head>
@@ -384,6 +389,9 @@
                 <button id="printLabelsButton" class="btn btn-info" style="display: none;">
                     <i class="bi bi-printer"></i> <span data-translate="printLabelsButton">Imprimir Etiquetas</span>
                 </button>
+                 <button id="printDocMaterialButton" class="btn btn-primary" style="display: none;">
+                    <i class="bi bi-file-earmark-pdf"></i> <span data-translate="printMaterialDocButton">Imprimir Doc. Material</span>
+                </button>
             </div>
              <p id="ingresoStatus" class="mt-3 text-center"></p>
         </div>
@@ -626,7 +634,11 @@ document.addEventListener('DOMContentLoaded', () => {
             noItemsFound: "No items found.",
             savingError: "Error while saving",
             successDocCreated: "Success! Document {doc_number} created.",
-            labelsGenerated: "Labels generated. You can now clear the form."
+            labelsGenerated: "Labels generated. You can now clear the form.",
+            printMaterialDocButton: "Print Material Doc.",
+            generatingMaterialDoc: "Generating Material Document...",
+            materialDocGenerated: "Document generated.",
+            sublocationRequiredError: "The Sublocation field is mandatory for the selected items. Please fill in the highlighted fields."
         },
         es: {
             // General
@@ -756,7 +768,10 @@ document.addEventListener('DOMContentLoaded', () => {
             noItemsFound: "No se encontraron posiciones.",
             savingError: "Error al guardar",
             successDocCreated: "¡Éxito! Documento {doc_number} creado.",
-            labelsGenerated: "Etiquetas generadas. Puede limpiar el formulario."
+            labelsGenerated: "Etiquetas generadas. Puede limpiar el formulario.",
+            printMaterialDocButton: "Imprimir Doc. Material",
+            generatingMaterialDoc: "Generando Documento de Material...",
+            materialDocGenerated: "Documento generado.",sublocationRequiredError: "El campo Sub-Ubicación es obligatorio para las posiciones seleccionadas. Por favor, complete los campos marcados en rojo."
         }
     };
 
@@ -918,6 +933,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ingresoStatus = document.getElementById('ingresoStatus');
     const selectAllIngresoItemsCheckbox = document.getElementById('selectAllIngresoItemsCheckbox');
     const printLabelsButton = document.getElementById('printLabelsButton');
+    const printDocMaterialButton = document.getElementById('printDocMaterialButton');
     const longTextModal = new bootstrap.Modal(document.getElementById('longTextModal'));
 
     // --- FUNCIONES DEL SPINNER ---
@@ -1140,6 +1156,7 @@ msegTableBody.addEventListener('click', (e) => {
     });
 
     printLabelsButton.addEventListener('click', handlePrintLabels);
+    printDocMaterialButton.addEventListener('click', handlePrintDocMaterial);
     ingresoItemsTableBody.addEventListener('dblclick', (e) => {
         const descCell = e.target.closest('.material-description-cell');
         if (!descCell) return;
@@ -1664,6 +1681,34 @@ msegTableBody.innerHTML = '';
     toggleSpecialColumnsVisibility();
 }
 async function openSignatureModal() {
+const moveType = clMovimientoInput.value.trim();
+
+    // La validación solo se ejecuta si el tipo de movimiento es '101'
+    if (moveType === '101') {
+        let allSublocationsAreValid = true;
+        const sublocationInputs = msegTableBody.querySelectorAll('input[data-field="SUB_LOC"]');
+
+        sublocationInputs.forEach(input => {
+            // Primero, removemos cualquier marca de error anterior
+            input.classList.remove('is-invalid');
+
+            // Verificamos si el campo está vacío
+            if (input.value.trim() === '') {
+                input.classList.add('is-invalid'); // Lo marcamos en rojo (estilo de Bootstrap)
+                allSublocationsAreValid = false;   // Marcamos que hay un error
+            }
+        });
+
+        // Si se encontró al menos un campo vacío...
+        if (!allSublocationsAreValid) {
+            const errorMessage = "El campo Sub-Ubicación es obligatorio. Por favor, complete los campos marcados en rojo.";
+            alert(errorMessage); // Mostramos una alerta al usuario
+            setScanStatus(errorMessage, "error"); // También lo ponemos en la barra de estado
+            playSound('error');
+            return; // Detenemos la ejecución para que no se abra la ventana de firmas
+        }
+    }
+
     currentSaveHandler = saveData;
     modalErrorMessage.style.display = 'none';
     receptorSelect.innerHTML = `<option value="">${getText('loading')}</option>`;
@@ -1671,7 +1716,6 @@ async function openSignatureModal() {
     labelSizeSelect.value = '';
 
     // --- Lógica condicional para mostrar/ocultar campos ---
-    const moveType = clMovimientoInput.value.trim();
     const centro = centroInput.value.trim();
 
     // Verificamos la condición especial: Movimiento 101 y Centro 4000
@@ -1739,6 +1783,34 @@ async function openSignatureModal() {
         }
     }
     async function openIngresoSignatureModal() {
+    let allSublocationsAreValid = true;
+    const selectedRows = ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked');
+
+    // Revisamos cada una de las filas que el usuario ha seleccionado
+    selectedRows.forEach(checkbox => {
+        const row = checkbox.closest('tr');
+        const sublocationInput = row.querySelector('input[name="sublocation"]');
+        
+        if (sublocationInput) {
+            // Limpiamos cualquier error previo
+            sublocationInput.classList.remove('is-invalid');
+
+            // Si el campo de sub-ubicación de esta fila seleccionada está vacío...
+            if (sublocationInput.value.trim() === '') {
+                sublocationInput.classList.add('is-invalid'); // Lo marcamos en rojo
+                allSublocationsAreValid = false; // Anotamos que hay un error
+            }
+        }
+    });
+
+    // Si después de revisar todas las filas seleccionadas se encontró un error...
+    if (!allSublocationsAreValid) {
+        const errorMessage = getText('sublocationRequiredError');
+        alert(errorMessage);
+        setIngresoStatus(errorMessage, "error");
+        playSound('error');
+        return; // Detenemos el proceso y no abrimos la ventana de firmas
+    }
         const selectedItems = ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked');
         if (selectedItems.length === 0) {
             alert('Debe seleccionar al menos una posición para guardar.');
@@ -2457,9 +2529,10 @@ function toggleSpecialColumnsVisibility() {
 
                 ingresoSaveButton.style.display = 'none';
                 printLabelsButton.style.display = 'inline-block';
+                printDocMaterialButton.style.display = 'inline-block';
                 
                 document.querySelectorAll('#ingresoContent input, #ingresoContent button').forEach(el => {
-                    if(el.id !== 'ingresoClearButton' && el.id !== 'printLabelsButton' && el.id !== 'backButtonIngreso' && el.id !== 'logoutButtonIngreso') {
+                    if(el.id !== 'ingresoClearButton' && el.id !== 'printLabelsButton' && el.id !== 'printDocMaterialButton' && el.id !== 'backButtonIngreso' && el.id !== 'logoutButtonIngreso') {
                         el.disabled = true;
                     }
                 });
@@ -2510,6 +2583,41 @@ function toggleSpecialColumnsVisibility() {
         }
     }
 
+     async function handlePrintDocMaterial() {
+        if (!lastSavedIngresoData) {
+            alert("No hay datos del último guardado para imprimir.");
+            return;
+        }
+        setIngresoStatus(getText('generatingMaterialDoc', 'Generando Documento de Material...'), 'info');
+        showSpinner();
+        try {
+            // Esta función llama a la nueva ruta /printMaterialDoc
+            const response = await fetch(`${API_BASE_URL}/printMaterialDoc`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    connection_params: sapConnection,
+                    print_data: lastSavedIngresoData
+                })
+            });
+            const result = await response.json();
+            if (result.success && result.pdf_data) {
+                const pdfBlob = new Blob([Uint8Array.from(atob(result.pdf_data), c => c.charCodeAt(0))], { type: 'application/pdf' });
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+                window.open(pdfUrl, '_blank');
+                setIngresoStatus(getText('materialDocGenerated', 'Documento generado.'), 'success');
+            } else {
+                throw new Error(result.error || "No se recibieron datos del PDF desde el servidor.");
+            }
+        } catch (err) {
+            setIngresoStatus(`${getText('printingError', 'Error al imprimir')}: ${err.message}`, 'error');
+            playSound('error');
+            alert(`${getText('printingError', 'Error al generar documento')}: ${err.message}`);
+        } finally {
+            hideSpinner();
+        }
+    }
+
     function clearIngresoForm(clearAll = true) {
         if(clearAll) {
             ingresoNroPedidoInput.value = '';
@@ -2522,6 +2630,7 @@ function toggleSpecialColumnsVisibility() {
         updateIngresoTableVisibility();
         ingresoSaveButton.style.display = 'inline-block';
         printLabelsButton.style.display = 'none';
+        printDocMaterialButton.style.display = 'none';
         lastSavedIngresoData = null;
         document.querySelectorAll('#ingresoContent input, #ingresoContent button').forEach(el => {
             el.disabled = false;
