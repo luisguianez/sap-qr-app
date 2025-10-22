@@ -44,11 +44,6 @@
             display: none;
             justify-content: center;
             align-items: center;
-        
-        input[readonly] {
-        background-color: #b1b1b1;
-        cursor: not-allowed;
-        }
         }
     </style>
 </head>
@@ -340,14 +335,10 @@
                 </div>
                 <div class="col-md-2"><label for="ingresoTipoMovimiento" class="form-label" data-translate="moveTypeLabel">Tipo de Movimiento</label><input type="text" class="form-control" id="ingresoTipoMovimiento" value="101" readonly></div>
                 <div class="col-md-4">
-                    <label class="form-label" data-translate="specialStockLabel">Indicador de Stock Especial</label>
-                    <div>
-                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="ingresoStockEspecial" id="stockSin" value="" checked><label class="form-check-label" for="stockSin" data-translate="noIndicatorLabel">Sin Indicador</label></div>
-                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="ingresoStockEspecial" id="stockQ" value="Q"><label class="form-check-label" for="stockQ">Q</label></div>
-                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="ingresoStockEspecial" id="stockE" value="E"><label class="form-check-label" for="stockE">E</label></div>
-                    </div>
+                   
+                
+                        
                 </div>
-                <div class="col-md-3 d-flex align-items-end"><div class="form-check"><input class="form-check-input" type="checkbox" id="ingresoItemAdopted"><label class="form-check-label" for="ingresoItemAdopted" data-translate="itemAdoptedLabel">Item Adopted</label></div></div>
                 <div class="col-md-3"><label for="ingresoFechaDoc" class="form-label" data-translate="docDateLabel">Fecha de Documento</label><input type="date" class="form-control" id="ingresoFechaDoc"></div>
                 <div class="col-md-3"><label for="ingresoFechaCont" class="form-label" data-translate="postingDateLabel">Fecha de Contabilización</label><input type="date" class="form-control" id="ingresoFechaCont"></div>
                 <div class="col-md-3"><label for="ingresoMaterialSlip" class="form-label" data-translate="materialSlipLabel">Material Slip</label><input type="text" class="form-control" id="ingresoMaterialSlip"></div>
@@ -355,32 +346,33 @@
             </div>
             <h4 class="mb-3 mt-4" data-translate="poItemsTitle">Posiciones del Pedido</h4>
             <div class="table-responsive">
-                <table id="ingresoItemsTable" class="table table-bordered table-sm">
-                    <thead>
-                        <tr>
-                            <th><input type="checkbox" id="selectAllIngresoItemsCheckbox"></th>
-                            <th data-translate="posCol">Pos.</th>
-                            <th data-translate="materialCol">Material</th>
-                            <th data-translate="materialDescCol">Descripción</th>
-                            <th class="wbs-col" data-translate="wbsCol">Elemento PEP (WBS)</th>
-                            <th class="so-col" data-translate="salesOrderHeader">Pedido Venta</th>
-                            <th class="so-col" data-translate="salesOrderItemHeader">Pos. Ped. Venta</th>
-                            <th data-translate="plantLabel">Planta</th>
-                            <th data-translate="storageLocationLabel">Almacén</th>
-                            <th data-translate="qtyCol">Cantidad</th>
-                            <th data-translate="unitCol">UM</th>
-                            <th data-translate="batchCol" style="min-width: 100px;">Lote</th>
-                            <th data-translate="sublocationHeader" style="min-width: 150px;">Sub-Ubicación</th>
-                            <th style="min-width: 160px;" data-translate="tagCol">TAG</th>
-                            <th style="min-width: 80px;" data-translate="countryHeader">País</th>
-                            <th style="min-width: 200px;" data-translate="itemTextHeader">Texto Posición</th>
-                            <th data-translate="certCol">Certificado</th>
-                            <th data-translate="docsCol">Documentos</th>
-                            <th data-translate="inspCol">Inspección</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ingresoItemsTableBody"></tbody>
-                </table>
+ <table id="ingresoItemsTable" class="table table-bordered table-sm">
+    <thead>
+        <tr>
+            <th><input type="checkbox" id="selectAllIngresoItemsCheckbox"></th>
+            <th data-translate="posCol">Pos.</th>
+            <th data-translate="specialStockLabel">Ind. Stock Esp.</th>
+            <th data-translate="materialCol">Material</th>
+            <th data-translate="materialDescCol">Descripción</th>
+            <th class="wbs-col" data-translate="wbsCol">Elemento PEP (WBS)</th>
+            <th class="so-col" data-translate="salesOrderHeader">Pedido Venta</th>
+            <th class="so-col" data-translate="salesOrderItemHeader">Pos. Ped. Venta</th>
+            <th data-translate="plantLabel">Planta</th>
+            <th data-translate="storageLocationLabel">Almacén</th>
+            <th data-translate="qtyCol">Cantidad</th>
+            <th data-translate="unitCol">UM</th>
+            <th data-translate="batchCol" style="min-width: 100px;">Lote</th>
+            <th data-translate="sublocationHeader" style="min-width: 150px;">Sub-Ubicación</th>
+            <th style="min-width: 160px;" data-translate="tagCol">TAG</th>
+            <th style="min-width: 80px;" data-translate="countryHeader">País</th>
+            <th style="min-width: 200px;" data-translate="itemTextHeader">Texto Posición</th>
+            <th data-translate="certCol">Certificado</th>
+            <th data-translate="docsCol">Documentos</th>
+            <th data-translate="inspCol">Inspección</th>
+        </tr>
+    </thead>
+    <tbody id="ingresoItemsTableBody"></tbody>
+</table>
             </div>
             <hr>
             <div class="text-center">
@@ -771,7 +763,8 @@ document.addEventListener('DOMContentLoaded', () => {
             labelsGenerated: "Etiquetas generadas. Puede limpiar el formulario.",
             printMaterialDocButton: "Imprimir Doc. Material",
             generatingMaterialDoc: "Generando Documento de Material...",
-            materialDocGenerated: "Documento generado.",sublocationRequiredError: "El campo Sub-Ubicación es obligatorio para las posiciones seleccionadas. Por favor, complete los campos marcados en rojo."
+            materialDocGenerated: "Documento generado.",
+            sublocationRequiredError: "El campo Sub-Ubicación es obligatorio para las posiciones seleccionadas. Por favor, complete los campos marcados en rojo."
         }
     };
 
@@ -965,6 +958,10 @@ document.addEventListener('DOMContentLoaded', () => {
             sublocationAreaContainer.style.display = 'none';
         }
     });
+
+    almacenInput.addEventListener('input', (e) => {
+    e.target.value = e.target.value.toUpperCase();
+});
     sublocationTableHead.addEventListener('click', handleSort);
     filterInput.addEventListener('input', filterAndRender);
     exportToExcelButton.addEventListener('click', exportToExcel);
@@ -1059,7 +1056,7 @@ msegTableBody.addEventListener('click', (e) => {
     document.getElementById('searchPoButton').addEventListener('click', fetchPurchaseOrderItems);
     ingresoClearButton.addEventListener('click', () => clearIngresoForm(true));
     ingresoSaveButton.addEventListener('click', openIngresoSignatureModal);
-    document.querySelectorAll('input[name="ingresoStockEspecial"]').forEach(radio => radio.addEventListener('change', updateIngresoTableVisibility));
+  //document.querySelectorAll('input[name="ingresoStockEspecial"]').forEach(radio => radio.addEventListener('change', updateIngresoTableVisibility));
     ingresoItemsTableBody.addEventListener('change', e => {
         if (e.target.classList.contains('item-checkbox')) {
             const checkedCount = ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked').length;
@@ -1150,7 +1147,7 @@ msegTableBody.addEventListener('click', (e) => {
        // CONVIERTE A MAYÚSCULAS EL CAMPO LOTE EN TIEMPO REAL
     ingresoItemsTableBody.addEventListener('input', (e) => {
         // Se asegura de que el cambio solo aplique a los campos con el nombre 'lote'
-        if (e.target && e.target.getAttribute('name') === 'lote') {
+        if (e.target && e.target.getAttribute('name') === 'lote' || e.target.getAttribute('name') === 'almacen') {
             e.target.value = e.target.value.toUpperCase();
         }
     });
@@ -1681,6 +1678,7 @@ msegTableBody.innerHTML = '';
     toggleSpecialColumnsVisibility();
 }
 async function openSignatureModal() {
+
 const moveType = clMovimientoInput.value.trim();
 
     // La validación solo se ejecuta si el tipo de movimiento es '101'
@@ -1708,7 +1706,6 @@ const moveType = clMovimientoInput.value.trim();
             return; // Detenemos la ejecución para que no se abra la ventana de firmas
         }
     }
-
     currentSaveHandler = saveData;
     modalErrorMessage.style.display = 'none';
     receptorSelect.innerHTML = `<option value="">${getText('loading')}</option>`;
@@ -1783,6 +1780,7 @@ const moveType = clMovimientoInput.value.trim();
         }
     }
     async function openIngresoSignatureModal() {
+
     let allSublocationsAreValid = true;
     const selectedRows = ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked');
 
@@ -1805,7 +1803,7 @@ const moveType = clMovimientoInput.value.trim();
 
     // Si después de revisar todas las filas seleccionadas se encontró un error...
     if (!allSublocationsAreValid) {
-        const errorMessage = getText('sublocationRequiredError');
+        const errorMessage = "El campo Sub-Ubicación es obligatorio para las posiciones seleccionadas. Por favor, complete los campos marcados en rojo.";
         alert(errorMessage);
         setIngresoStatus(errorMessage, "error");
         playSound('error');
@@ -2362,11 +2360,11 @@ function toggleSpecialColumnsVisibility() {
         updateTableVisibility('msegTable', msegColumnVisibility);
         updateTableVisibility('sublocationTable', sublocationColumnVisibility);
     }
-    function updateIngresoTableVisibility() {
-        const stockType = document.querySelector('input[name="ingresoStockEspecial"]:checked').value;
-        document.querySelectorAll('#ingresoItemsTable .wbs-col').forEach(el => el.style.display = stockType === 'Q' ? '' : 'none');
-        document.querySelectorAll('#ingresoItemsTable .so-col').forEach(el => el.style.display = stockType === 'E' ? '' : 'none');
-    }
+  //  function updateIngresoTableVisibility() {
+  //      const stockType = document.querySelector('input[name="ingresoStockEspecial"]:checked').value;
+  //      document.querySelectorAll('#ingresoItemsTable .wbs-col').forEach(el => el.style.display = stockType === 'Q' ? '' : 'none');
+  //      document.querySelectorAll('#ingresoItemsTable .so-col').forEach(el => el.style.display = stockType === 'E' ? '' : 'none');
+  //  }
     async function fetchPurchaseOrderItems() {
         const poNumber = ingresoNroPedidoInput.value.trim();
         if (!poNumber) { clearIngresoForm(false); return; }
@@ -2397,65 +2395,100 @@ function toggleSpecialColumnsVisibility() {
         }
     }
     
-    function renderIngresoItemsTable(items) {
-        ingresoItemsTableBody.innerHTML = '';
-        selectAllIngresoItemsCheckbox.checked = false;
-        items.forEach(item => {
-            const tr = document.createElement('tr');
-            tr.dataset.pos = item.EBELP;
-            const posSinCeros = parseInt(item.EBELP, 10);
-            const materialSinCeros = (item.MATNR || '').replace(/^0+/, '');
-            tr.innerHTML = `
-                <td><input type="checkbox" class="form-check-input item-checkbox"></td>
-                <td>${posSinCeros}</td>
-                <td>${materialSinCeros}</td>
-                <td class="material-description-cell" style="cursor: pointer;">${item.TXZ01}</td>
-                <td class="wbs-col">${item.PS_PSP_PNR_D || ''}</td>
-                <td class="so-col">${item.KDAUF || ''}</td>
-                <td class="so-col">${item.KDPOS || ''}</td>
-                <td>${item.WERKS}</td>
-                <td>
-                    <div class="input-group input-group-sm">
-                        <input type="text" class="form-control form-control-sm" name="almacen" value="${item.LGORT || ''}">
-                        <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="almacen"><i class="bi bi-search"></i></button>
-                    </div>
-                </td>
-                <td><input type="number" class="form-control form-control-sm" name="cantidad" value="${item.MENGE || 0}"></td>
-                <td>${item.MEINS}</td>
-                <td>
-                    <div class="input-group input-group-sm">
-                        <input type="text" class="form-control" name="lote">
-                        <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="lote"><i class="bi bi-search"></i></button>
-                    </div>
-                </td>
-                <td>
-                    <div class="input-group input-group-sm">
-                        <input type="text" class="form-control" name="sublocation">
-                        <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="sublocation"><i class="bi bi-search"></i></button>
-                    </div>
-                </td>
-                <td>
-                    <div class="input-group input-group-sm">
-                        <input type="text" class="form-control" name="tag">
-                        <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="tag"><i class="bi bi-search"></i></button>
-                    </div>
-                </td>
-                <td>
-                    <div class="input-group input-group-sm">
-                        <input type="text" class="form-control" name="pais">
-                        <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="pais"><i class="bi bi-search"></i></button>
-                    </div>
-                </td>
-                <td><input type="text" class="form-control form-control-sm" name="sgtxt"></td>
-                <td><input type="file" class="form-control form-control-sm" name="certificado"></td>
-                <td><input type="file" class="form-control form-control-sm" name="documentos"></td>
-                <td><input type="file" class="form-control form-control-sm" name="inspeccion"></td>
-            `;
-            ingresoItemsTableBody.appendChild(tr);
-        });
-        updateIngresoTableVisibility();
-    }
+   function renderIngresoItemsTable(items) {
+    // PASO 1: Analizar todos los items para decidir qué columnas mostrar
+    let showWbsColumn = false;
+    let showSoColumn = false;
+    items.forEach(item => {
+        if (item.SOBKZ === 'Q') showWbsColumn = true;
+        if (item.SOBKZ === 'E') showSoColumn = true;
+    });
 
+    // PASO 2: Mostrar u ocultar las cabeceras de las columnas
+    document.querySelectorAll('#ingresoItemsTable .wbs-col').forEach(el => el.style.display = showWbsColumn ? '' : 'none');
+    document.querySelectorAll('#ingresoItemsTable .so-col').forEach(el => el.style.display = showSoColumn ? '' : 'none');
+
+    // PASO 3: Renderizar las filas
+    ingresoItemsTableBody.innerHTML = '';
+    selectAllIngresoItemsCheckbox.checked = false;
+    
+    items.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.dataset.pos = item.EBELP;
+        const posSinCeros = parseInt(item.EBELP, 10);
+        const materialSinCeros = (item.MATNR || '').replace(/^0+/, '');
+        const stockIndicator = item.SOBKZ || '';
+
+        // --- LÓGICA DE CONSTRUCCIÓN DINÁMICA DE LA FILA ---
+        // Se inicia la cadena HTML de la fila
+        let rowHtml = `
+            <td><input type="checkbox" class="form-check-input item-checkbox"></td>
+            <td>${posSinCeros}</td>
+            <td>${stockIndicator}</td>
+            <td>${materialSinCeros}</td>
+            <td class="material-description-cell" style="cursor: pointer;">${item.TXZ01}</td>
+        `;
+
+        // Se AÑADE la celda PEP solo si la columna es visible
+        if (showWbsColumn) {
+            const wbsContent = (stockIndicator === 'Q') ? (item.PS_PSP_PNR_D || '') : '';
+            rowHtml += `<td class="wbs-col">${wbsContent}</td>`;
+        }
+
+        // Se AÑADEN las celdas de Pedido Venta solo si la columna es visible
+        if (showSoColumn) {
+            const soNumContent = (stockIndicator === 'E') ? (item.KDAUF || '') : '';
+            const soItemContent = (stockIndicator === 'E') ? (item.KDPOS || '') : '';
+            rowHtml += `<td class="so-col">${soNumContent}</td>`;
+            rowHtml += `<td class="so-col">${soItemContent}</td>`;
+        }
+        
+        // Se AÑADE el resto de las celdas
+        rowHtml += `
+            <td>${item.WERKS}</td>
+            <td>
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control form-control-sm" name="almacen" value="${item.LGORT || ''}">
+                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="almacen"><i class="bi bi-search"></i></button>
+                </div>
+            </td>
+            <td><input type="number" class="form-control form-control-sm" name="cantidad" value="${item.MENGE || 0}"></td>
+            <td>${item.MEINS}</td>
+            <td>
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control" name="lote">
+                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="lote"><i class="bi bi-search"></i></button>
+                </div>
+            </td>
+            <td>
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control" name="sublocation">
+                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="sublocation"><i class="bi bi-search"></i></button>
+                </div>
+            </td>
+            <td>
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control" name="tag">
+                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="tag"><i class="bi bi-search"></i></button>
+                </div>
+            </td>
+            <td>
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control" name="pais">
+                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="pais"><i class="bi bi-search"></i></button>
+                </div>
+            </td>
+            <td><input type="text" class="form-control form-control-sm" name="sgtxt"></td>
+            <td><input type="file" class="form-control form-control-sm" name="certificado"></td>
+            <td><input type="file" class="form-control form-control-sm" name="documentos"></td>
+            <td><input type="file" class="form-control form-control-sm" name="inspeccion"></td>
+        `;
+
+        // Se asigna el HTML construido a la fila
+        tr.innerHTML = rowHtml;
+        ingresoItemsTableBody.appendChild(tr);
+    });
+}
     async function saveIngresoData(signatureData) {
         const selectedItems = [];
         ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
@@ -2465,6 +2498,7 @@ function toggleSpecialColumnsVisibility() {
             if (originalItem) {
                 selectedItems.push({
                     posicion: pos,
+                    stock_especial: originalItem.SOBKZ || '',
                     material: originalItem.MATNR,
                     plant: originalItem.WERKS,
                     um: originalItem.MEINS,
@@ -2485,11 +2519,10 @@ function toggleSpecialColumnsVisibility() {
         const headerData = {
             nro_pedido: document.getElementById('ingresoNroPedido').value,
             tipo_movimiento: document.getElementById('ingresoTipoMovimiento').value,
-            stock_especial: document.querySelector('input[name="ingresoStockEspecial"]:checked').value,
+           // stock_especial: document.querySelector('input[name="ingresoStockEspecial"]:checked').value,
             fecha_doc: document.getElementById('ingresoFechaDoc').value,
             fecha_cont: document.getElementById('ingresoFechaCont').value,
             material_slip: document.getElementById('ingresoMaterialSlip').value,
-            item_adopted: document.getElementById('ingresoItemAdopted').checked,
             texto_cabecera: document.getElementById('ingresoTextoCabecera').value,
         };
         const formData = new FormData();
@@ -2569,8 +2602,21 @@ function toggleSpecialColumnsVisibility() {
             if (result.success && result.pdf_data) {
                 const pdfBlob = new Blob([Uint8Array.from(atob(result.pdf_data), c => c.charCodeAt(0))], { type: 'application/pdf' });
                 const pdfUrl = URL.createObjectURL(pdfBlob);
-                window.open(pdfUrl, '_blank');
-                setIngresoStatus(getText('labelsGenerated'), 'success');
+               const anchor = document.createElement('a');
+    anchor.style.display = 'none';
+    anchor.href = pdfUrl;
+
+    // 2. Asignarle un nombre de archivo para la descarga
+    anchor.download = 'Etiquetas.pdf';
+
+    // 3. Añadirlo a la página, simular un clic y removerlo
+    document.body.appendChild(anchor);
+    anchor.click();
+    window.URL.revokeObjectURL(pdfUrl); // Limpiar la URL del objeto
+    document.body.removeChild(anchor);
+    // --- FIN DEL CAMBIO ---
+
+    setIngresoStatus(getText('labelsGenerated'), 'success');
             } else {
                 throw new Error(result.error || "No se recibieron datos del PDF desde el servidor.");
             }
@@ -2604,8 +2650,18 @@ function toggleSpecialColumnsVisibility() {
             if (result.success && result.pdf_data) {
                 const pdfBlob = new Blob([Uint8Array.from(atob(result.pdf_data), c => c.charCodeAt(0))], { type: 'application/pdf' });
                 const pdfUrl = URL.createObjectURL(pdfBlob);
-                window.open(pdfUrl, '_blank');
-                setIngresoStatus(getText('materialDocGenerated', 'Documento generado.'), 'success');
+               const anchor = document.createElement('a');
+    anchor.style.display = 'none';
+    anchor.href = pdfUrl;
+    anchor.download = 'Documento_Material.pdf'; // Nombre de archivo para este caso
+
+    document.body.appendChild(anchor);
+    anchor.click();
+    window.URL.revokeObjectURL(pdfUrl);
+    document.body.removeChild(anchor);
+    // --- FIN DEL CAMBIO ---
+
+    setIngresoStatus(getText('materialDocGenerated', 'Documento generado.'), 'success');
             } else {
                 throw new Error(result.error || "No se recibieron datos del PDF desde el servidor.");
             }
@@ -2619,24 +2675,41 @@ function toggleSpecialColumnsVisibility() {
     }
 
     function clearIngresoForm(clearAll = true) {
-        if(clearAll) {
-            ingresoNroPedidoInput.value = '';
-            document.getElementById('stockSin').checked = true;
-        }
-        ingresoItemsTableBody.innerHTML = '';
-        ingresoSaveButton.disabled = true;
-        setIngresoStatus('', 'info');
-        selectAllIngresoItemsCheckbox.checked = false;
-        updateIngresoTableVisibility();
-        ingresoSaveButton.style.display = 'inline-block';
-        printLabelsButton.style.display = 'none';
-        printDocMaterialButton.style.display = 'none';
-        lastSavedIngresoData = null;
-        document.querySelectorAll('#ingresoContent input, #ingresoContent button').forEach(el => {
-            el.disabled = false;
-        });
-        ingresoSaveButton.disabled = true;
+    // Limpia la tabla y los datos en memoria
+    ingresoItemsTableBody.innerHTML = '';
+    poItemsData = []; // <-- IMPORTANTE: Resetea los datos de las posiciones
+    selectAllIngresoItemsCheckbox.checked = false;
+
+    // Si clearAll es true (llamado por Limpiar o Volver), limpia también la cabecera
+    if (clearAll) {
+        ingresoNroPedidoInput.value = '';
+        // Resetea todos los campos de cabecera a sus valores por defecto
+        document.getElementById('ingresoTipoMovimiento').value = '101';
+        document.getElementById('ingresoFechaDoc').valueAsDate = new Date();
+        document.getElementById('ingresoFechaCont').valueAsDate = new Date();
+        document.getElementById('ingresoMaterialSlip').value = '';
+        document.getElementById('ingresoTextoCabecera').value = '';
+        document.querySelectorAll('#ingresoItemsTable .wbs-col').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('#ingresoItemsTable .so-col').forEach(el => el.style.display = 'none');
     }
+
+    // Lógica para resetear el estado de los botones y mensajes
+    setIngresoStatus('', 'info');
+    lastSavedIngresoData = null;
+    
+    // Habilita todos los campos y botones, excepto los de impresión
+    document.querySelectorAll('#ingresoContent input, #ingresoContent button').forEach(el => {
+        if (el.id !== 'printLabelsButton' && el.id !== 'printDocMaterialButton') {
+            el.disabled = false;
+        }
+    });
+
+    // Muestra/oculta los botones según el estado
+    ingresoSaveButton.style.display = 'inline-block';
+    printLabelsButton.style.display = 'none';
+    printDocMaterialButton.style.display = 'none';
+    ingresoSaveButton.disabled = true; // El botón de guardar se deshabilita hasta que se seleccione algo
+}
 
     function setIngresoStatus(message, type) {
         ingresoStatus.textContent = message;
