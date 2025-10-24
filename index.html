@@ -30,9 +30,7 @@
             transform: translateY(-50%);
             opacity: 0.5;
         }
-        .reserva-col, .reserva-cell, .so-col {
-            display: none;
-        }
+      
         #spinner-overlay {
             position: fixed;
             top: 0;
@@ -1594,11 +1592,8 @@ msegTableBody.addEventListener('click', (e) => {
         toggleReservaColumn();
     }
     function toggleReservaColumn() {
-        const show = reservaCheckbox.checked;
-        document.querySelectorAll('.reserva-col, .reserva-cell').forEach(el => {
-            el.classList.toggle('d-none', !show);
-        });
-        msegColumnVisibility['reservationCol'] = show;
+        const shouldBeVisible = reservaCheckbox.checked;
+        msegColumnVisibility['reservationCol'] = shouldBeVisible;
         updateTableVisibility('msegTable', msegColumnVisibility);
     }
     function renderTable() {
@@ -2096,18 +2091,15 @@ function toggleSpecialColumnsVisibility() {
     orderNo2Elements.forEach(el => el.classList.toggle('d-none', !shouldShow));
 }
 
-    function updateTableVisibility(tableId, visibilityObject) {
-        for (const columnKey in visibilityObject) {
-            const isVisible = visibilityObject[columnKey];
-            const cells = document.querySelectorAll(`#${tableId} [data-column="${columnKey}"], #${tableId} .cell-${columnKey}`);
-            cells.forEach(cell => {
-                if (columnKey === 'reservationCol' && !reservaCheckbox.checked) {
-                    return;
-                }
-                cell.classList.toggle('d-none', !isVisible);
-            });
-        }
+ function updateTableVisibility(tableId, visibilityObject) {
+    for (const columnKey in visibilityObject) {
+        const isVisible = visibilityObject[columnKey]; 
+        const cells = document.querySelectorAll(`#${tableId} [data-column="${columnKey}"], #${tableId} .cell-${columnKey}`);
+        cells.forEach(cell => {
+            cell.classList.toggle('d-none', !isVisible);
+        });
     }
+}
     function areSublocationFiltersFilled() {
         return sublocationCentroInput.value.trim() && sublocationAlmacenInput.value.trim();
     }
@@ -2418,6 +2410,19 @@ function toggleSpecialColumnsVisibility() {
         const posSinCeros = parseInt(item.EBELP, 10);
         const materialSinCeros = (item.MATNR || '').replace(/^0+/, '');
         const stockIndicator = item.SOBKZ || '';
+        let defaultAlmacen = item.LGORT || ''; 
+        let defaultSublocation = '';
+        const planta = item.WERKS;
+        
+        if (!defaultAlmacen) {
+        if (planta === '1000') {
+            defaultAlmacen = 'LI01';
+            defaultSublocation = '00.00';
+        } else if (planta === '4000') {
+            defaultAlmacen = '4004';
+            defaultSublocation = '00.00';
+        }
+        }
 
         // --- LÓGICA DE CONSTRUCCIÓN DINÁMICA DE LA FILA ---
         // Se inicia la cadena HTML de la fila
@@ -2448,7 +2453,7 @@ function toggleSpecialColumnsVisibility() {
             <td>${item.WERKS}</td>
             <td>
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control form-control-sm" name="almacen" value="${item.LGORT || ''}">
+                    <input type="text" class="form-control form-control-sm" name="almacen" value="${defaultAlmacen}">
                     <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="almacen"><i class="bi bi-search"></i></button>
                 </div>
             </td>
@@ -2462,7 +2467,7 @@ function toggleSpecialColumnsVisibility() {
             </td>
             <td>
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control" name="sublocation">
+                    <input type="text" class="form-control" name="sublocation" value="${defaultSublocation}">
                     <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="sublocation"><i class="bi bi-search"></i></button>
                 </div>
             </td>
@@ -2605,6 +2610,7 @@ function toggleSpecialColumnsVisibility() {
                const anchor = document.createElement('a');
     anchor.style.display = 'none';
     anchor.href = pdfUrl;
+    anchor.target = "_blank";
 
     // 2. Asignarle un nombre de archivo para la descarga
     anchor.download = 'Etiquetas.pdf';
@@ -2653,6 +2659,7 @@ function toggleSpecialColumnsVisibility() {
                const anchor = document.createElement('a');
     anchor.style.display = 'none';
     anchor.href = pdfUrl;
+    anchor.target = "_blank";
     anchor.download = 'Documento_Material.pdf'; // Nombre de archivo para este caso
 
     document.body.appendChild(anchor);
