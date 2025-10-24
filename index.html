@@ -2414,14 +2414,17 @@ function toggleSpecialColumnsVisibility() {
         let defaultSublocation = '';
         const planta = item.WERKS;
         
-        if (!defaultAlmacen) {
-        if (planta === '1000') {
-            defaultAlmacen = 'LI01';
-            defaultSublocation = '00.00';
-        } else if (planta === '4000') {
-            defaultAlmacen = '4004';
-            defaultSublocation = '00.00';
+     if (!defaultAlmacen) { 
+            if (planta === '1000') {
+                defaultAlmacen = 'LI01';
+            } else if (planta === '4000') {
+                defaultAlmacen = '4004';
+            }
         }
+        
+        // Lógica para SUB-UBICACIÓN: Se aplica siempre para esas plantas
+        if (planta === '1000' || planta === '4000') {
+            defaultSublocation = '00.00';
         }
 
         // --- LÓGICA DE CONSTRUCCIÓN DINÁMICA DE LA FILA ---
