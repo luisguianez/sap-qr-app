@@ -178,6 +178,8 @@
         <div class="text-center my-3">
             <button id="reset-button" class="btn btn-warning me-2" style="display: none;" data-translate="clearButton">Limpiar</button>
             <button id="save-button" class="btn btn-success" style="display: none;" data-translate="saveButton">Guardar en SAP</button>
+            <button id="printDocMaterialButtonMain" class="btn btn-primary ms-2" style="display: none;"> <i class="bi bi-file-earmark-pdf"></i> <span data-translate="printMaterialDocButton">Imprimir Doc. Material</span>
+    </button>
             <button id="layoutButtonMseg" class="btn btn-info" style="display: none;" data-bs-toggle="tooltip" title="Seleccionar Columnas"><i class="bi bi-layout-three-columns"></i></button>
         </div>
         <div class="table-responsive">
@@ -628,7 +630,8 @@ document.addEventListener('DOMContentLoaded', () => {
             printMaterialDocButton: "Print Material Doc.",
             generatingMaterialDoc: "Generating Material Document...",
             materialDocGenerated: "Document generated.",
-            sublocationRequiredError: "The Sublocation field is mandatory for the selected items. Please fill in the highlighted fields."
+            sublocationRequiredError: "The Sublocation field is mandatory for the selected items. Please fill in the highlighted fields.",
+            printMaterialDocButton: "Print Material Doc.",
         },
         es: {
             // General
@@ -762,7 +765,8 @@ document.addEventListener('DOMContentLoaded', () => {
             printMaterialDocButton: "Imprimir Doc. Material",
             generatingMaterialDoc: "Generando Documento de Material...",
             materialDocGenerated: "Documento generado.",
-            sublocationRequiredError: "El campo Sub-Ubicación es obligatorio para las posiciones seleccionadas. Por favor, complete los campos marcados en rojo."
+            sublocationRequiredError: "El campo Sub-Ubicación es obligatorio para las posiciones seleccionadas. Por favor, complete los campos marcados en rojo.",
+            printMaterialDocButton: "Imprimir Doc. Material",
         }
     };
 
@@ -846,6 +850,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSaveHandler = null;
     let currentSearchHelpTargetRowInput = null;
     let lastSavedIngresoData = null;
+    let lastSavedQRData = null;
 
     // --- Referencias al DOM ---
     const spinner = document.getElementById('spinner-overlay');
@@ -926,6 +931,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const printLabelsButton = document.getElementById('printLabelsButton');
     const printDocMaterialButton = document.getElementById('printDocMaterialButton');
     const longTextModal = new bootstrap.Modal(document.getElementById('longTextModal'));
+    const printDocMaterialButtonMain = document.getElementById('printDocMaterialButtonMain');
 
     // --- FUNCIONES DEL SPINNER ---
     function showSpinner() { spinner.style.display = 'flex'; }
@@ -948,6 +954,7 @@ document.addEventListener('DOMContentLoaded', () => {
     resetButton.addEventListener('click', resetAll);
     saveButton.addEventListener('click', openSignatureModal);
     confirmSaveButton.addEventListener('click', handleConfirmSave);
+    printDocMaterialButtonMain.addEventListener('click', handlePrintDocMaterialMain);
     [sublocationCentroInput, sublocationAlmacenInput].forEach(input => input.addEventListener('input', manageSublocationScannerState));
     sublocationCentroInput.addEventListener('input', () => {
         if (sublocationCentroInput.value.trim() === '4000') {
@@ -1911,7 +1918,7 @@ const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => 
 
     // Buscamos la fila correspondiente en la tabla para leer los datos actuales
     const row = msegTableBody.querySelector(`tr[data-key="${key}"]`);
-
+     
     let subLocValue = sapData.SUB_LOC; // Valor por defecto
 
     // Si la fila existe, leemos los valores directamente de los inputs
@@ -1979,7 +1986,16 @@ const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => 
                 }
                 playSound('beep');
                 alert(finalMessage);
-                await resetAll();
+                lastSavedQRData = {
+                    doc_number: result.sap_document_number,
+                    doc_year: headerData.fechaContab.substring(0, 4),
+                    // No necesitas los items completos, solo el número y el año para la impresión del documento.
+                };
+                saveButton.style.display = 'none'; // Oculta el botón de guardar
+                printDocMaterialButtonMain.style.display = 'inline-block';
+                [clMovimientoInput, almacenInput, centroInput, textoCabeceraInput, specialStockIndicatorInput, reservaCheckbox].forEach(el => el.disabled = true);
+                document.querySelectorAll('#msegTableBody input, #msegTableBody button').forEach(el => el.disabled = true);
+               // await resetAll();
             } else {
                 setScanStatus(`${getText('saveError')}: ${result.error}`, "error");
                 playSound('error');
@@ -1995,8 +2011,11 @@ const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => 
     async function resetAll() {
         await stopScanner();
         clearFormAndTable();
+        [clMovimientoInput, almacenInput, centroInput, textoCabeceraInput, specialStockIndicatorInput, reservaCheckbox].forEach(el => el.disabled = false);
         manageScannerState();
         toggleSpecialColumnsVisibility();
+        printDocMaterialButtonMain.style.display = 'none'; 
+        lastSavedQRData = null; 
     }
     function clearFormAndTable() {
         msegTableBody.innerHTML = '';
@@ -2115,6 +2134,54 @@ function toggleSpecialColumnsVisibility() {
             sublocationReaderMessage.style.display = 'block';
         }
     }
+
+    async function handlePrintDocMaterialMain() {
+        if (!lastSavedQRData) {
+            alert("No hay datos del último guardado para imprimir.");
+            return;
+        }
+        setScanStatus(getText('generatingMaterialDoc', 'Generando Documento de Material...'), 'info');
+        showSpinner();
+        try {
+            // Reutiliza la misma ruta del Ingreso de Materiales
+            const response = await fetch(`${API_BASE_URL}/printMaterialDoc`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    connection_params: sapConnection,
+                    print_data: lastSavedQRData // Usamos los datos del último guardado QR
+                })
+            });
+            const result = await response.json();
+            if (result.success && result.pdf_data) {
+                const pdfBlob = new Blob([Uint8Array.from(atob(result.pdf_data), c => c.charCodeAt(0))], { type: 'application/pdf' });
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+                const anchor = document.createElement('a');
+                anchor.style.display = 'none';
+                anchor.href = pdfUrl;
+                anchor.target = "_blank";
+                anchor.download = 'Documento_Material_QR.pdf'; 
+
+                document.body.appendChild(anchor);
+                anchor.click();
+                setTimeout(() => {
+                    window.URL.revokeObjectURL(pdfUrl);
+                    document.body.removeChild(anchor);
+                }, 100);
+
+                setScanStatus(getText('materialDocGenerated', 'Documento generado.'), 'success');
+            } else {
+                throw new Error(result.error || "No se recibieron datos del PDF desde el servidor.");
+            }
+        } catch (err) {
+            setScanStatus(`${getText('printingError', 'Error al imprimir')}: ${err.message}`, 'error');
+            playSound('error');
+            alert(`${getText('printingError', 'Error al generar documento')}: ${err.message}`);
+        } finally {
+            hideSpinner();
+        }
+    }
+
     async function startSublocationScanner() {
         if (isSublocationScanning) return;
         isSublocationScanning = true;
@@ -2621,8 +2688,10 @@ function toggleSpecialColumnsVisibility() {
     // 3. Añadirlo a la página, simular un clic y removerlo
     document.body.appendChild(anchor);
     anchor.click();
+    setTimeout(() => {
     window.URL.revokeObjectURL(pdfUrl); // Limpiar la URL del objeto
     document.body.removeChild(anchor);
+    }, 100);
     // --- FIN DEL CAMBIO ---
 
     setIngresoStatus(getText('labelsGenerated'), 'success');
@@ -2667,8 +2736,10 @@ function toggleSpecialColumnsVisibility() {
 
     document.body.appendChild(anchor);
     anchor.click();
+    setTimeout(() => {
     window.URL.revokeObjectURL(pdfUrl);
     document.body.removeChild(anchor);
+    }, 100); 
     // --- FIN DEL CAMBIO ---
 
     setIngresoStatus(getText('materialDocGenerated', 'Documento generado.'), 'success');
