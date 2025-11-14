@@ -30,7 +30,7 @@
             transform: translateY(-50%);
             opacity: 0.5;
         }
-      
+        .wbs-col, .so-col { display: none; }
         #spinner-overlay {
             position: fixed;
             top: 0;
@@ -43,6 +43,28 @@
             justify-content: center;
             align-items: center;
         }
+        input[readonly] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+
+        #ingresoItemsTable thead th {
+            position: -webkit-sticky; /* Para compatibilidad con Safari */
+            position: sticky;
+            top: 0; 
+            z-index: 10; 
+            
+            background-color: #f8f9fa; /* (Este es el mismo color de fondo de tu app) */
+        }
+        
+        #ingresoItemsTable tbody td {
+            position: relative; /* Las forzamos a tener un contexto de apilamiento */
+            z-index: 1;         /* Las ponemos en Capa 1 (Abajo) */
+        }
+        
+        #searchHelpModal {
+            z-index: 1060; 
+       }
     </style>
 </head>
 <body>
@@ -177,6 +199,7 @@
         </div>
         <div class="text-center my-3">
             <button id="reset-button" class="btn btn-warning me-2" style="display: none;" data-translate="clearButton">Limpiar</button>
+            <button id="deleteQrButton" class="btn btn-danger me-2" style="display: none;" data-translate="deleteSelectedButton" disabled>Eliminar Seleccionados</button>
             <button id="save-button" class="btn btn-success" style="display: none;" data-translate="saveButton">Guardar en SAP</button>
             <button id="printDocMaterialButtonMain" class="btn btn-primary ms-2" style="display: none;"> <i class="bi bi-file-earmark-pdf"></i> <span data-translate="printMaterialDocButton">Imprimir Doc. Material</span>
     </button>
@@ -185,8 +208,9 @@
         <div class="table-responsive">
             <table id="msegTable" class="table table-bordered table-striped table-sm">
                 <thead><tr>
-                    <th data-column="docCol" data-translate="docCol">Documento</th>
-                    <th data-column="yearCol" data-translate="yearCol">Año</th>
+                    <th style="width: 1%;"><input type="checkbox" id="selectAllQrCheckbox"></th>
+                    <th data-column="docCol" data-translate="docCol" class="d-none">Documento</th>
+                    <th data-column="yearCol" data-translate="yearCol" class="d-none">Año</th>
                     <th data-column="posCol" data-translate="posCol">Pos.</th>
                     <th data-column="materialCol" data-translate="materialCol">Material</th>
                     <th data-column="materialDescCol" data-translate="materialDescCol"  style="min-width: 230px;">Texto Material</th>
@@ -201,7 +225,9 @@
                     <th data-column="subLocCol" data-translate="subLocCol" style="min-width: 180px;">Sub Ubicacion</th>
                     <th data-column="areaCol" style="min-width: 150px;" data-translate="areaCol">Área</th>
                     <th data-column="orderNoCol" data-translate="orderNoCol">Nro. Pedido</th>
+                    <th id="poItemCol1" data-column="poItemCol1" data-translate="poItemCol1" class="text-center align-middle" style="min-width: 80px;">Pos. Pedido 1</th>
                     <th data-column="orderNo2Col" class="d-none" data-translate="orderNo2Col">Pedido 2</th>
+                    <th id="poItemCol2" data-column="poItemCol2" data-translate="poItemCol2" class="text-center align-middle d-none" style="min-width: 80px;">Pos. Pedido 2</th>
                     <th data-column="wbsCol" data-translate="wbsCol">Elemento PEP</th>
                     <th data-column="reservationCol" class="reserva-col d-none" data-translate="reservationCol">Reserva</th>
                     <th data-column="salesOrderCol" data-translate="salesOrderCol">Pedido Cliente</th>
@@ -325,59 +351,64 @@
             <div class="row g-3 p-3 border rounded bg-light mb-4">
                 <div style="width: 350px;">
                     <label for="ingresoNroPedido" class="form-label" data-translate="poNumberLabel">Nro de Pedido</label>
-          <div class="input-group">
-    <input type="text" class="form-control" id="ingresoNroPedido">
-    <button class="btn btn-primary" type="button" id="searchPoButton">
-        <i class="bi bi-search"></i>
-        <span class="d-none d-sm-inline" data-translate="searchPOButton"> Buscar Pedido</span>
-    </button>
-</div>
+					<div class="input-group">
+						<input type="text" class="form-control" id="ingresoNroPedido">
+						<button class="btn btn-primary" type="button" id="searchPoButton">
+							<i class="bi bi-search"></i>
+							<span class="d-none d-sm-inline" data-translate="searchPOButton"> Buscar Pedido</span>
+						</button>
+					</div>
                 </div>
                 <div class="col-md-2"><label for="ingresoTipoMovimiento" class="form-label" data-translate="moveTypeLabel">Tipo de Movimiento</label><input type="text" class="form-control" id="ingresoTipoMovimiento" value="101" readonly></div>
-                <div class="col-md-4">
-                   
-                
-                        
-                </div>
                 <div class="col-md-3"><label for="ingresoFechaDoc" class="form-label" data-translate="docDateLabel">Fecha de Documento</label><input type="date" class="form-control" id="ingresoFechaDoc"></div>
                 <div class="col-md-3"><label for="ingresoFechaCont" class="form-label" data-translate="postingDateLabel">Fecha de Contabilización</label><input type="date" class="form-control" id="ingresoFechaCont"></div>
                 <div class="col-md-3"><label for="ingresoMaterialSlip" class="form-label" data-translate="materialSlipLabel">Material Slip</label><input type="text" class="form-control" id="ingresoMaterialSlip"></div>
+                <div class="col-md-3"><label for="ingresoBillOfLading" class="form-label" data-translate="billOfLadingLabel">Bill of Lading</label><input type="text" class="form-control" id="ingresoBillOfLading"> </div>
                 <div class="col-md-3"><label for="ingresoTextoCabecera" class="form-label" data-translate="headerTextLabel">Texto de Cabecera</label><input type="text" class="form-control" id="ingresoTextoCabecera"  maxlength="25"></div>
             </div>
             <h4 class="mb-3 mt-4" data-translate="poItemsTitle">Posiciones del Pedido</h4>
+            <div class="row mb-2">
+                <div class="col-md-6"> <input type="text" id="ingresoFilterInput" class="form-control" placeholder="Filtrar resultados..." data-translate="filterPlaceholder">
+                </div>
+            </div>
             <div class="table-responsive">
- <table id="ingresoItemsTable" class="table table-bordered table-sm">
-    <thead>
-        <tr>
-            <th><input type="checkbox" id="selectAllIngresoItemsCheckbox"></th>
-            <th data-translate="posCol">Pos.</th>
-            <th data-translate="specialStockLabel">Ind. Stock Esp.</th>
-            <th data-translate="materialCol">Material</th>
-            <th data-translate="materialDescCol">Descripción</th>
-            <th class="wbs-col" data-translate="wbsCol">Elemento PEP (WBS)</th>
-            <th class="so-col" data-translate="salesOrderHeader">Pedido Venta</th>
-            <th class="so-col" data-translate="salesOrderItemHeader">Pos. Ped. Venta</th>
-            <th data-translate="plantLabel">Planta</th>
-            <th data-translate="storageLocationLabel">Almacén</th>
-            <th data-translate="qtyCol">Cantidad</th>
-            <th data-translate="unitCol">UM</th>
-            <th data-translate="batchCol" style="min-width: 100px;">Lote</th>
-            <th data-translate="sublocationHeader" style="min-width: 150px;">Sub-Ubicación</th>
-            <th style="min-width: 160px;" data-translate="tagCol">TAG</th>
-            <th style="min-width: 80px;" data-translate="countryHeader">País</th>
-            <th style="min-width: 200px;" data-translate="itemTextHeader">Texto Posición</th>
-            <th data-translate="certCol">Certificado</th>
-            <th data-translate="docsCol">Documentos</th>
-            <th data-translate="inspCol">Inspección</th>
-        </tr>
-    </thead>
-    <tbody id="ingresoItemsTableBody"></tbody>
-</table>
+				<table id="ingresoItemsTable" class="table table-bordered table-sm">
+					<thead>
+					<tr>
+        <th><input type="checkbox" id="selectAllIngresoItemsCheckbox"></th>
+        <th data-column="actionsCol" data-translate="actionsCol">Acciones</th>
+        <th data-column="posCol" data-translate="posCol">Pos.</th>
+        <th data-column="specialStockCol" data-translate="specialStockLabel">Ind. Stock Esp.</th>
+        <th data-column="materialCol" data-translate="materialCol">Material</th>
+        <th data-column="materialDescCol" data-translate="materialDescCol">Descripción</th>
+        <th data-column="wbsCol" class="wbs-col" data-translate="wbsCol">Elemento PEP (WBS)</th>
+        <th data-column="salesOrderCol" class="so-col" data-translate="salesOrderHeader">Pedido Venta</th>
+        <th data-column="salesOrderItemCol" class="so-col" data-translate="salesOrderItemHeader">Pos. Ped. Venta</th>
+        <th data-column="plantCol" data-translate="plantLabel">Planta</th>
+        <th data-column="storageLocationCol" data-translate="storageLocationLabel">Almacén</th>
+        <th data-column="qtyCol" data-translate="qtyCol">Cantidad</th>
+        <th data-column="unitCol" data-translate="unitCol">UM</th>
+        <th data-column="batchCol" data-translate="batchCol" style="min-width: 100px;">Lote</th>
+        <th data-column="sublocationCol" data-translate="sublocationHeader" style="min-width: 150px;">Sub-Ubicación</th>
+        <th data-column="tagCol" data-translate="tagCol" style="min-width: 160px;">TAG</th>
+        <th data-column="countryCol" data-translate="countryHeader" style="min-width: 80px;" class="country-col">País</th>
+        <th data-column="areaCol" data-translate="areaHeader" class="area-col d-none">AREA</th>
+        <th data-column="itemTextCol" data-translate="itemTextHeader" style="min-width: 200px;">Texto Posición</th>
+        <th data-column="certCol" data-translate="certCol">Certificado</th>
+        <th data-column="docsCol" data-translate="docsCol">Documentos</th>
+        <th data-column="inspCol" data-translate="inspCol">Inspección</th>
+                   </tr>
+					</thead>
+					<tbody id="ingresoItemsTableBody"></tbody>
+				</table>
             </div>
             <hr>
             <div class="text-center">
                 <button id="ingresoClearButton" class="btn btn-warning me-2" data-translate="clearButton">Limpiar</button>
+                <button id="deleteIngresoButton" class="btn btn-danger me-2" style="display: none;" data-translate="deleteSelectedButton" disabled>Eliminar Seleccionados</button>
                 <button id="ingresoSaveButton" class="btn btn-success" disabled data-translate="saveButton">Guardar en SAP</button>
+                <button id="layoutButtonIngreso" class="btn btn-info ms-2" data-bs-toggle="tooltip" title="Seleccionar Columnas">
+        <i class="bi bi-layout-three-columns"></i> </button>
                 <button id="printLabelsButton" class="btn btn-info" style="display: none;">
                     <i class="bi bi-printer"></i> <span data-translate="printLabelsButton">Imprimir Etiquetas</span>
                 </button>
@@ -482,6 +513,146 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="splitItemModal" tabindex="-1" aria-labelledby="splitItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="splitItemModalLabel">Dividir Posición</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+    <input type="hidden" id="splitOriginalPos">
+    <div id="split-error-message" class="alert alert-danger" style="display: none;"></div>
+    
+    <h6 class="mb-3">Datos Originales</h6>
+    <div class="row bg-light p-3 rounded mb-4">
+        <div class="col-md-3">
+            <label class="form-label">Material:</label>
+            <p id="splitMaterial" class="form-control-plaintext"></p>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Texto:</label>
+            <p id="splitMaterialText" class="form-control-plaintext"></p>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Cantidad Restante:</label>
+            <p id="splitRemainingQty" class="form-control-plaintext fw-bold"></p>
+        </div>
+    </div>
+
+    <h6 class="mb-3">Datos de las Nuevas Líneas (Ignora filas con cantidad 0)</h6>
+    
+    <div class="row g-2 mb-3">
+        <div class="col-md-2">
+            <label for="splitNewQty_0" class="form-label">Cantidad 1</label>
+            <input type="number" class="form-control form-control-sm split-qty" id="splitNewQty_0" min="0" step="any" placeholder="0.000">
+        </div>
+        <div class="col-md-3">
+            <label for="splitNewBatch_0" class="form-label">Lote 1</label>
+            <div class="input-group input-group-sm">
+                <input type="text" class="form-control text-uppercase split-batch" id="splitNewBatch_0">
+                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="lote" data-index="0"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <label for="splitNewStorageLoc_0" class="form-label">Almacén 1</label>
+            <div class="input-group input-group-sm">
+                <input type="text" class="form-control split-storageloc" id="splitNewStorageLoc_0">
+                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="almacen" data-index="0"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <label for="splitNewSublocation_0" class="form-label">Sub-Ubic. 1</label>
+            <div class="input-group input-group-sm">
+                <input type="text" class="form-control split-sublocation" id="splitNewSublocation_0">
+                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="sublocation" data-index="0"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <label for="splitNewTag_0" class="form-label">TAG 1</label>
+            <div class="input-group input-group-sm">
+                <input type="text" class="form-control split-tag" id="splitNewTag_0">
+                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="tag" data-index="0"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+    </div>
+    <div class="row g-2 mb-3 border-top pt-3">
+        <div class="col-md-2">
+            <label for="splitNewQty_1" class="form-label">Cantidad 2</label>
+            <input type="number" class="form-control form-control-sm split-qty" id="splitNewQty_1" min="0" step="any" placeholder="0.000">
+        </div>
+        <div class="col-md-3">
+            <label for="splitNewBatch_1" class="form-label">Lote 2</label>
+            <div class="input-group input-group-sm">
+                <input type="text" class="form-control text-uppercase split-batch" id="splitNewBatch_1">
+                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="lote" data-index="1"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <label for="splitNewStorageLoc_1" class="form-label">Almacén 2</label>
+            <div class="input-group input-group-sm">
+                <input type="text" class="form-control split-storageloc" id="splitNewStorageLoc_1">
+                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="almacen" data-index="1"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <label for="splitNewSublocation_1" class="form-label">Sub-Ubic. 2</label>
+            <div class="input-group input-group-sm">
+                <input type="text" class="form-control split-sublocation" id="splitNewSublocation_1">
+                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="sublocation" data-index="1"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <label for="splitNewTag_1" class="form-label">TAG 2</label>
+            <div class="input-group input-group-sm">
+                <input type="text" class="form-control split-tag" id="splitNewTag_1">
+                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="tag" data-index="1"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+    </div>
+    <div class="row g-2 mb-2 border-top pt-3">
+        <div class="col-md-2">
+            <label for="splitNewQty_2" class="form-label">Cantidad 3</label>
+            <input type="number" class="form-control form-control-sm split-qty" id="splitNewQty_2" min="0" step="any" placeholder="0.000">
+        </div>
+        <div class="col-md-3">
+            <label for="splitNewBatch_2" class="form-label">Lote 3</label>
+            <div class="input-group input-group-sm">
+                <input type="text" class="form-control text-uppercase split-batch" id="splitNewBatch_2">
+                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="lote" data-index="2"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <label for="splitNewStorageLoc_2" class="form-label">Almacén 3</label>
+            <div class="input-group input-group-sm">
+                <input type="text" class="form-control split-storageloc" id="splitNewStorageLoc_2">
+                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="almacen" data-index="2"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <label for="splitNewSublocation_2" class="form-label">Sub-Ubic. 3</label>
+            <div class="input-group input-group-sm">
+                <input type="text" class="form-control split-sublocation" id="splitNewSublocation_2">
+                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="sublocation" data-index="2"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <label for="splitNewTag_2" class="form-label">TAG 3</label>
+            <div class="input-group input-group-sm">
+                <input type="text" class="form-control split-tag" id="splitNewTag_2">
+                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="tag" data-index="2"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+    </div>
+    </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="addSplitLineButton" class="btn btn-primary">Añadir Línea</button>
             </div>
         </div>
     </div>
@@ -613,13 +784,15 @@ document.addEventListener('DOMContentLoaded', () => {
             noIndicatorLabel: "No Indicator",
             itemAdoptedLabel: "Item Adopted",
             docDateLabel: "Document Date",
-            materialSlipLabel: "Material Slip",
+            materialSlipLabel: "Delivery Note",
+            billOfLadingLabel: "Bill of Lading",
             poItemsTitle: "Purchase Order Items",
             salesOrderHeader: "Sales Order",
             salesOrderItemHeader: "SO Item",
             sublocationHeader: "Sublocation",
             countryHeader: "Country",
             itemTextHeader: "Item Text",
+            areaHeader: "Area",
             printLabelsButton: "Print Labels",
             searchingPO: "Searching PO",
             itemsLoaded: "items loaded.",
@@ -631,7 +804,12 @@ document.addEventListener('DOMContentLoaded', () => {
             generatingMaterialDoc: "Generating Material Document...",
             materialDocGenerated: "Document generated.",
             sublocationRequiredError: "The Sublocation field is mandatory for the selected items. Please fill in the highlighted fields.",
+            actionsCol: "Acciones",
+            deleteSelectedButton: "Delete Selected",
             printMaterialDocButton: "Print Material Doc.",
+            poItemCol1: "P.O. Item 1",
+            poItemCol2: "P.O. Item 2",
+            filterPlaceholder: "Filter results...",
         },
         es: {
             // General
@@ -748,13 +926,15 @@ document.addEventListener('DOMContentLoaded', () => {
             noIndicatorLabel: "Sin Indicador",
             itemAdoptedLabel: "Item Adopted",
             docDateLabel: "Fecha de Documento",
-            materialSlipLabel: "Material Slip",
+            materialSlipLabel: "Nota de Entrega",
+            billOfLadingLabel: "Carta de Porte",
             poItemsTitle: "Posiciones del Pedido",
             salesOrderHeader: "Pedido Venta",
             salesOrderItemHeader: "Pos. Ped. Venta",
             sublocationHeader: "Sub-Ubicación",
             countryHeader: "País",
             itemTextHeader: "Texto Posición",
+            areaHeader: "Area",
             printLabelsButton: "Imprimir Etiquetas",
             searchingPO: "Buscando pedido",
             itemsLoaded: "posiciones cargadas.",
@@ -766,7 +946,12 @@ document.addEventListener('DOMContentLoaded', () => {
             generatingMaterialDoc: "Generando Documento de Material...",
             materialDocGenerated: "Documento generado.",
             sublocationRequiredError: "El campo Sub-Ubicación es obligatorio para las posiciones seleccionadas. Por favor, complete los campos marcados en rojo.",
+            actionsCol: "Acciones",
+            deleteSelectedButton: "Eliminar Seleccionados",
             printMaterialDocButton: "Imprimir Doc. Material",
+            poItemCol1: "Pos. Pedido 1",
+            poItemCol2: "Pos. Pedido 2",
+            filterPlaceholder: "Filtrar resultados...",
         }
     };
 
@@ -845,6 +1030,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSearchHelpTarget = null;
     let msegColumnVisibility = {};
     let sublocationColumnVisibility = {};
+    let ingresoColumnVisibility = {};
     let currentLayoutConfig = {};
     let poItemsData = [];
     let currentSaveHandler = null;
@@ -904,6 +1090,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const startSublocationScanButton = document.getElementById('startSublocationScanButton');
     const stopSublocationScanButton = document.getElementById('stopSublocationScanButton');
     const layoutButtonSub = document.getElementById('layoutButtonSub');
+    const layoutButtonIngreso = document.getElementById('layoutButtonIngreso');
     const signatureModalElement = document.getElementById('signatureModal');
     const signatureModal = new bootstrap.Modal(signatureModalElement);
     const receptorSelect = document.getElementById('receptorSelect');
@@ -926,11 +1113,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const ingresoItemsTableBody = document.getElementById('ingresoItemsTableBody');
     const ingresoSaveButton = document.getElementById('ingresoSaveButton');
     const ingresoClearButton = document.getElementById('ingresoClearButton');
+    const deleteIngresoButton = document.getElementById('deleteIngresoButton');
     const ingresoStatus = document.getElementById('ingresoStatus');
     const selectAllIngresoItemsCheckbox = document.getElementById('selectAllIngresoItemsCheckbox');
     const printLabelsButton = document.getElementById('printLabelsButton');
     const printDocMaterialButton = document.getElementById('printDocMaterialButton');
     const longTextModal = new bootstrap.Modal(document.getElementById('longTextModal'));
+    const splitItemModal = new bootstrap.Modal(document.getElementById('splitItemModal'));
+    const deleteQrButton = document.getElementById('deleteQrButton'); 
+    const selectAllQrCheckbox = document.getElementById('selectAllQrCheckbox'); 
     const printDocMaterialButtonMain = document.getElementById('printDocMaterialButtonMain');
 
     // --- FUNCIONES DEL SPINNER ---
@@ -954,7 +1145,7 @@ document.addEventListener('DOMContentLoaded', () => {
     resetButton.addEventListener('click', resetAll);
     saveButton.addEventListener('click', openSignatureModal);
     confirmSaveButton.addEventListener('click', handleConfirmSave);
-    printDocMaterialButtonMain.addEventListener('click', handlePrintDocMaterialMain);
+    deleteIngresoButton.addEventListener('click', deleteSelectedIngresoRows);
     [sublocationCentroInput, sublocationAlmacenInput].forEach(input => input.addEventListener('input', manageSublocationScannerState));
     sublocationCentroInput.addEventListener('input', () => {
         if (sublocationCentroInput.value.trim() === '4000') {
@@ -963,15 +1154,16 @@ document.addEventListener('DOMContentLoaded', () => {
             sublocationAreaContainer.style.display = 'none';
         }
     });
-
-    almacenInput.addEventListener('input', (e) => {
+        almacenInput.addEventListener('input', (e) => {
     e.target.value = e.target.value.toUpperCase();
-});
+    });
+    deleteQrButton.addEventListener('click', deleteSelectedQrRows);
     sublocationTableHead.addEventListener('click', handleSort);
     filterInput.addEventListener('input', filterAndRender);
     exportToExcelButton.addEventListener('click', exportToExcel);
     layoutButtonSub.addEventListener('click', () => openLayoutModal('sublocationTable', sublocationColumnVisibility, 'layoutModalTitle'));
     layoutButtonMseg.addEventListener('click', () => openLayoutModal('msegTable', msegColumnVisibility, 'layoutModalTitle'));
+    layoutButtonIngreso.addEventListener('click', () => openLayoutModal('ingresoItemsTable', ingresoColumnVisibility, 'layoutModalTitle'));
     applyLayoutButton.addEventListener('click', applyLayoutChanges);
     document.getElementById('searchCentro').addEventListener('click', () => openSearchHelp('centro', 'Z_SEARCH_HELP_WERKS', {}, 'searchHelpForPlant'));
     document.getElementById('searchAlmacen').addEventListener('click', () => openSearchHelp('almacen', 'Z_SEARCH_HELP_LGORT', { IV_WERKS: centroInput.value.trim() }, 'searchHelpForStorage'));
@@ -985,6 +1177,7 @@ document.addEventListener('DOMContentLoaded', () => {
     stopScanButton.addEventListener('click', stopScanner);
     startSublocationScanButton.addEventListener('click', startSublocationScanner);
     stopSublocationScanButton.addEventListener('click', stopSublocationScanner);
+    printDocMaterialButtonMain.addEventListener('click', handlePrintDocMaterialMain);
     msegTableBody.addEventListener('click', function(e) {
         if (e.target && e.target.classList.contains('select-file-btn')) {
             const fileInput = e.target.nextElementSibling;
@@ -992,6 +1185,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 fileInput.click();
             }
         }
+    });
+    selectAllQrCheckbox.addEventListener('change', (e) => {
+        const isChecked = e.target.checked;
+        msegTableBody.querySelectorAll('.qr-item-checkbox').forEach(chk => chk.checked = isChecked);
+        updateDeleteQrButtonState(); // Actualiza estado del botón eliminar
     });
     msegTableBody.addEventListener('change', function(e) {
         if (e.target && e.target.classList.contains('file-input')) {
@@ -1012,6 +1210,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
+        else if (e.target.classList.contains('qr-item-checkbox')) {
+            updateDeleteQrButtonState();
+            const totalCheckboxes = msegTableBody.querySelectorAll('.qr-item-checkbox').length;
+            const checkedCount = msegTableBody.querySelectorAll('.qr-item-checkbox:checked').length;
+            selectAllQrCheckbox.checked = totalCheckboxes > 0 && totalCheckboxes === checkedCount;
+        }
     });
     msegTableBody.addEventListener('input', (e) => {
         if (e.target.tagName === 'INPUT' && e.target.type === 'text') {
@@ -1026,132 +1230,151 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-msegTableBody.addEventListener('click', (e) => {
-    const searchButton = e.target.closest('.search-btn');
-    if (!searchButton) return;
+	msegTableBody.addEventListener('click', (e) => {
+		const searchButton = e.target.closest('.search-btn');
+		if (!searchButton) return;
 
-    // Obtenemos el tipo de búsqueda y la fila actual
-    const searchType = searchButton.dataset.searchType;
-    const currentRow = searchButton.closest('tr');
-    
-    if (searchType === 'sublocation_qr') {
-        // Obtenemos el campo de texto de la sub-ubicación en esta fila
-        const targetInput = currentRow.querySelector('input[data-field="SUB_LOC"]');
-        
-        // Obtenemos el centro y almacén de los campos de cabecera de la pantalla QR
-        const planta = centroInput.value.trim();
-        const almacen = almacenInput.value.trim();
+		// Obtenemos el tipo de búsqueda y la fila actual
+		const searchType = searchButton.dataset.searchType;
+		const currentRow = searchButton.closest('tr');
+		
+		if (searchType === 'sublocation_qr') {
+			// Obtenemos el campo de texto de la sub-ubicación en esta fila
+			const targetInput = currentRow.querySelector('input[data-field="SUB_LOC"]');
+			
+			// Obtenemos el centro y almacén de los campos de cabecera de la pantalla QR
+			const planta = centroInput.value.trim();
+			const almacen = almacenInput.value.trim();
 
-        if (!planta || !almacen) {
-            alert('Se requiere Planta y Almacén en los datos de cabecera para buscar la sub-ubicación.');
-            return;
-        }
+			if (!planta || !almacen) {
+				alert('Se requiere Planta y Almacén en los datos de cabecera para buscar la sub-ubicación.');
+				return;
+			}
 
-        // Reutilizamos la misma configuración y llamada que en el otro modo
-        const config = {
-            display: {'ZZ_SUB_UBIC': 'Sub Ubicacion', 'DESCRIPCION': 'Descripcion'},
-            order: ['ZZ_SUB_UBIC', 'DESCRIPCION'],
-            returnColumn: 'ZZ_SUB_UBIC'
-        };
-        
-        openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_SUBLOCATION', { IV_WERKS: planta, IV_LGORT: almacen }, 'Ayuda de Búsqueda - Sub Ubicaciones', config);
-    }
-});
+			// Reutilizamos la misma configuración y llamada que en el otro modo
+			const config = {
+				display: {'ZZ_SUB_UBIC': 'Sub Ubicacion', 'DESCRIPCION': 'Descripcion'},
+				order: ['ZZ_SUB_UBIC', 'DESCRIPCION'],
+				returnColumn: 'ZZ_SUB_UBIC'
+			};
+			
+			openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_SUBLOCATION', { IV_WERKS: planta, IV_LGORT: almacen }, 'Ayuda de Búsqueda - Sub Ubicaciones', config);
+		}
+	});
 
     document.getElementById('searchPoButton').addEventListener('click', fetchPurchaseOrderItems);
     ingresoClearButton.addEventListener('click', () => clearIngresoForm(true));
     ingresoSaveButton.addEventListener('click', openIngresoSignatureModal);
-  //document.querySelectorAll('input[name="ingresoStockEspecial"]').forEach(radio => radio.addEventListener('change', updateIngresoTableVisibility));
+    document.getElementById('ingresoFilterInput').addEventListener('input', filterIngresoItemsTable);
+    
     ingresoItemsTableBody.addEventListener('change', e => {
         if (e.target.classList.contains('item-checkbox')) {
             const checkedCount = ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked').length;
             ingresoSaveButton.disabled = checkedCount === 0;
             const totalCheckboxes = ingresoItemsTableBody.querySelectorAll('.item-checkbox').length;
             selectAllIngresoItemsCheckbox.checked = totalCheckboxes > 0 && totalCheckboxes === checkedCount;
+            deleteIngresoButton.style.display = checkedCount > 0 ? 'inline-block' : 'none';
+            deleteIngresoButton.disabled = checkedCount === 0;
         }
     });
     selectAllIngresoItemsCheckbox.addEventListener('change', e => {
         const isChecked = e.target.checked;
         ingresoItemsTableBody.querySelectorAll('.item-checkbox').forEach(checkbox => checkbox.checked = isChecked);
         ingresoSaveButton.disabled = !isChecked || ingresoItemsTableBody.querySelectorAll('.item-checkbox').length === 0;
+        const hasItems = ingresoItemsTableBody.querySelectorAll('.item-checkbox').length > 0;
+        ingresoSaveButton.disabled = !isChecked || !hasItems;
+    
+    // Habilitar/mostrar el botón de eliminar global
+    deleteIngresoButton.style.display = isChecked && hasItems ? 'inline-block' : 'none';
+    deleteIngresoButton.disabled = !isChecked || !hasItems;
     });
+    
     ingresoItemsTableBody.addEventListener('click', (e) => {
-        const searchButton = e.target.closest('.search-btn');
-        if (!searchButton) return;
-        const searchType = searchButton.dataset.searchType;
-        const currentRow = searchButton.closest('tr');
-        const pos = currentRow.dataset.pos;
-        const originalItem = poItemsData.find(d => d.EBELP === pos);
-        if (searchType === 'lote') {
-            const material = originalItem.MATNR;
-            const planta = originalItem.WERKS;
-            const targetInput = currentRow.querySelector('input[name="lote"]');
-            if (!material || !planta) {
-                alert('Se requiere Material y Planta en la posición para buscar el lote.');
-                return;
-            }
-            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_BATCH', { IV_MATNR: material, IV_WERKS: planta }, 'Ayuda de Búsqueda - Lotes');
-        } 
-        else if (searchType === 'sublocation') {
-            const planta = originalItem.WERKS;
-            const almacen = currentRow.querySelector('input[name="almacen"]').value;
-            const targetInput = currentRow.querySelector('input[name="sublocation"]');
-            if (!planta || !almacen) {
-                alert('Se requiere Planta y Almacén para buscar la sub-ubicación.');
-                return;
-            }
-            const config = {
-                display: {'ZZ_SUB_UBIC': 'Sub Ubicacion', 'DESCRIPCION': 'Descripcion'},
-                order: ['ZZ_SUB_UBIC', 'DESCRIPCION'],
-                returnColumn: 'ZZ_SUB_UBIC'
-            };
-            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_SUBLOCATION', { IV_WERKS: planta, IV_LGORT: almacen }, 'Ayuda de Búsqueda - Sub Ubicaciones', config);
-        }
-        else if (searchType === 'almacen') {
-            const planta = originalItem.WERKS;
-            const targetInput = currentRow.querySelector('input[name="almacen"]');
-            if (!planta) {
-                alert('Se requiere la Planta para buscar el almacén.');
-                return;
-            }
-            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_LGORT', { IV_WERKS: planta }, 'Ayuda de Búsqueda - Almacén');
-        }
-        else if (searchType === 'tag') {
-            const planta = originalItem.WERKS;
-            const targetInput = currentRow.querySelector('input[name="tag"]');
-            if (!planta) {
-                alert('Se requiere la Planta para buscar el TAG.');
-                return;
-            }
-            const config = {
-                display: {'ZZUBICACION': 'TAG', 'DESCRIPCION': 'Descripcion'},
-                order: ['ZZUBICACION', 'DESCRIPCION'],
-                returnColumn: 'ZZUBICACION'
-            };
-            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_TAG', { IV_WERKS: planta }, 'Ayuda de Búsqueda - TAG', config);
-        }
-        else if (searchType === 'pais') {
-            const targetInput = currentRow.querySelector('input[name="pais"]');
-            const config = {
-                display: {'ZZ_PAIS': 'Pais', 'DESCRIPCION': 'Descripcion'},
-                order: ['ZZ_PAIS', 'DESCRIPCION'],
-                returnColumn: 'ZZ_PAIS'
-            };
-            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_COUNTRY', {}, 'Ayuda de Búsqueda - País', config);
-        }
-    });
+		// Primero, revisa si se hizo clic en el botón de split
+		const splitButton = e.target.closest('.split-item-btn');
+		if (splitButton) {
+			const pos = splitButton.dataset.pos;
+			openSplitModal(pos);
+			return; // Importante: Termina la ejecución aquí si fue un clic de split
+		}
 
-        clMovimientoInput.addEventListener('input', () => {
-        // Si ya hay códigos escaneados en la tabla...
+		// Si no fue un split, revisa si se hizo clic en un botón de búsqueda
+		const searchButton = e.target.closest('.search-btn');
+		if (searchButton) {
+			const searchType = searchButton.dataset.searchType;
+			const currentRow = searchButton.closest('tr');
+			const pos = currentRow.dataset.pos;
+			// La lógica para buscar el 'originalItem' debe estar aquí dentro
+			const originalItem = poItemsData.find(d => d.EBELP === pos);
+			if (!originalItem) return; // Si no encuentra el item, no continúa
+
+			if (searchType === 'lote') {
+				const material = originalItem.MATNR;
+				const planta = originalItem.WERKS;
+				const targetInput = currentRow.querySelector('input[name="lote"]');
+				if (!material || !planta) {
+					alert('Se requiere Material y Planta en la posición para buscar el lote.');
+					return;
+				}
+				openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_BATCH', { IV_MATNR: material, IV_WERKS: planta }, 'Ayuda de Búsqueda - Lotes');
+			} 
+			else if (searchType === 'sublocation') {
+				const planta = originalItem.WERKS;
+				const almacen = currentRow.querySelector('input[name="almacen"]').value;
+				const targetInput = currentRow.querySelector('input[name="sublocation"]');
+				if (!planta || !almacen) {
+					alert('Se requiere Planta y Almacén para buscar la sub-ubicación.');
+					return;
+				}
+				const config = {
+					display: {'ZZ_SUB_UBIC': 'Sub Ubicacion', 'DESCRIPCION': 'Descripcion'},
+					order: ['ZZ_SUB_UBIC', 'DESCRIPCION'],
+					returnColumn: 'ZZ_SUB_UBIC'
+				};
+				openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_SUBLOCATION', { IV_WERKS: planta, IV_LGORT: almacen }, 'Ayuda de Búsqueda - Sub Ubicaciones', config);
+			}
+			else if (searchType === 'almacen') {
+				const planta = originalItem.WERKS;
+				const targetInput = currentRow.querySelector('input[name="almacen"]');
+				if (!planta) {
+					alert('Se requiere la Planta para buscar el almacén.');
+					return;
+				}
+				openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_LGORT', { IV_WERKS: planta }, 'Ayuda de Búsqueda - Almacén');
+			}
+			else if (searchType === 'tag') {
+				const planta = originalItem.WERKS;
+				const targetInput = currentRow.querySelector('input[name="tag"]');
+				if (!planta) {
+					alert('Se requiere la Planta para buscar el TAG.');
+					return;
+				}
+				const config = {
+					display: {'ZZUBICACION': 'TAG', 'DESCRIPCION': 'Descripcion'},
+					order: ['ZZUBICACION', 'DESCRIPCION'],
+					returnColumn: 'ZZUBICACION'
+				};
+				openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_TAG', { IV_WERKS: planta }, 'Ayuda de Búsqueda - TAG', config);
+			}
+			else if (searchType === 'pais') {
+				const targetInput = currentRow.querySelector('input[name="pais"]');
+				const config = {
+					display: {'ZZ_PAIS': 'Pais', 'DESCRIPCION': 'Descripcion'},
+					order: ['ZZ_PAIS', 'DESCRIPCION'],
+					returnColumn: 'ZZ_PAIS'
+				};
+				openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_COUNTRY', {}, 'Ayuda de Búsqueda - País', config);
+			}
+		}
+	});
+
+    clMovimientoInput.addEventListener('input', () => {
         if (scannedCodes.size > 0) {
-            // ...vuelve a dibujar la tabla para aplicar el cambio.
             renderTable();
         }
     });
 
-       // CONVIERTE A MAYÚSCULAS EL CAMPO LOTE EN TIEMPO REAL
     ingresoItemsTableBody.addEventListener('input', (e) => {
-        // Se asegura de que el cambio solo aplique a los campos con el nombre 'lote'
         if (e.target && e.target.getAttribute('name') === 'lote' || e.target.getAttribute('name') === 'almacen') {
             e.target.value = e.target.value.toUpperCase();
         }
@@ -1159,37 +1382,79 @@ msegTableBody.addEventListener('click', (e) => {
 
     printLabelsButton.addEventListener('click', handlePrintLabels);
     printDocMaterialButton.addEventListener('click', handlePrintDocMaterial);
+
     ingresoItemsTableBody.addEventListener('dblclick', (e) => {
         const descCell = e.target.closest('.material-description-cell');
         if (!descCell) return;
         const currentRow = descCell.closest('tr');
         const pos = currentRow.dataset.pos;
         const originalItem = poItemsData.find(d => d.EBELP === pos);
-        const poNumber = ingresoNroPedidoInput.value;
         if (originalItem && originalItem.MATNR) {
-        fetchAndShowLongText(originalItem.MATNR);
-    }
+            fetchAndShowLongText(originalItem.MATNR);
+        }
     });
 
     msegTableBody.addEventListener('dblclick', (e) => {
-    // Busca la celda de descripción del material a la que se le hizo clic
-    const descCell = e.target.closest('.cell-materialDescCol');
-    if (!descCell) return; // Si no se hizo clic en la celda correcta, no hace nada
-
-    // Encuentra la fila (tr) completa
-    const currentRow = descCell.closest('tr');
-    const key = currentRow.dataset.key; // Obtiene la clave única de la fila (ej: "doc-año-pos")
-
-    // Si la clave existe, busca los datos en el mapa 'scannedCodes'
-    if (key && scannedCodes.has(key)) {
-        const sapData = scannedCodes.get(key); // Obtiene el objeto con todos los datos de esa fila
-        
-        // Si tenemos los datos y el número de material, llamamos a la función existente
-        if (sapData && sapData.MATNR) {
-            fetchAndShowLongText(sapData.MATNR);
+        const descCell = e.target.closest('.cell-materialDescCol');
+        if (!descCell) return;
+        const currentRow = descCell.closest('tr');
+        const key = currentRow.dataset.key;
+        if (key && scannedCodes.has(key)) {
+            const sapData = scannedCodes.get(key);
+            if (sapData && sapData.MATNR) {
+                fetchAndShowLongText(sapData.MATNR);
+            }
         }
-    }
-});
+    });
+
+    document.getElementById('addSplitLineButton').addEventListener('click', addSplitLine);
+
+ // Delegar eventos para los botones de búsqueda DENTRO del modal de split
+    document.getElementById('splitItemModal').addEventListener('click', (e) => {
+        const searchButton = e.target.closest('.search-btn-split');
+        if (!searchButton) return; // No fue un clic en un botón de búsqueda
+
+        const searchType = searchButton.dataset.searchType;
+        const index = searchButton.dataset.index; // El índice (0, 1, o 2) de la fila
+        
+        const modal = document.getElementById('splitItemModal');
+        const planta = modal.dataset.werks;
+        const material = modal.dataset.matnr;
+
+        if (searchType === 'lote') {
+            const targetInput = document.getElementById(`splitNewBatch_${index}`);
+            if (!planta || !material) { alert('Se requiere Material y Planta para buscar el lote.'); return; }
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_BATCH', { IV_MATNR: material, IV_WERKS: planta }, 'Ayuda de Búsqueda - Lotes');
+        } 
+        else if (searchType === 'almacen') {
+            const targetInput = document.getElementById(`splitNewStorageLoc_${index}`);
+            if (!planta) { alert('No se pudo determinar la Planta para la búsqueda.'); return; }
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_LGORT', { IV_WERKS: planta }, 'Ayuda de Búsqueda - Almacén');
+        } 
+        else if (searchType === 'sublocation') {
+            const targetInput = document.getElementById(`splitNewSublocation_${index}`);
+            const almacen = document.getElementById(`splitNewStorageLoc_${index}`).value; // Lee el almacén de esta fila
+            if (!planta || !almacen) { alert('Se requiere Planta y Almacén para buscar la sub-ubicación.'); return; }
+            const config = {
+                display: {'ZZ_SUB_UBIC': 'Sub Ubicacion', 'DESCRIPCION': 'Descripcion'},
+                order: ['ZZ_SUB_UBIC', 'DESCRIPCION'],
+                returnColumn: 'ZZ_SUB_UBIC'
+            };
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_SUBLOCATION', { IV_WERKS: planta, IV_LGORT: almacen }, 'Ayuda de Búsqueda - Sub Ubicaciones', config);
+        }
+        else if (searchType === 'tag') {
+            const targetInput = document.getElementById(`splitNewTag_${index}`);
+            if (!planta) { alert('Se requiere la Planta para buscar el TAG.'); return; }
+            const config = {
+                display: {'ZZUBICACION': 'TAG', 'DESCRIPCION': 'Descripcion'},
+                order: ['ZZUBICACION', 'DESCRIPCION'],
+                returnColumn: 'ZZUBICACION'
+            };
+            // Reutiliza la misma RFC que el TAG de la línea principal
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_TAG', { IV_WERKS: planta }, 'Ayuda de Búsqueda - TAG', config);
+        }
+    });
+
 
     // --- LÓGICA DE AYUDA DE BÚSQUEDA (MATCHCODE) ---
     async function openSearchHelp(targetInputId, rfcName, params, titleKey, columnConfig = null) {
@@ -1254,6 +1519,9 @@ msegTableBody.addEventListener('click', (e) => {
                 })
             });
             const result = await response.json();
+            if (rfcName === 'Z_SEARCH_HELP_SUBLOCATION') {
+            console.log("Respuesta de Z_SEARCH_HELP_SUBLOCATION:", result.data);
+        }
             if (result.success) {
                 populateSearchHelpTable(result.data, columnConfig);
             } else {
@@ -1318,7 +1586,7 @@ msegTableBody.addEventListener('click', (e) => {
             });
         }
     }
-
+    
     function handleSearchHelpSelection(e) {
         const row = e.target.closest('tr');
         if (!row || row.dataset.returnValue === undefined) return;
@@ -1436,7 +1704,13 @@ msegTableBody.addEventListener('click', (e) => {
             ingresoContent.style.display = 'block';
             document.getElementById('ingresoFechaDoc').valueAsDate = new Date();
             document.getElementById('ingresoFechaCont').valueAsDate = new Date();
-            updateIngresoTableVisibility();
+           // const countryHeader = document.querySelector('#ingresoItemsTable thead th[data-translate="countryHeader"]');
+            
+        //    if (countryHeader) {
+        //        countryHeader.style.display = 'none';
+        //    }
+
+            //updateIngresoTableVisibility();
         }
     }
 
@@ -1633,6 +1907,7 @@ msegTableBody.innerHTML = '';
 
         // Construimos la fila completa
         tr.innerHTML = `
+            <td><input type="checkbox" class="form-check-input qr-item-checkbox" data-key="${key}"></td>
             <td class="cell-docCol">${doc}</td>
             <td class="cell-yearCol">${year}</td>
             <td class="cell-posCol">${item}</td>
@@ -1667,7 +1942,9 @@ msegTableBody.innerHTML = '';
             ${sublocationCellHtml}
             <td class="cell-areaCol">${sapData.SUBMI || ''}</td>
             <td class="cell-orderNoCol">${sapData.EBELN || ''}</td>
+            <td data-column="poItemCol1" class="text-center align-middle cell-poItemCol1">${sapData.EBELP || ''}</td>
             <td class="cell-orderNo2Col d-none">${sapData.EBELN2 || ''}</td>
+            <td data-column="poItemCol2" class="text-center align-middle cell-poItemCol2 d-none">${sapData.EBELP2 || ''}</td>
             <td class="cell-wbsCol">${sapData.PS_PSP_PNR || ''}</td>
             <td class="cell-reservationCol reserva-cell d-none"><input type="text" class="form-control form-control-sm" value="${sapData.RSNUM || ''}" data-key="${key}" data-field="RSNUM" ${isReadOnly}></td>
             <td class="cell-salesOrderCol">${sapData.KDAUF || ''}</td>
@@ -1679,6 +1956,28 @@ msegTableBody.innerHTML = '';
     updateTableVisibility('msegTable', msegColumnVisibility);
     toggleSpecialColumnsVisibility();
 }
+
+function updateDeleteQrButtonState() {
+        const checkedCount = msegTableBody.querySelectorAll('.qr-item-checkbox:checked').length;
+        deleteQrButton.disabled = checkedCount === 0;
+    }
+
+function deleteSelectedQrRows() {
+        const keysToDelete = [];
+        msegTableBody.querySelectorAll('.qr-item-checkbox:checked').forEach(chk => {
+            keysToDelete.push(chk.dataset.key);
+        });
+
+        if (keysToDelete.length === 0) return; 
+
+        keysToDelete.forEach(key => {
+            scannedCodes.delete(key);
+        });
+
+        renderTable(); 
+        updateButtonsVisibility(); 
+        selectAllQrCheckbox.checked = false; 
+    }
 async function openSignatureModal() {
 
 const moveType = clMovimientoInput.value.trim();
@@ -1805,7 +2104,7 @@ const moveType = clMovimientoInput.value.trim();
 
     // Si después de revisar todas las filas seleccionadas se encontró un error...
     if (!allSublocationsAreValid) {
-        const errorMessage = "El campo Sub-Ubicación es obligatorio para las posiciones seleccionadas. Por favor, complete los campos marcados en rojo.";
+        const errorMessage = getText('sublocationRequiredError'); // <-- Usamos la función de traducción
         alert(errorMessage);
         setIngresoStatus(errorMessage, "error");
         playSound('error');
@@ -1918,7 +2217,7 @@ const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => 
 
     // Buscamos la fila correspondiente en la tabla para leer los datos actuales
     const row = msegTableBody.querySelector(`tr[data-key="${key}"]`);
-     
+
     let subLocValue = sapData.SUB_LOC; // Valor por defecto
 
     // Si la fila existe, leemos los valores directamente de los inputs
@@ -1948,6 +2247,9 @@ const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => 
         SUB_LOC: sapData.SUB_LOC, // Se usa el valor actualizado
         SUBMI: sapData.SUBMI,
         EBELN: sapData.EBELN,
+        EBELP: sapData.EBELP, // Posición Pedido 1
+        EBELN2: sapData.EBELN2,
+        EBELP2: sapData.EBELP2, // Posición Pedido 2
         PS_PSP_PNR: sapData.PS_PSP_PNR,
         KDAUF: sapData.KDAUF,
         KDPOS: sapData.KDPOS,
@@ -1992,10 +2294,12 @@ const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => 
                     // No necesitas los items completos, solo el número y el año para la impresión del documento.
                 };
                 saveButton.style.display = 'none'; // Oculta el botón de guardar
-                printDocMaterialButtonMain.style.display = 'inline-block';
+                printDocMaterialButtonMain.style.display = 'inline-block'; // Muestra el botón de impresión
+
+                // Deshabilita inputs de cabecera y de la tabla para evitar cambios
                 [clMovimientoInput, almacenInput, centroInput, textoCabeceraInput, specialStockIndicatorInput, reservaCheckbox].forEach(el => el.disabled = true);
                 document.querySelectorAll('#msegTableBody input, #msegTableBody button').forEach(el => el.disabled = true);
-               // await resetAll();
+                //await resetAll();
             } else {
                 setScanStatus(`${getText('saveError')}: ${result.error}`, "error");
                 playSound('error');
@@ -2009,7 +2313,7 @@ const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => 
         }
     }
     async function resetAll() {
-        await stopScanner();
+       await stopScanner();
         clearFormAndTable();
         [clMovimientoInput, almacenInput, centroInput, textoCabeceraInput, specialStockIndicatorInput, reservaCheckbox].forEach(el => el.disabled = false);
         manageScannerState();
@@ -2024,6 +2328,7 @@ const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => 
         textoCabeceraInput.value = '';
         reservaCheckbox.checked = false;
         setScanStatus("", "");
+        selectAllQrCheckbox.checked = false;
         updateButtonsVisibility();
         toggleReservaColumn();
     }
@@ -2031,8 +2336,10 @@ const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => 
         const showButtons = msegTableBody.rows.length > 0;
         resetButton.style.display = showButtons ? 'inline-block' : 'none';
         layoutButtonMseg.style.display = showButtons ? 'inline-block' : 'none';
+        deleteQrButton.style.display = showButtons ? 'inline-block' : 'none';
         const showSave = showButtons && !isGuestMode;
         saveButton.style.display = showSave ? 'inline-block' : 'none';
+        updateDeleteQrButtonState()
     }
     function setScanStatus(message, type) {
         scanStatusElement.textContent = message;
@@ -2093,6 +2400,9 @@ const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => 
             visibilityObject[chk.value] = chk.checked;
         });
         updateTableVisibility(tableId, visibilityObject);
+       if (tableId === 'msegTable') { 
+        toggleSpecialColumnsVisibility(); 
+    }
         layoutModal.hide();
     }
 
@@ -2110,15 +2420,15 @@ function toggleSpecialColumnsVisibility() {
     orderNo2Elements.forEach(el => el.classList.toggle('d-none', !shouldShow));
 }
 
- function updateTableVisibility(tableId, visibilityObject) {
-    for (const columnKey in visibilityObject) {
-        const isVisible = visibilityObject[columnKey]; 
-        const cells = document.querySelectorAll(`#${tableId} [data-column="${columnKey}"], #${tableId} .cell-${columnKey}`);
-        cells.forEach(cell => {
+    function updateTableVisibility(tableId, visibilityObject) {
+        for (const columnKey in visibilityObject) {
+           const isVisible = visibilityObject[columnKey];
+            const cells = document.querySelectorAll(`#${tableId} [data-column="${columnKey}"], #${tableId} .cell-${columnKey}`);
+            cells.forEach(cell => {
             cell.classList.toggle('d-none', !isVisible);
-        });
+            });
+        }
     }
-}
     function areSublocationFiltersFilled() {
         return sublocationCentroInput.value.trim() && sublocationAlmacenInput.value.trim();
     }
@@ -2134,54 +2444,6 @@ function toggleSpecialColumnsVisibility() {
             sublocationReaderMessage.style.display = 'block';
         }
     }
-
-    async function handlePrintDocMaterialMain() {
-        if (!lastSavedQRData) {
-            alert("No hay datos del último guardado para imprimir.");
-            return;
-        }
-        setScanStatus(getText('generatingMaterialDoc', 'Generando Documento de Material...'), 'info');
-        showSpinner();
-        try {
-            // Reutiliza la misma ruta del Ingreso de Materiales
-            const response = await fetch(`${API_BASE_URL}/printMaterialDoc`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    connection_params: sapConnection,
-                    print_data: lastSavedQRData // Usamos los datos del último guardado QR
-                })
-            });
-            const result = await response.json();
-            if (result.success && result.pdf_data) {
-                const pdfBlob = new Blob([Uint8Array.from(atob(result.pdf_data), c => c.charCodeAt(0))], { type: 'application/pdf' });
-                const pdfUrl = URL.createObjectURL(pdfBlob);
-                const anchor = document.createElement('a');
-                anchor.style.display = 'none';
-                anchor.href = pdfUrl;
-                anchor.target = "_blank";
-                anchor.download = 'Documento_Material_QR.pdf'; 
-
-                document.body.appendChild(anchor);
-                anchor.click();
-                setTimeout(() => {
-                    window.URL.revokeObjectURL(pdfUrl);
-                    document.body.removeChild(anchor);
-                }, 100);
-
-                setScanStatus(getText('materialDocGenerated', 'Documento generado.'), 'success');
-            } else {
-                throw new Error(result.error || "No se recibieron datos del PDF desde el servidor.");
-            }
-        } catch (err) {
-            setScanStatus(`${getText('printingError', 'Error al imprimir')}: ${err.message}`, 'error');
-            playSound('error');
-            alert(`${getText('printingError', 'Error al generar documento')}: ${err.message}`);
-        } finally {
-            hideSpinner();
-        }
-    }
-
     async function startSublocationScanner() {
         if (isSublocationScanning) return;
         isSublocationScanning = true;
@@ -2454,136 +2716,195 @@ function toggleSpecialColumnsVisibility() {
         }
     }
     
-   function renderIngresoItemsTable(items) {
+function renderIngresoItemsTable(items) {
     // PASO 1: Analizar todos los items para decidir qué columnas mostrar
     let showWbsColumn = false;
     let showSoColumn = false;
+    let defaultAlmacen = '';
+    
+    if (items.length > 0) {
+        defaultAlmacen = items[0].LGORT;
+    }
+
     items.forEach(item => {
         if (item.SOBKZ === 'Q') showWbsColumn = true;
         if (item.SOBKZ === 'E') showSoColumn = true;
     });
 
-    // PASO 2: Mostrar u ocultar las cabeceras de las columnas
-    document.querySelectorAll('#ingresoItemsTable .wbs-col').forEach(el => el.style.display = showWbsColumn ? '' : 'none');
-    document.querySelectorAll('#ingresoItemsTable .so-col').forEach(el => el.style.display = showSoColumn ? '' : 'none');
+    ingresoColumnVisibility['wbsCol'] = showWbsColumn;
+    ingresoColumnVisibility['salesOrderCol'] = showSoColumn;
+    ingresoColumnVisibility['salesOrderItemCol'] = showSoColumn;
 
-    // PASO 3: Renderizar las filas
     ingresoItemsTableBody.innerHTML = '';
     selectAllIngresoItemsCheckbox.checked = false;
     
     items.forEach(item => {
         const tr = document.createElement('tr');
         tr.dataset.pos = item.EBELP;
-        const posSinCeros = parseInt(item.EBELP, 10);
+        let posSinCeros;
+        const posString = String(item.EBELP);
+        if (posString.includes('.')) {
+            const parts = posString.split('.');
+            posSinCeros = parseInt(parts[0], 10) + '.' + parts[1];
+        } else {
+            posSinCeros = parseInt(posString, 10);
+        }
+        
         const materialSinCeros = (item.MATNR || '').replace(/^0+/, '');
         const stockIndicator = item.SOBKZ || '';
-        let defaultAlmacen = item.LGORT || ''; 
-        let defaultSublocation = '';
-        const planta = item.WERKS;
+        const planta = item.WERKS; // Centro de ESTE item
+        const bednr = item.BEDNR || ''; // Nuevo campo AREA
         
-     if (!defaultAlmacen) { 
+        // 1. Lógica para el Almacén por defecto
+        if (!defaultAlmacen) {
             if (planta === '1000') {
                 defaultAlmacen = 'LI01';
             } else if (planta === '4000') {
                 defaultAlmacen = '4004';
             }
         }
-        
-        // Lógica para SUB-UBICACIÓN: Se aplica siempre para esas plantas
+
+        // 2. Lógica para la Sub-Ubicación por defecto (CON TU VALIDACIÓN)
+        let defaultSublocation = ''; // Default para todo
+
+        // 2a. Asignar default '00.00' para las plantas conocidas
         if (planta === '1000' || planta === '4000') {
             defaultSublocation = '00.00';
         }
 
+        // 2b. SOBREESCRIBIR con la lógica especial si se cumplen las condiciones
+        if (planta === '1000' && stockIndicator === 'E') {
+            if (bednr === 'SAL GY') {
+                defaultSublocation = 'ZGY.001';
+            } else if (bednr.startsWith('SAL')) {
+                defaultSublocation = 'ZDR.001';
+            }
+            // Si no es 'SAL GY' ni 'SAL...', se queda con el '00.00' asignado arriba.
+        }
+        // --- FIN DE LA LÓGICA DE VALIDACIÓN ---
+        
+
         // --- LÓGICA DE CONSTRUCCIÓN DINÁMICA DE LA FILA ---
-        // Se inicia la cadena HTML de la fila
+        
+        const isSplitLine = item.EBELP_ORIGINAL !== undefined; 
+        const readonlyForSplits = isSplitLine ? 'readonly' : '';
+        const checkboxChecked = item.isSelected ? 'checked' : '';
+
+        const almacenValue = item.userInput_Almacen ?? (isSplitLine ? (item.LGORT_NUEVO ?? item.LGORT) : (item.LGORT || defaultAlmacen));
+        const loteValue = item.userInput_Batch ?? (isSplitLine ? (item.CHARG_NUEVO || '') : '');
+        const sublocationValue = item.userInput_Sublocation ?? (isSplitLine ? (item.SUBLOCATION_NUEVA || '') : defaultSublocation);
+        const tagValue = item.userInput_Tag ?? (isSplitLine ? (item.TAG_NUEVO || '') : '');
+        const paisValue = item.userInput_Pais ?? ''; 
+        const sgtxtValue = item.userInput_Sgtxt ?? '';
+
+
         let rowHtml = `
-            <td><input type="checkbox" class="form-check-input item-checkbox"></td>
-            <td>${posSinCeros}</td>
-            <td>${stockIndicator}</td>
-            <td>${materialSinCeros}</td>
-            <td class="material-description-cell" style="cursor: pointer;">${item.TXZ01}</td>
+            <td class="cell-selectCol"><input type="checkbox" class="form-check-input item-checkbox" ${checkboxChecked || ''}></td>
+            
+            <td class="cell-actionsCol">
+                <button class="btn btn-sm btn-outline-primary split-item-btn" data-pos="${item.EBELP}" title="Dividir Posición" ${isSplitLine ? 'disabled' : ''}>
+                    <i class="bi bi-diagram-2"></i>
+                </button>
+            </td>
+            <td class="cell-posCol">${posSinCeros}</td>
+            <td class="cell-specialStockCol">${stockIndicator}</td>
+            <td class="cell-materialCol">${materialSinCeros}</td>
+            <td class="material-description-cell cell-materialDescCol" style="cursor: pointer;">${item.TXZ01}</td>
+            
         `;
 
-        // Se AÑADE la celda PEP solo si la columna es visible
+        // Columnas WBS y Pedido Venta (lógica sin cambios)
         if (showWbsColumn) {
             const wbsContent = (stockIndicator === 'Q') ? (item.PS_PSP_PNR_D || '') : '';
-            rowHtml += `<td class="wbs-col">${wbsContent}</td>`;
+            rowHtml += `<td class="wbs-col cell-wbsCol">${wbsContent}</td>`;
+        } else {
+            rowHtml += `<td class="wbs-col cell-wbsCol"></td>`; 
         }
-
-        // Se AÑADEN las celdas de Pedido Venta solo si la columna es visible
         if (showSoColumn) {
             const soNumContent = (stockIndicator === 'E') ? (item.KDAUF || '') : '';
             const soItemContent = (stockIndicator === 'E') ? (item.KDPOS || '') : '';
-            rowHtml += `<td class="so-col">${soNumContent}</td>`;
-            rowHtml += `<td class="so-col">${soItemContent}</td>`;
+            rowHtml += `<td class="so-col cell-salesOrderCol">${soNumContent}</td>`;
+            rowHtml += `<td class="so-col cell-salesOrderItemCol">${soItemContent}</td>`;
+        } else {
+             rowHtml += `<td class="so-col cell-salesOrderCol"></td>`; 
+             rowHtml += `<td class="so-col cell-salesOrderItemCol"></td>`; 
         }
         
-        // Se AÑADE el resto de las celdas
         rowHtml += `
-            <td>${item.WERKS}</td>
-            <td>
+            <td class="cell-plantCol">${item.WERKS}</td>
+            <td class="cell-storageLocationCol">
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control form-control-sm" name="almacen" value="${defaultAlmacen}">
-                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="almacen"><i class="bi bi-search"></i></button>
+                    <input type="text" class="form-control form-control-sm" name="almacen" value="${almacenValue}" ${readonlyForSplits}>
+                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="almacen" ${readonlyForSplits}><i class="bi bi-search"></i></button>
                 </div>
             </td>
-            <td><input type="number" class="form-control form-control-sm" name="cantidad" value="${item.MENGE || 0}"></td>
-            <td>${item.MEINS}</td>
-            <td>
+            <td class="cell-qtyCol"><input type="number" class="form-control form-control-sm" name="cantidad" value="${item.MENGE || 0}"></td>
+            <td class="cell-unitCol">${item.MEINS}</td>
+            <td class="cell-batchCol">
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control" name="lote">
-                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="lote"><i class="bi bi-search"></i></button>
+                    <input type="text" class="form-control" name="lote" value="${loteValue}" ${readonlyForSplits}>
+                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="lote" ${readonlyForSplits}><i class="bi bi-search"></i></button>
                 </div>
             </td>
-            <td>
+            <td class="cell-sublocationCol">
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control" name="sublocation" value="${defaultSublocation}">
-                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="sublocation"><i class="bi bi-search"></i></button>
+                    <input type="text" class="form-control" name="sublocation" value="${sublocationValue}" ${readonlyForSplits}>
+                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="sublocation" ${readonlyForSplits}><i class="bi bi-search"></i></button>
                 </div>
             </td>
-            <td>
+            <td class="cell-tagCol">
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control" name="tag">
-                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="tag"><i class="bi bi-search"></i></button>
+                    <input type="text" class="form-control" name="tag" value="${tagValue}" ${readonlyForSplits}>
+                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="tag" ${readonlyForSplits}><i class="bi bi-search"></i></button>
                 </div>
             </td>
-            <td>
-                <div class="input-group input-group-sm">
-                    <input type="text" class="form-control" name="pais">
-                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="pais"><i class="bi bi-search"></i></button>
-                </div>
+            
+            <td class="cell-areaCol area-col">${item.BEDNR || ''}</td>
+            <td class="cell-countryCol country-col"> <div class="input-group input-group-sm">
+                <input type="text" class="form-control" name="pais" ${readonlyForSplits}>
+                <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="pais" ${readonlyForSplits}><i class="bi bi-search"></i></button>
+            </div>
             </td>
-            <td><input type="text" class="form-control form-control-sm" name="sgtxt"></td>
-            <td><input type="file" class="form-control form-control-sm" name="certificado"></td>
-            <td><input type="file" class="form-control form-control-sm" name="documentos"></td>
-            <td><input type="file" class="form-control form-control-sm" name="inspeccion"></td>
+            <td class="cell-itemTextCol"><input type="text" class="form-control form-control-sm" name="sgtxt" value="${sgtxtValue}"></td>
+            <td class="cell-certCol"><input type="file" class="form-control form-control-sm" name="certificado" ${readonlyForSplits}></td>
+            <td class="cell-docsCol"><input type="file" class="form-control form-control-sm" name="documentos" ${readonlyForSplits}></td>
+            <td class="cell-inspCol"><input type="file" class="form-control form-control-sm" name="inspeccion" ${readonlyForSplits}></td>
         `;
 
-        // Se asigna el HTML construido a la fila
         tr.innerHTML = rowHtml;
         ingresoItemsTableBody.appendChild(tr);
     });
+    
+    // --- Lógica final sin cambios ---
+    ingresoClearButton.disabled = false;
+    ingresoSaveButton.style.display = 'inline-block';
+    layoutButtonIngreso.style.display = 'inline-block'; 
+    deleteIngresoButton.style.display = 'inline-block'; 
+    updateTableVisibility('ingresoItemsTable', ingresoColumnVisibility);
 }
     async function saveIngresoData(signatureData) {
+        syncTableInputsToData();
         const selectedItems = [];
         ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
             const tr = checkbox.closest('tr');
             const pos = tr.dataset.pos;
             const originalItem = poItemsData.find(d => d.EBELP === pos);
             if (originalItem) {
+            const posToSend = originalItem.EBELP_ORIGINAL || originalItem.EBELP;
                 selectedItems.push({
-                    posicion: pos,
+                    posicion: posToSend,
                     stock_especial: originalItem.SOBKZ || '',
                     material: originalItem.MATNR,
+                    bednr: originalItem.BEDNR || '', 
                     plant: originalItem.WERKS,
                     um: originalItem.MEINS,
-                    almacen: tr.querySelector('[name="almacen"]').value,
-                    cantidad: tr.querySelector('[name="cantidad"]').value,
-                    lote: tr.querySelector('[name="lote"]').value,
-                    sublocation: tr.querySelector('[name="sublocation"]').value,
-                    tag: tr.querySelector('[name="tag"]').value,
-                    pais: tr.querySelector('[name="pais"]').value,
-                    sgtxt: tr.querySelector('[name="sgtxt"]').value
+                    almacen: originalItem.userInput_Almacen ?? (isSplitLine ? originalItem.LGORT_NUEVO : originalItem.LGORT),
+                    cantidad: originalItem.MENGE, // 'MENGE' ya se actualiza desde el input
+                    lote: originalItem.userInput_Batch ?? (isSplitLine ? originalItem.CHARG_NUEVO : ''),
+                    sublocation: originalItem.userInput_Sublocation ?? (isSplitLine ? originalItem.SUBLOCATION_NUEVA : ''),
+                    tag: originalItem.userInput_Tag ?? (isSplitLine ? originalItem.TAG_NUEVO : ''),
+                    pais: originalItem.userInput_Pais ?? '',
+                    sgtxt: originalItem.userInput_Sgtxt ?? ''
                 });
             }
         });
@@ -2598,6 +2919,7 @@ function toggleSpecialColumnsVisibility() {
             fecha_doc: document.getElementById('ingresoFechaDoc').value,
             fecha_cont: document.getElementById('ingresoFechaCont').value,
             material_slip: document.getElementById('ingresoMaterialSlip').value,
+            bill_of_lading: document.getElementById('ingresoBillOfLading').value,
             texto_cabecera: document.getElementById('ingresoTextoCabecera').value,
         };
         const formData = new FormData();
@@ -2677,10 +2999,9 @@ function toggleSpecialColumnsVisibility() {
             if (result.success && result.pdf_data) {
                 const pdfBlob = new Blob([Uint8Array.from(atob(result.pdf_data), c => c.charCodeAt(0))], { type: 'application/pdf' });
                 const pdfUrl = URL.createObjectURL(pdfBlob);
-               const anchor = document.createElement('a');
+                const anchor = document.createElement('a');
     anchor.style.display = 'none';
     anchor.href = pdfUrl;
-    anchor.target = "_blank";
 
     // 2. Asignarle un nombre de archivo para la descarga
     anchor.download = 'Etiquetas.pdf';
@@ -2692,9 +3013,9 @@ function toggleSpecialColumnsVisibility() {
     window.URL.revokeObjectURL(pdfUrl); // Limpiar la URL del objeto
     document.body.removeChild(anchor);
     }, 100);
-    // --- FIN DEL CAMBIO ---
 
     setIngresoStatus(getText('labelsGenerated'), 'success');
+                setIngresoStatus(getText('labelsGenerated'), 'success');
             } else {
                 throw new Error(result.error || "No se recibieron datos del PDF desde el servidor.");
             }
@@ -2728,10 +3049,9 @@ function toggleSpecialColumnsVisibility() {
             if (result.success && result.pdf_data) {
                 const pdfBlob = new Blob([Uint8Array.from(atob(result.pdf_data), c => c.charCodeAt(0))], { type: 'application/pdf' });
                 const pdfUrl = URL.createObjectURL(pdfBlob);
-               const anchor = document.createElement('a');
+                const anchor = document.createElement('a');
     anchor.style.display = 'none';
     anchor.href = pdfUrl;
-    anchor.target = "_blank";
     anchor.download = 'Documento_Material.pdf'; // Nombre de archivo para este caso
 
     document.body.appendChild(anchor);
@@ -2739,10 +3059,8 @@ function toggleSpecialColumnsVisibility() {
     setTimeout(() => {
     window.URL.revokeObjectURL(pdfUrl);
     document.body.removeChild(anchor);
-    }, 100); 
-    // --- FIN DEL CAMBIO ---
-
-    setIngresoStatus(getText('materialDocGenerated', 'Documento generado.'), 'success');
+    }, 100);
+                setIngresoStatus(getText('materialDocGenerated', 'Documento generado.'), 'success');
             } else {
                 throw new Error(result.error || "No se recibieron datos del PDF desde el servidor.");
             }
@@ -2755,7 +3073,98 @@ function toggleSpecialColumnsVisibility() {
         }
     }
 
-    function clearIngresoForm(clearAll = true) {
+async function handlePrintDocMaterialMain() {
+        if (!lastSavedQRData) {
+            alert("No hay datos del último guardado para imprimir.");
+            return;
+        }
+        setScanStatus(getText('generatingMaterialDoc', 'Generando Documento de Material...'), 'info');
+        showSpinner();
+        try {
+            // Reutiliza la misma ruta del Ingreso de Materiales
+            const response = await fetch(`${API_BASE_URL}/printMaterialDoc`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    connection_params: sapConnection,
+                    print_data: lastSavedQRData // Usamos los datos del último guardado QR
+                })
+            });
+            const result = await response.json();
+            if (result.success && result.pdf_data) {
+                const pdfBlob = new Blob([Uint8Array.from(atob(result.pdf_data), c => c.charCodeAt(0))], { type: 'application/pdf' });
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+                const anchor = document.createElement('a');
+                anchor.style.display = 'none';
+                anchor.href = pdfUrl;
+                anchor.target = "_blank";
+                anchor.download = 'Documento_Material_QR.pdf'; 
+
+                document.body.appendChild(anchor);
+                anchor.click();
+                setTimeout(() => {
+                    window.URL.revokeObjectURL(pdfUrl);
+                    document.body.removeChild(anchor);
+                }, 100);
+
+                setScanStatus(getText('materialDocGenerated', 'Documento generado.'), 'success');
+            } else {
+                throw new Error(result.error || "No se recibieron datos del PDF desde el servidor.");
+            }
+        } catch (err) {
+            setScanStatus(`${getText('printingError', 'Error al imprimir')}: ${err.message}`, 'error');
+            playSound('error');
+            alert(`${getText('printingError', 'Error al generar documento')}: ${err.message}`);
+        } finally {
+            hideSpinner();
+        }
+    }
+
+function deleteSelectedIngresoRows() {
+    syncTableInputsToData();
+    const rowsToDeletePos = [];
+    ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
+        const tr = checkbox.closest('tr');
+        rowsToDeletePos.push(tr.dataset.pos);
+    });
+
+    if (rowsToDeletePos.length === 0 || !confirm(`¿Está seguro de eliminar ${rowsToDeletePos.length} posición(es) seleccionada(s)? Esta acción es irreversible.`)) {
+        return;
+    }
+
+    // 1. Recorrer las filas a eliminar para revertir cantidades de splits
+    rowsToDeletePos.forEach(posToDelete => {
+        const itemToDelete = poItemsData.find(item => item.EBELP === posToDelete);
+        
+        // LÓGICA CLAVE: Revertir cantidad SOLO si la línea es un SPLIT.
+        if (itemToDelete && itemToDelete.CHARG_NUEVO !== undefined) {
+            // Usamos la posición original (la base) para encontrar la línea a la que devolver la cantidad.
+            const originalPosBase = String(itemToDelete.EBELP_ORIGINAL || itemToDelete.EBELP).split('.')[0];
+            
+            // Buscamos la línea base que aún existe en el array poItemsData
+            const lineToUpdate = poItemsData.find(item => String(item.EBELP).split('.')[0] === originalPosBase);
+            
+            if (lineToUpdate) {
+                const qtyToReturn = parseFloat(itemToDelete.MENGE);
+                lineToUpdate.MENGE = (parseFloat(lineToUpdate.MENGE) + qtyToReturn).toFixed(3);
+            }
+        }
+    });
+
+    // 2. Filtrar el array global
+    poItemsData = poItemsData.filter(item => !rowsToDeletePos.includes(item.EBELP));
+
+    // 3. Re-renderizar la tabla y actualizar botones
+    renderIngresoItemsTable(poItemsData);
+    
+    // 4. Actualizar botones de guardado/eliminación
+    const checkedCount = ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked').length;
+    ingresoSaveButton.disabled = checkedCount === 0;
+    deleteIngresoButton.disabled = true;
+    selectAllIngresoItemsCheckbox.checked = false;
+}
+
+function clearIngresoForm(clearAll = true) {
     // Limpia la tabla y los datos en memoria
     ingresoItemsTableBody.innerHTML = '';
     poItemsData = []; // <-- IMPORTANTE: Resetea los datos de las posiciones
@@ -2769,9 +3178,9 @@ function toggleSpecialColumnsVisibility() {
         document.getElementById('ingresoFechaDoc').valueAsDate = new Date();
         document.getElementById('ingresoFechaCont').valueAsDate = new Date();
         document.getElementById('ingresoMaterialSlip').value = '';
+        document.getElementById('ingresoBillOfLading').value = '';
         document.getElementById('ingresoTextoCabecera').value = '';
-        document.querySelectorAll('#ingresoItemsTable .wbs-col').forEach(el => el.style.display = 'none');
-    document.querySelectorAll('#ingresoItemsTable .so-col').forEach(el => el.style.display = 'none');
+        document.getElementById('ingresoFilterInput').value = '';
     }
 
     // Lógica para resetear el estado de los botones y mensajes
@@ -2790,11 +3199,68 @@ function toggleSpecialColumnsVisibility() {
     printLabelsButton.style.display = 'none';
     printDocMaterialButton.style.display = 'none';
     ingresoSaveButton.disabled = true; // El botón de guardar se deshabilita hasta que se seleccione algo
+
+    // --- INICIO DE LA CORRECCIÓN ---
+    // En lugar de las líneas comentadas, ahora reseteamos el objeto de
+    // visibilidad al estado "limpio" y le decimos a la tabla que aplique ese estado.
+
+    // 1. Reinicia el objeto de visibilidad a partir del HTML (donde WBS y SO son 'true')
+    ingresoColumnVisibility = initializeColumnVisibility('ingresoItemsTable');
+    
+    // 2. Establece manualmente el estado "limpio" (todo oculto)
+    ingresoColumnVisibility['countryCol'] = false;        // Oculta tu columna País
+    ingresoColumnVisibility['areaCol'] = false;
+    ingresoColumnVisibility['wbsCol'] = false;           // Oculta WBS
+    ingresoColumnVisibility['salesOrderCol'] = false;     // Oculta Pedido Venta
+    ingresoColumnVisibility['salesOrderItemCol'] = false; // Oculta Pos. Pedido Venta
+    
+    // 3. Llama a la función de visibilidad para que aplique este estado "limpio" a la tabla
+    updateTableVisibility('ingresoItemsTable', ingresoColumnVisibility);
+    // --- FIN DE LA CORRECCIÓN ---
 }
 
     function setIngresoStatus(message, type) {
         ingresoStatus.textContent = message;
         ingresoStatus.className = `mt-3 text-center message-${type}`;
+    }
+
+    function filterIngresoItemsTable() {
+        // 1. Obtiene el texto del filtro y lo pasa a minúsculas
+        const filterText = document.getElementById('ingresoFilterInput').value.toLowerCase();
+        
+        // 2. Obtiene todas las filas (<tr>) del cuerpo de la tabla
+        const rows = ingresoItemsTableBody.getElementsByTagName('tr');
+        
+        // 3. Recorre cada fila
+        for (const row of rows) {
+            // 4. Obtiene todo el texto de la fila (Material, Texto, Lote, etc.)
+            const rowText = row.textContent || row.innerText;
+            
+            // 5. Compara si el texto de la fila (en minúsculas) incluye el texto del filtro
+            if (rowText.toLowerCase().includes(filterText)) {
+                row.style.display = ''; // Si lo incluye, la MUESTRA
+            } else {
+                row.style.display = 'none'; // Si no, la OCULTA
+            }
+        }
+    }
+
+    function syncTableInputsToData() {
+        const rows = ingresoItemsTableBody.getElementsByTagName('tr');
+        for (const row of rows) {
+            const pos = row.dataset.pos;
+            const item = poItemsData.find(d => d.EBELP === pos);
+            if (item) {
+                // Guardamos el estado actual de los inputs en el objeto
+                item.userInput_Almacen = row.querySelector('input[name="almacen"]').value;
+                item.MENGE = row.querySelector('input[name="cantidad"]').value;
+                item.userInput_Batch = row.querySelector('input[name="lote"]').value;
+                item.userInput_Sublocation = row.querySelector('input[name="sublocation"]').value;
+                item.userInput_Tag = row.querySelector('input[name="tag"]').value;
+                item.userInput_Pais = row.querySelector('input[name="pais"]').value;
+                item.userInput_Sgtxt = row.querySelector('input[name="sgtxt"]').value;
+            }
+        }
     }
     
     async function fetchAndShowLongText(materialNumber) {
@@ -2826,12 +3292,207 @@ function toggleSpecialColumnsVisibility() {
         }
     }
 
+function openSplitModal(originalPos) {
+    // Limpiar el modal de datos anteriores
+    document.getElementById('split-error-message').style.display = 'none';
+    document.getElementById('splitOriginalPos').value = originalPos;
+   
+    
+    // Buscar el item original de los datos del Pedido
+    const originalItem = poItemsData.find(item => item.EBELP === originalPos);
+    if (!originalItem) {
+        alert("Error: No se encontró la posición original.");
+        return;
+    }
+    
+    document.getElementById('splitItemModal').dataset.werks = originalItem.WERKS;
+    document.getElementById('splitItemModal').dataset.matnr = originalItem.MATNR;
+
+// 1. Localizar la fila PADRE (ej. 10) para leer la cantidad.
+    const parentRow = ingresoItemsTableBody.querySelector(`tr[data-pos="${originalPos}"]`);
+    if (!parentRow) {
+        alert("Error: No se encontró la fila padre en la tabla.");
+        return;
+    }
+
+    // 2. Encontrar la *última* fila del grupo (sea el padre o el último split, ej. 10.1, 10.2)
+    //    para usarla como fuente de datos a proponer.
+    const splitGroupItems = poItemsData.filter(item => 
+        item.EBELP === originalPos || String(item.EBELP).startsWith(originalPos + '.')
+    );
+    const lastItemInGroup = splitGroupItems[splitGroupItems.length - 1];
+    const sourceRow = ingresoItemsTableBody.querySelector(`tr[data-pos="${lastItemInGroup.EBELP}"]`);
+    
+    if (!sourceRow) {
+        // Fallback por si no se encuentra la fila (aunque no debería pasar)
+        alert("Error: No se encontró la fila de origen de datos.");
+        return;
+    }
+
+    // 3. Leer la "Cantidad Restante" SIEMPRE de la fila padre (parentRow)
+    const currentQtyInTable = parseFloat(parentRow.querySelector('input[name="cantidad"]').value) || 0;
+
+    // 4. Leer los datos a proponer desde la 'sourceRow' (la última fila del grupo)
+    const currentStorageLoc = sourceRow.querySelector('input[name="almacen"]').value;
+    const currentSublocation = sourceRow.querySelector('input[name="sublocation"]').value;
+    const currentTag = sourceRow.querySelector('input[name="tag"]').value;
+    const currentBatch = sourceRow.querySelector('input[name="lote"]').value;
+    
+    // --- FIN DE LA CORRECCIÓN ---
+
+
+    // Poblar los campos informativos del modal
+    document.getElementById('splitMaterial').textContent = (originalItem.MATNR || '').replace(/^0+/, '');
+    document.getElementById('splitMaterialText').textContent = originalItem.TXZ01;
+    document.getElementById('splitRemainingQty').textContent = currentQtyInTable.toFixed(3); // <-- Usa la cantidad del padre
+    
+    // --- LÓGICA ACTUALIZADA ---
+    // Limpiar y poblar las 3 filas con los datos de la 'sourceRow'
+    for (let i = 0; i < 3; i++) {
+        const qtyInput = document.getElementById(`splitNewQty_${i}`);
+        qtyInput.value = ''; // Limpiar cantidad
+        qtyInput.classList.remove('is-invalid'); // Limpiar validación de error
+        
+        document.getElementById(`splitNewBatch_${i}`).value = currentBatch;
+        document.getElementById(`splitNewStorageLoc_${i}`).value = currentStorageLoc;
+        document.getElementById(`splitNewSublocation_${i}`).value = currentSublocation;
+        document.getElementById(`splitNewTag_${i}`).value = currentTag;
+    }
+
+    splitItemModal.show();
+}
+
+
+function addSplitLine() {
+    const originalPos = document.getElementById('splitOriginalPos').value;
+    const errorDiv = document.getElementById('split-error-message');
+    errorDiv.style.display = 'none'; // Ocultar error previo
+
+    const originalItemData = poItemsData.find(item => item.EBELP === originalPos);
+    if (!originalItemData) {
+        alert("Error: No se encontró la data original del item.");
+        return;
+    }
+
+ syncTableInputsToData();
+
+    // Cantidad restante de la LÍNEA ORIGINAL (la que se está dividiendo)
+    let remainingQtyOnOriginalLine = parseFloat(document.getElementById('splitRemainingQty').textContent);
+    let totalQtyToSplit = 0;
+    const newLinesData = []; // Array temporal para guardar las líneas a crear
+    
+    // --- PRIMER LOOP: Validación y recolección ---
+    for (let i = 0; i < 3; i++) {
+        const newQtyInput = document.getElementById(`splitNewQty_${i}`);
+        newQtyInput.classList.remove('is-invalid'); // Limpiar validación previa
+        
+        const newQtyStr = newQtyInput.value.trim();
+        // Si la cantidad está vacía o es 0, simplemente la ignoramos (tu requisito)
+        if (newQtyStr === '' || parseFloat(newQtyStr) === 0) {
+            continue; 
+        }
+        
+        const newQty = parseFloat(newQtyStr);
+
+        // Si no está vacía, pero no es un número o es negativa, es un error.
+        if (isNaN(newQty) || newQty < 0) {
+            errorDiv.textContent = `La cantidad en la fila ${i+1} debe ser un número válido (mayor a 0).`;
+            errorDiv.style.display = 'block';
+            newQtyInput.classList.add('is-invalid');
+            return; // Detener todo
+        }
+
+        // Si es un número válido > 0, lo sumamos
+        totalQtyToSplit += newQty;
+        newLinesData.push({
+            qty: newQty.toFixed(3),
+            batch: document.getElementById(`splitNewBatch_${i}`).value.toUpperCase(),
+            storageLoc: document.getElementById(`splitNewStorageLoc_${i}`).value,
+            sublocation: document.getElementById(`splitNewSublocation_${i}`).value,
+            tag: document.getElementById(`splitNewTag_${i}`).value
+        });
+    }
+    
+    if (newLinesData.length === 0) {
+        // No es un error si el usuario no puso nada o solo puso 0
+        // Simplemente cerramos el modal.
+        splitItemModal.hide();
+        return; 
+    }
+
+    // Usamos un pequeño margen de error para comparaciones de punto flotante
+    if (totalQtyToSplit > (remainingQtyOnOriginalLine + 0.0001)) {
+        errorDiv.textContent = `La cantidad total a dividir (${totalQtyToSplit}) no puede ser mayor a la disponible en la línea (${remainingQtyOnOriginalLine}).`;
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    // --- SI TODO ES VÁLIDO ---
+
+    // 1. Actualizar la cantidad de la línea original
+    originalItemData.MENGE = (remainingQtyOnOriginalLine - totalQtyToSplit).toFixed(3);
+
+
+    // --- INICIO DE LA CORRECCIÓN DE ORDEN ---
+    
+    const splitGroupItems = poItemsData.filter(item => 
+        item.EBELP === originalPos || String(item.EBELP).startsWith(originalPos + '.')
+    );
+    
+    const lastItemInGroup = splitGroupItems[splitGroupItems.length - 1];
+    
+    const insertionPointBaseIndex = poItemsData.findIndex(item => item.EBELP === lastItemInGroup.EBELP);
+
+    const existingSplitsCount = poItemsData.filter(item => String(item.EBELP).startsWith(originalPos + '.')).length;
+    
+    let linesAdded = 0; 
+
+    newLinesData.forEach(lineData => {
+        const splitItemData = JSON.parse(JSON.stringify(originalItemData)); // Clonar
+        
+        const newPosId = `${originalPos}.${existingSplitsCount + linesAdded + 1}`;
+        
+        splitItemData.EBELP = newPosId;
+        splitItemData.EBELP_ORIGINAL = originalPos; // Guardar referencia a la línea padre
+        splitItemData.MENGE = lineData.qty;
+        splitItemData.LGORT_NUEVO = lineData.storageLoc;     
+        splitItemData.CHARG_NUEVO = lineData.batch;          
+        splitItemData.SUBLOCATION_NUEVA = lineData.sublocation;
+        splitItemData.TAG_NUEVO = lineData.tag;
+
+        splitItemData.userInput_Almacen = undefined;
+        splitItemData.userInput_Batch = undefined;           
+        splitItemData.userInput_Sublocation = undefined;
+        splitItemData.userInput_Tag = undefined;
+        splitItemData.userInput_Sgtxt = undefined;
+        splitItemData.userInput_Pais = undefined;
+
+        poItemsData.splice(insertionPointBaseIndex + linesAdded + 1, 0, splitItemData);
+
+        linesAdded++; // Incrementar el contador para la siguiente vuelta
+    });
+
+    // 3. Volver a renderizar toda la tabla
+    renderIngresoItemsTable(poItemsData);
+    splitItemModal.hide();
+}
+
+
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
     msegColumnVisibility = initializeColumnVisibility('msegTable');
+    ingresoColumnVisibility = initializeColumnVisibility('ingresoItemsTable');
+    ingresoColumnVisibility['countryCol'] = false;        // Tu lógica original
+    ingresoColumnVisibility['areaCol'] = false;
+    ingresoColumnVisibility['wbsCol'] = false;           // Forzar a Oculto
+    ingresoColumnVisibility['salesOrderCol'] = false;     // Forzar a Oculto
+    ingresoColumnVisibility['salesOrderItemCol'] = false; // Forzar a Oculto
     sublocationColumnVisibility = initializeColumnVisibility('sublocationTable');
+    ingresoColumnVisibility['countryCol'] = false;
+    
 });
 </script>
+
 </body>
 </html>
