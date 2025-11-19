@@ -65,6 +65,17 @@
         #searchHelpModal {
             z-index: 1060; 
        }
+
+       #ingresoItemsTable .material-description-cell {
+            max-width: 250px; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis;
+        }
+          
+        #ingresoItemsTable th[data-column="materialDescCol"] {
+            min-width: 250px; 
+        }
     </style>
 </head>
 <body>
@@ -522,137 +533,137 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="splitItemModalLabel">Dividir Posición</h5>
+                <h5 class="modal-title" id="splitItemModalLabel" data-translate="splitModalTitle">Dividir Posición</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-    <input type="hidden" id="splitOriginalPos">
-    <div id="split-error-message" class="alert alert-danger" style="display: none;"></div>
-    
-    <h6 class="mb-3">Datos Originales</h6>
-    <div class="row bg-light p-3 rounded mb-4">
-        <div class="col-md-3">
-            <label class="form-label">Material:</label>
-            <p id="splitMaterial" class="form-control-plaintext"></p>
-        </div>
-        <div class="col-md-6">
-            <label class="form-label">Texto:</label>
-            <p id="splitMaterialText" class="form-control-plaintext"></p>
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">Cantidad Restante:</label>
-            <p id="splitRemainingQty" class="form-control-plaintext fw-bold"></p>
-        </div>
-    </div>
+                <input type="hidden" id="splitOriginalPos">
+                <div id="split-error-message" class="alert alert-danger" style="display: none;"></div>
+                
+                <h6 class="mb-3" data-translate="originalDataTitle">Datos Originales</h6>
+                <div class="row bg-light p-3 rounded mb-4">
+                    <div class="col-md-3">
+                        <label class="form-label" data-translate="materialLabel">Material:</label>
+                        <p id="splitMaterial" class="form-control-plaintext"></p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" data-translate="materialTextLabel">Texto:</label>
+                        <p id="splitMaterialText" class="form-control-plaintext"></p>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" data-translate="remainingQtyLabel">Cantidad Restante:</label>
+                        <p id="splitRemainingQty" class="form-control-plaintext fw-bold"></p>
+                    </div>
+                </div>
 
-    <h6 class="mb-3">Datos de las Nuevas Líneas (Ignora filas con cantidad 0)</h6>
-    
-    <div class="row g-2 mb-3">
-        <div class="col-md-2">
-            <label for="splitNewQty_0" class="form-label">Cantidad 1</label>
-            <input type="number" class="form-control form-control-sm split-qty" id="splitNewQty_0" min="0" step="any" placeholder="0.000">
-        </div>
-        <div class="col-md-3">
-            <label for="splitNewBatch_0" class="form-label">Lote 1</label>
-            <div class="input-group input-group-sm">
-                <input type="text" class="form-control text-uppercase split-batch" id="splitNewBatch_0">
-                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="lote" data-index="0"><i class="bi bi-search"></i></button>
+                <h6 class="mb-3" data-translate="newLinesTitle">Datos de las Nuevas Líneas (Ignora filas con cantidad 0)</h6>
+                
+                <div class="row g-2 mb-3">
+                    <div class="col-md-2">
+                        <label for="splitNewQty_0" class="form-label" data-translate="quantityLabel">Cantidad 1</label>
+                        <input type="number" class="form-control form-control-sm split-qty" id="splitNewQty_0" min="0" step="any" placeholder="0.000">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="splitNewBatch_0" class="form-label" data-translate="batchLabel">Lote 1</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control text-uppercase split-batch" id="splitNewBatch_0">
+                            <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="lote" data-index="0"><i class="bi bi-search"></i></button>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="splitNewStorageLoc_0" class="form-label" data-translate="storageLocLabel">Almacén 1</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control split-storageloc" id="splitNewStorageLoc_0">
+                            <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="almacen" data-index="0"><i class="bi bi-search"></i></button>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="splitNewSublocation_0" class="form-label" data-translate="sublocationLabel">Sub-Ubic. 1</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control split-sublocation" id="splitNewSublocation_0">
+                            <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="sublocation" data-index="0"><i class="bi bi-search"></i></button>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="splitNewTag_0" class="form-label" data-translate="tagLabel">TAG 1</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control split-tag" id="splitNewTag_0">
+                            <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="tag" data-index="0"><i class="bi bi-search"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-2 mb-3 border-top pt-3">
+                    <div class="col-md-2">
+                        <label for="splitNewQty_1" class="form-label" data-translate="quantityLabel">Cantidad 2</label>
+                        <input type="number" class="form-control form-control-sm split-qty" id="splitNewQty_1" min="0" step="any" placeholder="0.000">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="splitNewBatch_1" class="form-label" data-translate="batchLabel">Lote 2</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control text-uppercase split-batch" id="splitNewBatch_1">
+                            <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="lote" data-index="1"><i class="bi bi-search"></i></button>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="splitNewStorageLoc_1" class="form-label" data-translate="storageLocLabel">Almacén 2</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control split-storageloc" id="splitNewStorageLoc_1">
+                            <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="almacen" data-index="1"><i class="bi bi-search"></i></button>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="splitNewSublocation_1" class="form-label" data-translate="sublocationLabel">Sub-Ubic. 2</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control split-sublocation" id="splitNewSublocation_1">
+                            <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="sublocation" data-index="1"><i class="bi bi-search"></i></button>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="splitNewTag_1" class="form-label" data-translate="tagLabel">TAG 2</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control split-tag" id="splitNewTag_1">
+                            <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="tag" data-index="1"><i class="bi bi-search"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-2 mb-2 border-top pt-3">
+                    <div class="col-md-2">
+                        <label for="splitNewQty_2" class="form-label" data-translate="quantityLabel">Cantidad 3</label>
+                        <input type="number" class="form-control form-control-sm split-qty" id="splitNewQty_2" min="0" step="any" placeholder="0.000">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="splitNewBatch_2" class="form-label" data-translate="batchLabel">Lote 3</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control text-uppercase split-batch" id="splitNewBatch_2">
+                            <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="lote" data-index="2"><i class="bi bi-search"></i></button>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="splitNewStorageLoc_2" class="form-label" data-translate="storageLocLabel">Almacén 3</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control split-storageloc" id="splitNewStorageLoc_2">
+                            <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="almacen" data-index="2"><i class="bi bi-search"></i></button>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="splitNewSublocation_2" class="form-label" data-translate="sublocationLabel">Sub-Ubic. 3</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control split-sublocation" id="splitNewSublocation_2">
+                            <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="sublocation" data-index="2"><i class="bi bi-search"></i></button>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="splitNewTag_2" class="form-label" data-translate="tagLabel">TAG 3</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control split-tag" id="splitNewTag_2">
+                            <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="tag" data-index="2"><i class="bi bi-search"></i></button>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="col-md-2">
-            <label for="splitNewStorageLoc_0" class="form-label">Almacén 1</label>
-            <div class="input-group input-group-sm">
-                <input type="text" class="form-control split-storageloc" id="splitNewStorageLoc_0">
-                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="almacen" data-index="0"><i class="bi bi-search"></i></button>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <label for="splitNewSublocation_0" class="form-label">Sub-Ubic. 1</label>
-            <div class="input-group input-group-sm">
-                <input type="text" class="form-control split-sublocation" id="splitNewSublocation_0">
-                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="sublocation" data-index="0"><i class="bi bi-search"></i></button>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <label for="splitNewTag_0" class="form-label">TAG 1</label>
-            <div class="input-group input-group-sm">
-                <input type="text" class="form-control split-tag" id="splitNewTag_0">
-                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="tag" data-index="0"><i class="bi bi-search"></i></button>
-            </div>
-        </div>
-    </div>
-    <div class="row g-2 mb-3 border-top pt-3">
-        <div class="col-md-2">
-            <label for="splitNewQty_1" class="form-label">Cantidad 2</label>
-            <input type="number" class="form-control form-control-sm split-qty" id="splitNewQty_1" min="0" step="any" placeholder="0.000">
-        </div>
-        <div class="col-md-3">
-            <label for="splitNewBatch_1" class="form-label">Lote 2</label>
-            <div class="input-group input-group-sm">
-                <input type="text" class="form-control text-uppercase split-batch" id="splitNewBatch_1">
-                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="lote" data-index="1"><i class="bi bi-search"></i></button>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <label for="splitNewStorageLoc_1" class="form-label">Almacén 2</label>
-            <div class="input-group input-group-sm">
-                <input type="text" class="form-control split-storageloc" id="splitNewStorageLoc_1">
-                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="almacen" data-index="1"><i class="bi bi-search"></i></button>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <label for="splitNewSublocation_1" class="form-label">Sub-Ubic. 2</label>
-            <div class="input-group input-group-sm">
-                <input type="text" class="form-control split-sublocation" id="splitNewSublocation_1">
-                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="sublocation" data-index="1"><i class="bi bi-search"></i></button>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <label for="splitNewTag_1" class="form-label">TAG 2</label>
-            <div class="input-group input-group-sm">
-                <input type="text" class="form-control split-tag" id="splitNewTag_1">
-                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="tag" data-index="1"><i class="bi bi-search"></i></button>
-            </div>
-        </div>
-    </div>
-    <div class="row g-2 mb-2 border-top pt-3">
-        <div class="col-md-2">
-            <label for="splitNewQty_2" class="form-label">Cantidad 3</label>
-            <input type="number" class="form-control form-control-sm split-qty" id="splitNewQty_2" min="0" step="any" placeholder="0.000">
-        </div>
-        <div class="col-md-3">
-            <label for="splitNewBatch_2" class="form-label">Lote 3</label>
-            <div class="input-group input-group-sm">
-                <input type="text" class="form-control text-uppercase split-batch" id="splitNewBatch_2">
-                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="lote" data-index="2"><i class="bi bi-search"></i></button>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <label for="splitNewStorageLoc_2" class="form-label">Almacén 3</label>
-            <div class="input-group input-group-sm">
-                <input type="text" class="form-control split-storageloc" id="splitNewStorageLoc_2">
-                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="almacen" data-index="2"><i class="bi bi-search"></i></button>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <label for="splitNewSublocation_2" class="form-label">Sub-Ubic. 3</label>
-            <div class="input-group input-group-sm">
-                <input type="text" class="form-control split-sublocation" id="splitNewSublocation_2">
-                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="sublocation" data-index="2"><i class="bi bi-search"></i></button>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <label for="splitNewTag_2" class="form-label">TAG 3</label>
-            <div class="input-group input-group-sm">
-                <input type="text" class="form-control split-tag" id="splitNewTag_2">
-                <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="tag" data-index="2"><i class="bi bi-search"></i></button>
-            </div>
-        </div>
-    </div>
-    </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" id="addSplitLineButton" class="btn btn-primary">Añadir Línea</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-translate="cancelButton">Cancelar</button>
+                <button type="button" id="addSplitLineButton" class="btn btn-primary" data-translate="addLineButton">Añadir Línea</button>
             </div>
         </div>
     </div>
@@ -804,12 +815,26 @@ document.addEventListener('DOMContentLoaded', () => {
             generatingMaterialDoc: "Generating Material Document...",
             materialDocGenerated: "Document generated.",
             sublocationRequiredError: "The Sublocation field is mandatory for the selected items. Please fill in the highlighted fields.",
-            actionsCol: "Acciones",
+            actionsCol: "Actions",
             deleteSelectedButton: "Delete Selected",
             printMaterialDocButton: "Print Material Doc.",
             poItemCol1: "P.O. Item 1",
             poItemCol2: "P.O. Item 2",
             filterPlaceholder: "Filter results...",
+            // Split Modal
+            splitModalTitle: "Split Item",
+            originalDataTitle: "Original Data",
+            remainingQtyLabel: "Remaining Qty:",
+            newLinesTitle: "New Lines Data (Ignore rows with 0 quantity)",
+            quantityLabel: "Quantity",
+            batchLabel: "Batch",
+            storageLocLabel: "Storage Loc.",
+            sublocationLabel: "Sublocation",
+            tagLabel: "TAG",
+            materialLabel: "Material:",
+            materialTextLabel: "Text:",
+            addLineButton: "Add Line",
+            confirmDeleteMessage: "Are you sure you want to delete {count} selected position(s)? This action is irreversible.",
         },
         es: {
             // General
@@ -952,6 +977,19 @@ document.addEventListener('DOMContentLoaded', () => {
             poItemCol1: "Pos. Pedido 1",
             poItemCol2: "Pos. Pedido 2",
             filterPlaceholder: "Filtrar resultados...",
+            splitModalTitle: "Dividir Posición",
+            originalDataTitle: "Datos Originales",
+            remainingQtyLabel: "Cantidad Restante:",
+            newLinesTitle: "Datos de las Nuevas Líneas (Ignora filas con cantidad 0)",
+            quantityLabel: "Cantidad",
+            batchLabel: "Lote",
+            storageLocLabel: "Almacén",
+            sublocationLabel: "Sub-Ubicación",
+            tagLabel: "TAG",
+            materialLabel: "Material:",
+            materialTextLabel: "Texto:",
+            addLineButton: "Añadir Línea",
+            confirmDeleteMessage: "¿Está seguro de eliminar {count} posición(es) seleccionada(s)? Esta acción es irreversible.",
         }
     };
 
@@ -1111,6 +1149,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const applyLayoutButton = document.getElementById('applyLayoutButton');
     const ingresoNroPedidoInput = document.getElementById('ingresoNroPedido');
     const ingresoItemsTableBody = document.getElementById('ingresoItemsTableBody');
+    const ingresoItemsTableContainer = document.querySelector('#ingresoContent .table-responsive');
     const ingresoSaveButton = document.getElementById('ingresoSaveButton');
     const ingresoClearButton = document.getElementById('ingresoClearButton');
     const deleteIngresoButton = document.getElementById('deleteIngresoButton');
@@ -2689,6 +2728,7 @@ function toggleSpecialColumnsVisibility() {
     async function fetchPurchaseOrderItems() {
         const poNumber = ingresoNroPedidoInput.value.trim();
         if (!poNumber) { clearIngresoForm(false); return; }
+
         setIngresoStatus(`${getText('searchingPO')} ${poNumber}...`, 'info');
         showSpinner();
         try {
@@ -2698,23 +2738,59 @@ function toggleSpecialColumnsVisibility() {
                 body: JSON.stringify({ connection_params: sapConnection, po_number: poNumber, is_guest: isGuestMode })
             });
             const result = await response.json();
-            if (result.success && result.items) {
-                poItemsData = result.items;
-                renderIngresoItemsTable(result.items);
-                setIngresoStatus(result.items.length > 0 ? `${result.items.length} ${getText('itemsLoaded')}` : getText('noItemsFound'), 'success');
-                ingresoSaveButton.disabled = true;
-                playSound('beep');
-            } else {
-                throw new Error(result.error || 'Respuesta inválida.');
-            }
-        } catch (err) {
-            clearIngresoForm(false);
-            setIngresoStatus(`Error: ${err.message}`, 'error');
-            playSound('error');
-        } finally {
             hideSpinner();
+
+
+            if (result.success && result.items) {
+const sapItems = result.items; // Datos frescos de SAP
+            
+            if (poItemsData.length === 0 || poItemsData[0].EBELN !== poNumber) {
+                poItemsData = sapItems; 
+                setIngresoStatus(getText('poLoadedSuccess', 'Pedido cargado exitosamente.'), 'success');
+            } else {
+                // Hay datos locales para el mismo pedido. Hacemos la fusión.
+                
+                // 1. Identificar las posiciones originales (EBELP sin punto) que ya tenemos localmente.
+                const localOriginalPositions = poItemsData
+                    .map(item => String(item.EBELP).split('.')[0])
+                    .filter((value, index, self) => self.indexOf(value) === index); // Obtener únicos
+                
+                // 2. Encontrar qué posiciones originales de SAP nos faltan.
+                const missingPositions = sapItems.filter(sapItem => 
+                    !localOriginalPositions.includes(sapItem.EBELP)
+                );
+                
+                if (missingPositions.length > 0) {
+                    // 3. Añadir las posiciones faltantes (que el usuario eliminó) al final de poItemsData.
+                    poItemsData.push(...missingPositions);
+                    setIngresoStatus(getText('poMergedSuccess', `${missingPositions.length} posición(es) reincorporada(s) del pedido ${poNumber}.`), 'warning');
+                } else {
+                    setIngresoStatus(getText('poLoadedSuccess', 'Pedido cargado exitosamente.'), 'success');
+                }
+            }
+    
+            // 4. Re-renderizar la tabla con los datos fusionados (que incluyen splits y ediciones locales).
+            renderIngresoItemsTable(poItemsData);
+            
+            ingresoSaveButton.disabled = false;
+            
+            // LÍNEA CORREGIDA: Usamos el contenedor definido para desplazar la vista.
+            if (ingresoItemsTableContainer) {
+                 ingresoItemsTableContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            
+        } else {
+            throw new Error(result.error || 'Respuesta inválida.');
         }
+    } catch (err) {
+        clearIngresoForm(false);
+        setIngresoStatus(`Error: ${err.message}`, 'error');
+        playSound('error');
+    } finally {
+        // La llamada a hideSpinner() se movió arriba, antes de los bloques de éxito/error.
     }
+}
     
 function renderIngresoItemsTable(items) {
     // PASO 1: Analizar todos los items para decidir qué columnas mostrar
@@ -3128,7 +3204,14 @@ function deleteSelectedIngresoRows() {
         rowsToDeletePos.push(tr.dataset.pos);
     });
 
-    if (rowsToDeletePos.length === 0 || !confirm(`¿Está seguro de eliminar ${rowsToDeletePos.length} posición(es) seleccionada(s)? Esta acción es irreversible.`)) {
+    if (rowsToDeletePos.length === 0) return;
+
+    // 1. Obtener el mensaje de confirmación traducido y reemplazar el placeholder {count}
+    const confirmMessageTemplate = getText('confirmDeleteMessage', 'Are you sure you want to delete {count} selected position(s)? This action is irreversible.');
+    const confirmMessage = confirmMessageTemplate.replace('{count}', rowsToDeletePos.length);
+    
+    // 2. Usar el mensaje traducido en el cuadro de diálogo
+    if (!confirm(confirmMessage)) {
         return;
     }
 
@@ -3298,7 +3381,7 @@ function openSplitModal(originalPos) {
     document.getElementById('splitOriginalPos').value = originalPos;
    
     
-    // Buscar el item original de los datos del Pedido
+    // Buscar el item original de los datos del Pedido (Esta es la línea padre)
     const originalItem = poItemsData.find(item => item.EBELP === originalPos);
     if (!originalItem) {
         alert("Error: No se encontró la posición original.");
@@ -3308,57 +3391,42 @@ function openSplitModal(originalPos) {
     document.getElementById('splitItemModal').dataset.werks = originalItem.WERKS;
     document.getElementById('splitItemModal').dataset.matnr = originalItem.MATNR;
 
-// 1. Localizar la fila PADRE (ej. 10) para leer la cantidad.
+    // 1. Localizar la fila PADRE (ej. 10) para leer la cantidad disponible.
     const parentRow = ingresoItemsTableBody.querySelector(`tr[data-pos="${originalPos}"]`);
     if (!parentRow) {
         alert("Error: No se encontró la fila padre en la tabla.");
         return;
     }
-
-    // 2. Encontrar la *última* fila del grupo (sea el padre o el último split, ej. 10.1, 10.2)
-    //    para usarla como fuente de datos a proponer.
-    const splitGroupItems = poItemsData.filter(item => 
-        item.EBELP === originalPos || String(item.EBELP).startsWith(originalPos + '.')
-    );
-    const lastItemInGroup = splitGroupItems[splitGroupItems.length - 1];
-    const sourceRow = ingresoItemsTableBody.querySelector(`tr[data-pos="${lastItemInGroup.EBELP}"]`);
     
-    if (!sourceRow) {
-        // Fallback por si no se encuentra la fila (aunque no debería pasar)
-        alert("Error: No se encontró la fila de origen de datos.");
-        return;
-    }
-
-    // 3. Leer la "Cantidad Restante" SIEMPRE de la fila padre (parentRow)
+    // 2. Leer la "Cantidad Restante" SIEMPRE de la fila padre (parentRow)
     const currentQtyInTable = parseFloat(parentRow.querySelector('input[name="cantidad"]').value) || 0;
 
-    // 4. Leer los datos a proponer desde la 'sourceRow' (la última fila del grupo)
-    const currentStorageLoc = sourceRow.querySelector('input[name="almacen"]').value;
-    const currentSublocation = sourceRow.querySelector('input[name="sublocation"]').value;
-    const currentTag = sourceRow.querySelector('input[name="tag"]').value;
-    const currentBatch = sourceRow.querySelector('input[name="lote"]').value;
+    // 3. OBTENER VALORES DE LA LÍNEA PADRE DIRECTAMENTE DEL INPUT DE LA TABLA (la fuente de datos que tiene el usuario en la línea principal)
+    const parentInputLote = parentRow.querySelector('input[name="lote"]').value;
+    const parentInputAlmacen = parentRow.querySelector('input[name="almacen"]').value;
+    const parentInputSublocation = parentRow.querySelector('input[name="sublocation"]').value;
+    const parentInputTag = parentRow.querySelector('input[name="tag"]').value;
     
-    // --- FIN DE LA CORRECCIÓN ---
-
-
     // Poblar los campos informativos del modal
     document.getElementById('splitMaterial').textContent = (originalItem.MATNR || '').replace(/^0+/, '');
     document.getElementById('splitMaterialText').textContent = originalItem.TXZ01;
-    document.getElementById('splitRemainingQty').textContent = currentQtyInTable.toFixed(3); // <-- Usa la cantidad del padre
+    document.getElementById('splitRemainingQty').textContent = currentQtyInTable.toFixed(3); 
     
-    // --- LÓGICA ACTUALIZADA ---
-    // Limpiar y poblar las 3 filas con los datos de la 'sourceRow'
+
     for (let i = 0; i < 3; i++) {
         const qtyInput = document.getElementById(`splitNewQty_${i}`);
-        qtyInput.value = ''; // Limpiar cantidad
-        qtyInput.classList.remove('is-invalid'); // Limpiar validación de error
         
-        document.getElementById(`splitNewBatch_${i}`).value = currentBatch;
-        document.getElementById(`splitNewStorageLoc_${i}`).value = currentStorageLoc;
-        document.getElementById(`splitNewSublocation_${i}`).value = currentSublocation;
-        document.getElementById(`splitNewTag_${i}`).value = currentTag;
+        // 1. LIMPIEZA: Aseguramos que la cantidad esté vacía y sin error.
+        qtyInput.value = ''; 
+        qtyInput.classList.remove('is-invalid'); 
+        
+        // 2. PRECARGA: Inicializamos TODAS las líneas del modal con los datos del PADRE.
+        document.getElementById(`splitNewBatch_${i}`).value = parentInputLote;
+        document.getElementById(`splitNewStorageLoc_${i}`).value = parentInputAlmacen;
+        document.getElementById(`splitNewSublocation_${i}`).value = parentInputSublocation;
+        document.getElementById(`splitNewTag_${i}`).value = parentInputTag;
     }
-
+    
     splitItemModal.show();
 }
 
@@ -3460,6 +3528,7 @@ function addSplitLine() {
         splitItemData.SUBLOCATION_NUEVA = lineData.sublocation;
         splitItemData.TAG_NUEVO = lineData.tag;
 
+        splitItemData.isSelected = true;
         splitItemData.userInput_Almacen = undefined;
         splitItemData.userInput_Batch = undefined;           
         splitItemData.userInput_Sublocation = undefined;
