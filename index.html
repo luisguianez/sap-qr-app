@@ -209,7 +209,7 @@
             </div>
         </div>
         <div class="text-center my-3">
-            <button id="reset-button" class="btn btn-warning me-2" style="display: none;" data-translate="clearButton">Limpiar</button>
+            <button id="reset-button" class="btn btn-warning me-2" style="display: none;" data-translate="clearButton">Borrar Datos</button>
             <button id="deleteQrButton" class="btn btn-danger me-2" style="display: none;" data-translate="deleteSelectedButton" disabled>Eliminar Seleccionados</button>
             <button id="save-button" class="btn btn-success" style="display: none;" data-translate="saveButton">Guardar en SAP</button>
             <button id="printDocMaterialButtonMain" class="btn btn-primary ms-2" style="display: none;"> <i class="bi bi-file-earmark-pdf"></i> <span data-translate="printMaterialDocButton">Imprimir Doc. Material</span>
@@ -415,7 +415,7 @@
             </div>
             <hr>
             <div class="text-center">
-                <button id="ingresoClearButton" class="btn btn-warning me-2" data-translate="clearButton">Limpiar</button>
+                <button id="ingresoClearButton" class="btn btn-warning me-2" data-translate="clearButton">Borrar Datos</button>
                 <button id="deleteIngresoButton" class="btn btn-danger me-2" style="display: none;" data-translate="deleteSelectedButton" disabled>Eliminar Seleccionados</button>
                 <button id="ingresoSaveButton" class="btn btn-success" disabled data-translate="saveButton">Guardar en SAP</button>
                 <button id="layoutButtonIngreso" class="btn btn-info ms-2" data-bs-toggle="tooltip" title="Seleccionar Columnas">
@@ -843,7 +843,7 @@ document.addEventListener('DOMContentLoaded', () => {
             logoutButton: "Logout",
             continueButton: "Continuar",
             cancelButton: "Cancelar",
-            clearButton: "Limpiar",
+            clearButton: "Borrar Datos",
             saveButton: "Guardar en SAP",
             backButton: "Volver",
             activateCameraButton: "Activar Cámara",
@@ -1328,14 +1328,29 @@ document.addEventListener('DOMContentLoaded', () => {
     deleteIngresoButton.disabled = !isChecked || !hasItems;
     });
     
-    ingresoItemsTableBody.addEventListener('click', (e) => {
-		// Primero, revisa si se hizo clic en el botón de split
-		const splitButton = e.target.closest('.split-item-btn');
-		if (splitButton) {
-			const pos = splitButton.dataset.pos;
-			openSplitModal(pos);
-			return; // Importante: Termina la ejecución aquí si fue un clic de split
-		}
+  ingresoItemsTableBody.addEventListener('click', (e) => {
+        const fileBtn = e.target.closest('.select-file-ingreso-btn');
+        if (fileBtn) {
+            // Busca el input file hermano oculto
+            const fileInput = fileBtn.parentElement.querySelector('.file-ingreso-input');
+            if (fileInput) {
+                fileInput.click();
+            }
+        }
+        });
+
+        ingresoItemsTableBody.addEventListener('change', (e) => {
+        if (e.target.classList.contains('file-ingreso-input')) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : '';
+            // Busca el input de texto hermano
+            const textInput = e.target.parentElement.querySelector('.filename-display');
+            if (textInput) {
+                textInput.value = fileName;
+                // Feedback visual: Verde suave si tiene archivo, blanco si no
+                textInput.style.backgroundColor = fileName ? "#d1e7dd" : "";
+            }
+        }
+    
 
 		// Si no fue un split, revisa si se hizo clic en un botón de búsqueda
 		const searchButton = e.target.closest('.search-btn');
@@ -2735,7 +2750,7 @@ function toggleSpecialColumnsVisibility() {
             const response = await fetch(`${API_BASE_URL}/getPurchaseOrderItems`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ connection_params: sapConnection, po_number: poNumber, is_guest: isGuestMode })
+                body: JSON.stringify({ connection_params: sapConnection, po_number: poNumber, is_guest: isGuestMode, user_lang: navigator.language || navigator.userLanguage })
             });
             const result = await response.json();
             hideSpinner();
@@ -2941,10 +2956,29 @@ function renderIngresoItemsTable(items) {
                 <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="pais" ${readonlyForSplits}><i class="bi bi-search"></i></button>
             </div>
             </td>
-            <td class="cell-itemTextCol"><input type="text" class="form-control form-control-sm" name="sgtxt" value="${sgtxtValue}"></td>
-            <td class="cell-certCol"><input type="file" class="form-control form-control-sm" name="certificado" ${readonlyForSplits}></td>
-            <td class="cell-docsCol"><input type="file" class="form-control form-control-sm" name="documentos" ${readonlyForSplits}></td>
-            <td class="cell-inspCol"><input type="file" class="form-control form-control-sm" name="inspeccion" ${readonlyForSplits}></td>
+            <td class="cell-itemTextCol">
+            <input type="text" class="form-control form-control-sm" name="sgtxt" value="${sgtxtValue}"></td>
+<td class="cell-certCol">
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control form-control-sm filename-display" placeholder="" readonly>
+                    <button class="btn btn-outline-secondary select-file-ingreso-btn" type="button" ${readonlyForSplits}>...</button>
+                    <input type="file" class="d-none file-ingreso-input" name="certificado">
+                </div>
+            </td>
+            <td class="cell-docsCol">
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control form-control-sm filename-display" placeholder="" readonly>
+                    <button class="btn btn-outline-secondary select-file-ingreso-btn" type="button" ${readonlyForSplits}>...</button>
+                    <input type="file" class="d-none file-ingreso-input" name="documentos">
+                </div>
+            </td>
+            <td class="cell-inspCol">
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control form-control-sm filename-display" placeholder="" readonly>
+                    <button class="btn btn-outline-secondary select-file-ingreso-btn" type="button" ${readonlyForSplits}>...</button>
+                    <input type="file" class="d-none file-ingreso-input" name="inspeccion">
+                </div>
+            </td>
         `;
 
         tr.innerHTML = rowHtml;
