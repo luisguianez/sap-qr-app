@@ -835,6 +835,8 @@ document.addEventListener('DOMContentLoaded', () => {
             materialTextLabel: "Text:",
             addLineButton: "Add Line",
             confirmDeleteMessage: "Are you sure you want to delete {count} selected position(s)? This action is irreversible.",
+            poLoadedSuccess: "Order loaded successfully.",
+            poMergedSuccess: "{count} item(s) reincorporated from order {po}.",
         },
         es: {
             // General
@@ -990,6 +992,8 @@ document.addEventListener('DOMContentLoaded', () => {
             materialTextLabel: "Texto:",
             addLineButton: "Añadir Línea",
             confirmDeleteMessage: "¿Está seguro de eliminar {count} posición(es) seleccionada(s)? Esta acción es irreversible.",
+            poLoadedSuccess: "Pedido cargado exitosamente.",
+            poMergedSuccess: "{count} posición(es) reincorporada(s) del pedido {po}.",
         }
     };
 
@@ -1328,16 +1332,83 @@ document.addEventListener('DOMContentLoaded', () => {
     deleteIngresoButton.disabled = !isChecked || !hasItems;
     });
     
-  ingresoItemsTableBody.addEventListener('click', (e) => {
-        const fileBtn = e.target.closest('.select-file-ingreso-btn');
-        if (fileBtn) {
-            // Busca el input file hermano oculto
-            const fileInput = fileBtn.parentElement.querySelector('.file-ingreso-input');
-            if (fileInput) {
-                fileInput.click();
+  // --- MANEJADOR DE CLICS CORREGIDO PARA INGRESO ---
+ingresoItemsTableBody.addEventListener('click', (e) => {
+    // 1. Manejo de archivos (Certificados/Docs)
+    const fileBtn = e.target.closest('.select-file-ingreso-btn');
+    if (fileBtn) {
+        const fileInput = fileBtn.parentElement.querySelector('.file-ingreso-input');
+        if (fileInput) fileInput.click();
+        return; // Salimos para no ejecutar la lógica de búsqueda
+    }
+
+    // 2. Manejo de Botón Dividir Posición (Split)
+    const splitBtn = e.target.closest('.split-item-btn');
+    if (splitBtn) {
+        openSplitModal(splitBtn.dataset.pos);
+        return;
+    }
+
+    // 3. Manejo de MATCHCODES (Búsquedas)
+    const searchButton = e.target.closest('.search-btn');
+    if (searchButton) {
+        const searchType = searchButton.dataset.searchType;
+        const currentRow = searchButton.closest('tr');
+        const pos = currentRow.dataset.pos;
+        
+        // Buscamos la data del item en nuestro array global
+        const itemData = poItemsData.find(d => d.EBELP === pos);
+        if (!itemData) return;
+
+        const planta = itemData.WERKS;
+
+        if (searchType === 'lote') {
+            const targetInput = currentRow.querySelector('input[name="lote"]');
+            const material = itemData.MATNR;
+            if (!material || !planta) {
+                alert('Se requiere Material y Planta para buscar el lote.');
+                return;
             }
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_BATCH', { IV_MATNR: material, IV_WERKS: planta }, 'Ayuda de Búsqueda - Lotes');
+        } 
+        else if (searchType === 'sublocation') {
+            const targetInput = currentRow.querySelector('input[name="sublocation"]');
+            const almacen = currentRow.querySelector('input[name="almacen"]').value;
+            if (!planta || !almacen) {
+                alert('Se requiere Planta y Almacén para buscar la sub-ubicación.');
+                return;
+            }
+            const config = {
+                display: {'ZZ_SUB_UBIC': 'Sub Ubicacion', 'DESCRIPCION': 'Descripcion'},
+                order: ['ZZ_SUB_UBIC', 'DESCRIPCION'],
+                returnColumn: 'ZZ_SUB_UBIC'
+            };
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_SUBLOCATION', { IV_WERKS: planta, IV_LGORT: almacen }, 'Ayuda de Búsqueda - Sub Ubicaciones', config);
         }
-        });
+        else if (searchType === 'almacen') {
+            const targetInput = currentRow.querySelector('input[name="almacen"]');
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_LGORT', { IV_WERKS: planta }, 'Ayuda de Búsqueda - Almacén');
+        }
+        else if (searchType === 'tag') {
+            const targetInput = currentRow.querySelector('input[name="tag"]');
+            const config = {
+                display: {'ZZUBICACION': 'TAG', 'DESCRIPCION': 'Descripcion'},
+                order: ['ZZUBICACION', 'DESCRIPCION'],
+                returnColumn: 'ZZUBICACION'
+            };
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_TAG', { IV_WERKS: planta }, 'Ayuda de Búsqueda - TAG', config);
+        }
+        else if (searchType === 'pais') {
+            const targetInput = currentRow.querySelector('input[name="pais"]');
+            const config = {
+                display: {'ZZ_PAIS': 'Pais', 'DESCRIPCION': 'Descripcion'},
+                order: ['ZZ_PAIS', 'DESCRIPCION'],
+                returnColumn: 'ZZ_PAIS'
+            };
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_COUNTRY', {}, 'Ayuda de Búsqueda - País', config);
+        }
+    }
+});
 
         ingresoItemsTableBody.addEventListener('change', (e) => {
         if (e.target.classList.contains('file-ingreso-input')) {
@@ -1890,6 +1961,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         showSpinner();
+        const currentMoveType = clMovimientoInput.value.trim();
+        const currentCentro = centroInput.value.trim();
         const payload = {
             connection_params: sapConnection,
             rfc_params: { ...rfc_params, moveType: clMovimientoInput.value, specialStockIndicator: specialStockIndicatorInput.value },
@@ -1902,9 +1975,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success) {
                 setScanStatus(getText('validationSuccess'), "success");
                 playSound('beep');
-                const key = `${rfc_params.documentNumber}-${rfc_params.documentYear}-${rfc_params.item}`;
-                scannedCodes.set(key, result.msegData);
-                renderTable();
+            const key = `${rfc_params.documentNumber}-${rfc_params.documentYear}-${rfc_params.item}`;
+            let msegData = result.msegData;
+
+            // --- Lógica de valor por defecto ---
+            // Si es movimiento 101 y centro 4000, forzamos la sub-ubicación a 00.00
+            if (currentMoveType === '101' && currentCentro === '4000') {
+                msegData.SUB_LOC = '00.00';
+            }
+
+            scannedCodes.set(key, msegData);
+            renderTable();
             } else {
                 setScanStatus(result.error || "Error.", "error");
                 playSound('error');
@@ -2761,7 +2842,7 @@ const sapItems = result.items; // Datos frescos de SAP
             
             if (poItemsData.length === 0 || poItemsData[0].EBELN !== poNumber) {
                 poItemsData = sapItems; 
-                setIngresoStatus(getText('poLoadedSuccess', 'Pedido cargado exitosamente.'), 'success');
+                setIngresoStatus(getText('poLoadedSuccess') , 'success');
             } else {
                 // Hay datos locales para el mismo pedido. Hacemos la fusión.
                 
@@ -2778,9 +2859,12 @@ const sapItems = result.items; // Datos frescos de SAP
                 if (missingPositions.length > 0) {
                     // 3. Añadir las posiciones faltantes (que el usuario eliminó) al final de poItemsData.
                     poItemsData.push(...missingPositions);
-                    setIngresoStatus(getText('poMergedSuccess', `${missingPositions.length} posición(es) reincorporada(s) del pedido ${poNumber}.`), 'warning');
+                    const msg = getText('poMergedSuccess')
+                    .replace('{count}', missingPositions.length)
+                    .replace('{po}', poNumber);
+                   setIngresoStatus(msg, 'warning');
                 } else {
-                    setIngresoStatus(getText('poLoadedSuccess', 'Pedido cargado exitosamente.'), 'success');
+                    setIngresoStatus(getText('poLoadedSuccess'), 'success');
                 }
             }
     
