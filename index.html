@@ -837,6 +837,7 @@ document.addEventListener('DOMContentLoaded', () => {
             confirmDeleteMessage: "Are you sure you want to delete {count} selected position(s)? This action is irreversible.",
             poLoadedSuccess: "Order loaded successfully.",
             poMergedSuccess: "{count} item(s) reincorporated from order {po}.",
+            selectAtLeastOneItem: "You must select at least one item to save.",
         },
         es: {
             // General
@@ -994,6 +995,7 @@ document.addEventListener('DOMContentLoaded', () => {
             confirmDeleteMessage: "¿Está seguro de eliminar {count} posición(es) seleccionada(s)? Esta acción es irreversible.",
             poLoadedSuccess: "Pedido cargado exitosamente.",
             poMergedSuccess: "{count} posición(es) reincorporada(s) del pedido {po}.",
+            selectAtLeastOneItem: "Debe seleccionar al menos una posición para guardar.",
         }
     };
 
@@ -2247,7 +2249,7 @@ const moveType = clMovimientoInput.value.trim();
     }
         const selectedItems = ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked');
         if (selectedItems.length === 0) {
-            alert('Debe seleccionar al menos una posición para guardar.');
+            alert(getText('selectAtLeastOneItem'));
             return;
         }
         const firstSelectedRow = selectedItems[0].closest('tr');
@@ -2391,6 +2393,16 @@ const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => 
         RSNUM: sapData.RSNUM // Se usa el valor actualizado
     };
 });
+console.log("Datos de posiciones enviados a SAP (itemsForJson):", itemsForJson);
+
+
+// --- INSPECCIÓN EN CONSOLA (CDM) ---
+    console.group("DEBUG: Datos enviados a SAP");
+    console.log("CABECERA:", headerData);
+    console.table(itemsForJson); // Muestra las posiciones en una tabla bonita en la consola
+    console.groupEnd();
+
+    
         const jsonDataPayload = {
             connection_params: sapConnection,
             header: headerData,
@@ -3079,6 +3091,11 @@ function renderIngresoItemsTable(items) {
     async function saveIngresoData(signatureData) {
         syncTableInputsToData();
         const selectedItems = [];
+        const posMapping = {};
+       const selectedRows = ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked');
+
+   
+        
         ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
             const tr = checkbox.closest('tr');
             const pos = tr.dataset.pos;
@@ -3102,7 +3119,7 @@ function renderIngresoItemsTable(items) {
                 });
             }
         });
-        if (selectedItems.length === 0) { alert('Debe seleccionar al menos una posición.'); return; }
+        if (selectedItems.length === 0) { alert(getText('selectAtLeastOneItem')); return; }
         
         setIngresoStatus(getText('preparingData'), 'info');
         showSpinner();
