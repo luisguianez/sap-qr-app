@@ -1777,7 +1777,10 @@ ingresoItemsTableBody.addEventListener('click', (e) => {
                 const userToShow = isGuest ? (result.guest_user || 'Invitado') : connectionParamsForThisAttempt.user;
                 loginSection.style.display = 'none';
                 modeSelectionSection.style.display = 'block';
-                const displayText = `${getText('user')}: ${userToShow.toUpperCase()} (${sapEnvSelect.value})`;
+                const selectedClient = sapClientInput.value.trim();
+
+
+                const displayText = `${getText('user')}: ${userToShow.toUpperCase()} (${sapEnvSelect.value} ${selectedClient})`;
                 loggedInUserDisplays.forEach(display => {
                     display.textContent = displayText;
                 });
@@ -3150,7 +3153,7 @@ function renderIngresoItemsTable(items) {
             if (inspFile) { formData.append('files[]', inspFile); fileMetadata.push({ posicion: pos, field: 'inspeccion', filename: inspFile.name }); }
         });
         formData.append('file_metadata', JSON.stringify(fileMetadata));
-        
+        setIngresoStatus(getText('savingData'), 'info');
         try {
             const response = await fetch(`${API_BASE_URL}/saveIngreso`, { method: 'POST', body: formData });
             const result = await response.json();
