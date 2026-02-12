@@ -254,7 +254,7 @@
                     <th data-column="orderNoCol" data-translate="orderNoCol">Nro. Pedido</th>
                     <th id="poItemCol1" data-column="poItemCol1" data-translate="poItemCol1" class="text-center align-middle" style="min-width: 80px;">Pos. Pedido 1</th>
                     <th data-column="orderNo2Col" class="cell-orderNo2Col d-none" data-translate="orderNo2Col">Pedido 2</th>
-                    <th data-column="poItemCol2" class="cell-poItemCol2 d-none" data-translate="poItemCol2" style="min-width: 80px;">Pos. Pedido 2</th>
+                    <th data-column="poItemCol2" class="cell-poItemCol2 d-none" data-translate="poItemCol2">Pos. Pedido 2</th>
                     <th data-column="wbsCol" data-translate="wbsCol">Elemento PEP</th>
                     <th data-column="reservationCol" class="reserva-col d-none" data-translate="reservationCol">Reserva</th>
                     <th data-column="salesOrderCol" data-translate="salesOrderCol">Pedido Cliente</th>
@@ -2578,41 +2578,83 @@ console.log("Datos de posiciones enviados a SAP (itemsForJson):", itemsForJson);
 function toggleSpecialColumnsVisibility() {
     const moveType = clMovimientoInput.value.trim();
     const centro = centroInput.value.trim();
-    
-    // Condición para plantas especiales
     const isSpecialPlant = (centro === '4000' || centro === '2000');
+
+    // Referencias a los checkboxes del menú (Layout)
+    const checkPedido2 = document.querySelector('input[data-column="orderNo2Col"]');
+    const checkPos2 = document.querySelector('input[data-column="poItemCol2"]');
+    const checkSales = document.querySelector('input[data-column="salesOrderCol"]');
+    const checkSalesItem = document.querySelector('input[data-column="salesOrderItemCol"]');
+
+    // --- LÓGICA PARA PLANTAS ESPECIALES (2000 / 4000) ---
+    if (isSpecialPlant) {
+        // 1. FORZAR ACTIVACIÓN DE PEDIDO 2 Y POSICIÓN 2
+        // Actualizamos el "cerebro" (msegColumnVisibility) a TRUE
+        msegColumnVisibility['orderNo2Col'] = true;
+        msegColumnVisibility['poItemCol2'] = true;
+
+        // Actualizamos visualmente los checkboxes (para que aparezcan marcados)
+        if (checkPedido2) checkPedido2.checked = true;
+        if (checkPos2) checkPos2.checked = true;
+
+        // Mostramos las columnas en la tabla (quitamos d-none)
+        document.querySelectorAll('[data-column="orderNo2Col"], .cell-orderNo2Col')
+            .forEach(el => el.classList.remove('d-none'));
+        document.querySelectorAll('[data-column="poItemCol2"], .cell-poItemCol2')
+            .forEach(el => el.classList.remove('d-none'));
+
+        // 2. FORZAR OCULTAMIENTO DE SALES ORDER (PEDIDO CLIENTE)
+        // Actualizamos el "cerebro" a FALSE
+        msegColumnVisibility['salesOrderCol'] = false;
+        msegColumnVisibility['salesOrderItemCol'] = false;
+
+        // Desmarcamos los checkboxes
+        if (checkSales) checkSales.checked = false;
+        if (checkSalesItem) checkSalesItem.checked = false;
+
+        // Ocultamos las columnas en la tabla (agregamos d-none)
+        document.querySelectorAll('[data-column="salesOrderCol"], .cell-salesOrderCol')
+            .forEach(el => el.classList.add('d-none'));
+        document.querySelectorAll('[data-column="salesOrderItemCol"], .cell-salesOrderItemCol')
+            .forEach(el => el.classList.add('d-none'));
     
-    // Condición para mostrar campos adicionales (WBS, Pedido 2 y Posición Pedido 2)
-    const shouldShow = (moveType === '101' && isSpecialPlant);
+    } else {
+        // --- LÓGICA PARA OTRAS PLANTAS ---
+        // Aquí respetamos lo que el usuario haya decidido en el Layout
+        
+        // Pedido 2: Respetar estado del layout
+        const showP2 = msegColumnVisibility['orderNo2Col'];
+        document.querySelectorAll('[data-column="orderNo2Col"], .cell-orderNo2Col')
+            .forEach(el => el.classList.toggle('d-none', !showP2));
+            
+        const showPos2 = msegColumnVisibility['poItemCol2'];
+        document.querySelectorAll('[data-column="poItemCol2"], .cell-poItemCol2')
+            .forEach(el => el.classList.toggle('d-none', !showPos2));
 
-    // 1. Control de WBS, Pedido 2 (EBELN2) y Posición Pedido 2 (EBELP2)
-    // Añadimos poItemCol2 y cell-poItemCol2 a la lista de elementos a controlar
-    const extraFields = document.querySelectorAll(
-        '[data-column="wbsCol"], .cell-wbsCol, ' +
-        '[data-column="orderNo2Col"], .cell-orderNo2Col, ' +
-        '[data-column="poItemCol2"], .cell-poItemCol2'
-    );
-    extraFields.forEach(el => el.classList.toggle('d-none', !shouldShow));
+        // Sales Order: Respetar estado del layout
+        const showSales = msegColumnVisibility['salesOrderCol'];
+        document.querySelectorAll('[data-column="salesOrderCol"], .cell-salesOrderCol')
+            .forEach(el => el.classList.toggle('d-none', !showSales));
+            
+        const showSalesItem = msegColumnVisibility['salesOrderItemCol'];
+        document.querySelectorAll('[data-column="salesOrderItemCol"], .cell-salesOrderItemCol')
+            .forEach(el => el.classList.toggle('d-none', !showSalesItem));
+    }
 
-    // 2. Control de Sales Order (Pedido Cliente) y Sales Order Item
-    // Estos campos se deben OCULTAR si la planta es 2000 o 4000
-    const salesOrderFields = document.querySelectorAll(
-        '[data-column="salesOrderCol"], .cell-salesOrderCol, ' +
-        '[data-column="salesOrderItemCol"], .cell-salesOrderItemCol'
-    );
-
-    salesOrderFields.forEach(el => {
-        if (isSpecialPlant) {
-            // Si es planta 2000 o 4000, forzamos que se oculten
-            el.classList.add('d-none');
-        } else {
-            // Si no es planta especial, respetamos la visibilidad configurada en el layout
-            const isVisibleInLayout = msegColumnVisibility['salesOrderCol'];
-            el.classList.toggle('d-none', !isVisibleInLayout);
-        }
-    });
+    // --- LÓGICA DE WBS (ELEMENTO PEP) ---
+    // Esta sigue dependiendo del movimiento 101 + Planta Especial
+    const shouldShowWBS = (moveType === '101' && isSpecialPlant);
+    const checkWBS = document.querySelector('input[data-column="wbsCol"]');
+    
+    if (isSpecialPlant) {
+        // Sincronizamos también el WBS
+        msegColumnVisibility['wbsCol'] = shouldShowWBS;
+        if (checkWBS) checkWBS.checked = shouldShowWBS;
+    }
+    
+    document.querySelectorAll('[data-column="wbsCol"], .cell-wbsCol')
+        .forEach(el => el.classList.toggle('d-none', !msegColumnVisibility['wbsCol']));
 }
-
     function updateTableVisibility(tableId, visibilityObject) {
         for (const columnKey in visibilityObject) {
            const isVisible = visibilityObject[columnKey];
