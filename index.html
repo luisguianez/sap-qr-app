@@ -76,6 +76,22 @@
         #ingresoItemsTable th[data-column="materialDescCol"] {
             min-width: 250px; 
         }
+        
+#msegTable thead th {
+    vertical-align: middle !important;
+    text-align: center;
+}
+
+
+#msegTable tbody td {
+    vertical-align: middle !important;
+}
+
+
+.cell-poItemCol1, .cell-poItemCol2 {
+    line-height: 1.5; 
+    padding-top: 8px !important; 
+}
     </style>
 </head>
 <body>
@@ -237,8 +253,8 @@
                     <th data-column="areaCol" style="min-width: 150px;" data-translate="areaCol">Área</th>
                     <th data-column="orderNoCol" data-translate="orderNoCol">Nro. Pedido</th>
                     <th id="poItemCol1" data-column="poItemCol1" data-translate="poItemCol1" class="text-center align-middle" style="min-width: 80px;">Pos. Pedido 1</th>
-                    <th data-column="orderNo2Col" class="d-none" data-translate="orderNo2Col">Pedido 2</th>
-                    <th id="poItemCol2" data-column="poItemCol2" data-translate="poItemCol2" class="text-center align-middle d-none" style="min-width: 80px;">Pos. Pedido 2</th>
+                    <th data-column="orderNo2Col" class="cell-orderNo2Col d-none" data-translate="orderNo2Col">Pedido 2</th>
+                    <th data-column="poItemCol2" class="cell-poItemCol2 d-none" data-translate="poItemCol2" style="min-width: 80px;">Pos. Pedido 2</th>
                     <th data-column="wbsCol" data-translate="wbsCol">Elemento PEP</th>
                     <th data-column="reservationCol" class="reserva-col d-none" data-translate="reservationCol">Reserva</th>
                     <th data-column="salesOrderCol" data-translate="salesOrderCol">Pedido Cliente</th>
@@ -2562,15 +2578,39 @@ console.log("Datos de posiciones enviados a SAP (itemsForJson):", itemsForJson);
 function toggleSpecialColumnsVisibility() {
     const moveType = clMovimientoInput.value.trim();
     const centro = centroInput.value.trim();
-    const shouldShow = (moveType === '101' && (centro === '4000' || centro === '2000'));
+    
+    // Condición para plantas especiales
+    const isSpecialPlant = (centro === '4000' || centro === '2000');
+    
+    // Condición para mostrar campos adicionales (WBS, Pedido 2 y Posición Pedido 2)
+    const shouldShow = (moveType === '101' && isSpecialPlant);
 
-    // Seleccionamos todas las cabeceras y celdas de las columnas que queremos controlar
-    const wbsElements = document.querySelectorAll('[data-column="wbsCol"], .cell-wbsCol');
-    const orderNo2Elements = document.querySelectorAll('[data-column="orderNo2Col"], .cell-orderNo2Col');
+    // 1. Control de WBS, Pedido 2 (EBELN2) y Posición Pedido 2 (EBELP2)
+    // Añadimos poItemCol2 y cell-poItemCol2 a la lista de elementos a controlar
+    const extraFields = document.querySelectorAll(
+        '[data-column="wbsCol"], .cell-wbsCol, ' +
+        '[data-column="orderNo2Col"], .cell-orderNo2Col, ' +
+        '[data-column="poItemCol2"], .cell-poItemCol2'
+    );
+    extraFields.forEach(el => el.classList.toggle('d-none', !shouldShow));
 
-    // Usamos toggle para añadir o quitar la clase 'd-none' según la condición
-    wbsElements.forEach(el => el.classList.toggle('d-none', !shouldShow));
-    orderNo2Elements.forEach(el => el.classList.toggle('d-none', !shouldShow));
+    // 2. Control de Sales Order (Pedido Cliente) y Sales Order Item
+    // Estos campos se deben OCULTAR si la planta es 2000 o 4000
+    const salesOrderFields = document.querySelectorAll(
+        '[data-column="salesOrderCol"], .cell-salesOrderCol, ' +
+        '[data-column="salesOrderItemCol"], .cell-salesOrderItemCol'
+    );
+
+    salesOrderFields.forEach(el => {
+        if (isSpecialPlant) {
+            // Si es planta 2000 o 4000, forzamos que se oculten
+            el.classList.add('d-none');
+        } else {
+            // Si no es planta especial, respetamos la visibilidad configurada en el layout
+            const isVisibleInLayout = msegColumnVisibility['salesOrderCol'];
+            el.classList.toggle('d-none', !isVisibleInLayout);
+        }
+    });
 }
 
     function updateTableVisibility(tableId, visibilityObject) {
