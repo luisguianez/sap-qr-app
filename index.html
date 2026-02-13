@@ -2048,6 +2048,15 @@ msegTableBody.innerHTML = '';
         const isReadOnly = isGuestMode ? 'readonly' : '';
         const materialDisplay = (sapData.MATNR || '').replace(/^0+/, '');
 
+        const rawPedido2 = sapData.EBELN2 ? sapData.EBELN2.trim() : '';
+        let rawPos2 = sapData.EBELP2 ? sapData.EBELP2.trim() : '';
+
+        let displayPos2 = rawPos2;
+
+        if (!rawPedido2 || rawPos2 === '00000' || rawPos2 === '0') {
+            displayPos2 = '';
+        }
+
         // Lógica para decidir si la celda es editable y tiene matchcode
         let sublocationCellHtml = '';
         if (currentMoveType === '101') {
@@ -2103,7 +2112,7 @@ msegTableBody.innerHTML = '';
             <td class="cell-orderNoCol">${sapData.EBELN || ''}</td>
             <td data-column="poItemCol1" class="text-center align-middle cell-poItemCol1">${sapData.EBELP || ''}</td>
             <td class="cell-orderNo2Col d-none">${sapData.EBELN2 || ''}</td>
-            <td data-column="poItemCol2" class="text-center align-middle cell-poItemCol2 d-none">${sapData.EBELP2 || ''}</td>
+            <td data-column="poItemCol2" class="text-center align-middle cell-poItemCol2 d-none">${displayPos2}</td>
             <td class="cell-wbsCol">${sapData.PS_PSP_PNR || ''}</td>
             <td class="cell-reservationCol reserva-cell d-none"><input type="text" class="form-control form-control-sm" value="${sapData.RSNUM || ''}" data-key="${key}" data-field="RSNUM" ${isReadOnly}></td>
             <td class="cell-salesOrderCol">${sapData.KDAUF || ''}</td>
