@@ -76,7 +76,7 @@
         #ingresoItemsTable th[data-column="materialDescCol"] {
             min-width: 250px; 
         }
-        
+
 #msegTable thead th {
     vertical-align: middle !important;
     text-align: center;
@@ -248,17 +248,22 @@
                     <th data-column="docsCol" style="min-width: 200px;" data-translate="docsCol">Documentos</th>
                     <th data-column="inspCol" style="min-width: 200px;" data-translate="inspCol">Inspección</th>
                     <th data-column="itemTextCol" style="min-width: 150px;" data-translate="itemTextCol">Texto Pos.</th>
-                    <th data-column="tagCol" data-translate="tagCol">TAG</th>
+                    <th data-column="tagCol" style="min-width: 180px;" data-translate="tagCol">TAG</th>
+                    <th data-column="tagDestCol" style="min-width: 180px;" class="cell-311 d-none" data-translate="tagFromCol">TAG Destino</th>
+                    <th data-column="paisCol" style="min-width: 100px;" class="cell-311 d-none" data-translate="paisCol">País</th>
+                    <th data-column="paisDestCol" style="min-width: 100px;" class="cell-311 d-none" data-translate="paisFromCol">País Destino</th>
                     <th data-column="subLocCol" data-translate="subLocCol" style="min-width: 180px;">Sub Ubicacion</th>
+                    <th data-column="subLocDestCol" class="cell-311 d-none" style="min-width: 180px;">Sub Ubic. Destino</th>
                     <th data-column="areaCol" style="min-width: 150px;" data-translate="areaCol">Área</th>
                     <th data-column="orderNoCol" data-translate="orderNoCol">Nro. Pedido</th>
                     <th id="poItemCol1" data-column="poItemCol1" data-translate="poItemCol1" class="text-center align-middle" style="min-width: 80px;">Pos. Pedido 1</th>
                     <th data-column="orderNo2Col" class="cell-orderNo2Col d-none" data-translate="orderNo2Col">Pedido 2</th>
-                    <th data-column="poItemCol2" class="cell-poItemCol2 d-none" data-translate="poItemCol2">Pos. Pedido 2</th>
+                    <th data-column="poItemCol2" class="cell-poItemCol2 d-none" data-translate="poItemCol2" style="min-width: 80px;">Pos. Pedido 2</th>
                     <th data-column="wbsCol" data-translate="wbsCol">Elemento PEP</th>
                     <th data-column="reservationCol" class="reserva-col d-none" data-translate="reservationCol">Reserva</th>
                     <th data-column="salesOrderCol" data-translate="salesOrderCol">Pedido Cliente</th>
                     <th data-column="salesOrderItemCol" data-translate="salesOrderItemCol">Pos. Pedido Cliente</th>
+
                 </tr></thead>
                 <tbody id="msegTableBody"></tbody>
             </table>
@@ -418,8 +423,8 @@
         <th data-column="batchCol" data-translate="batchCol" style="min-width: 100px;">Lote</th>
         <th data-column="sublocationCol" data-translate="sublocationHeader" style="min-width: 150px;">Sub-Ubicación</th>
         <th data-column="tagCol" data-translate="tagCol" style="min-width: 160px;">TAG</th>
-        <th data-column="countryCol" data-translate="countryHeader" style="min-width: 80px;" class="country-col">País</th>
         <th data-column="areaCol" data-translate="areaHeader" class="area-col d-none">AREA</th>
+        <th data-column="countryCol" data-translate="countryHeader" style="min-width: 80px;" class="country-col">País</th>
         <th data-column="itemTextCol" data-translate="itemTextHeader" style="min-width: 200px;">Texto Posición</th>
         <th data-column="certCol" data-translate="certCol">Certificado</th>
         <th data-column="docsCol" data-translate="docsCol">Documentos</th>
@@ -851,8 +856,9 @@ document.addEventListener('DOMContentLoaded', () => {
             materialTextLabel: "Text:",
             addLineButton: "Add Line",
             confirmDeleteMessage: "Are you sure you want to delete {count} selected position(s)? This action is irreversible.",
-            poLoadedSuccess: "Order loaded successfully.",
-            poMergedSuccess: "{count} item(s) reincorporated from order {po}.",
+            tagFromCol: "Dest. TAG",
+            paisCol: "Country",
+            paisFromCol: "Dest. Country",
             selectAtLeastOneItem: "You must select at least one item to save.",
         },
         es: {
@@ -1009,8 +1015,9 @@ document.addEventListener('DOMContentLoaded', () => {
             materialTextLabel: "Texto:",
             addLineButton: "Añadir Línea",
             confirmDeleteMessage: "¿Está seguro de eliminar {count} posición(es) seleccionada(s)? Esta acción es irreversible.",
-            poLoadedSuccess: "Pedido cargado exitosamente.",
-            poMergedSuccess: "{count} posición(es) reincorporada(s) del pedido {po}.",
+            tagFromCol: "TAG Destino",
+            paisCol: "País",
+            paisFromCol: "País Destino",
             selectAtLeastOneItem: "Debe seleccionar al menos una posición para guardar.",
         }
     };
@@ -1218,6 +1225,9 @@ document.addEventListener('DOMContentLoaded', () => {
         almacenInput.addEventListener('input', (e) => {
     e.target.value = e.target.value.toUpperCase();
     });
+    specialStockIndicatorInput.addEventListener('input', (e) => {
+        e.target.value = e.target.value.toUpperCase();
+    });
     deleteQrButton.addEventListener('click', deleteSelectedQrRows);
     sublocationTableHead.addEventListener('click', handleSort);
     filterInput.addEventListener('input', filterAndRender);
@@ -1302,6 +1312,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (searchType === 'sublocation_qr') {
 			// Obtenemos el campo de texto de la sub-ubicación en esta fila
 			const targetInput = currentRow.querySelector('input[data-field="SUB_LOC"]');
+            
 			
 			// Obtenemos el centro y almacén de los campos de cabecera de la pantalla QR
 			const planta = centroInput.value.trim();
@@ -1321,6 +1332,52 @@ document.addEventListener('DOMContentLoaded', () => {
 			
 			openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_SUBLOCATION', { IV_WERKS: planta, IV_LGORT: almacen }, 'Ayuda de Búsqueda - Sub Ubicaciones', config);
 		}
+        else if (searchType === 'tag_qr' || searchType === 'tag_dest_qr') {
+            const fieldName = searchType === 'tag_qr' ? 'ZZUBICACION' : 'ZZUBICACION2';
+            const targetInput = currentRow.querySelector(`input[data-field="${fieldName}"]`);
+            const planta = centroInput.value.trim();
+            
+            if (!planta) {
+                alert('Se requiere el Centro en los datos de cabecera para buscar el TAG.');
+                return;
+            }
+            
+            const title = searchType === 'tag_qr' ? 'Ayuda de Búsqueda - TAG' : 'Ayuda de Búsqueda - TAG Destino';
+            const config = {
+                display: {'ZZUBICACION': 'TAG', 'DESCRIPCION': 'Descripcion'},
+                order: ['ZZUBICACION', 'DESCRIPCION'],
+                returnColumn: 'ZZUBICACION'
+            };
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_TAG', { IV_WERKS: planta }, title, config);
+        }
+        // ▼▼▼ AGREGA ESTO PARA PAÍS Y PAÍS DESTINO ▼▼▼
+        else if (searchType === 'pais_dest_qr') {
+            const targetInput = currentRow.querySelector('input[data-field="ZZPAIS_DEST"]');
+            
+            const config = {
+                display: {'ZZ_PAIS': 'Pais', 'DESCRIPCION': 'Descripcion'},
+                order: ['ZZ_PAIS', 'DESCRIPCION'],
+                returnColumn: 'ZZ_PAIS'
+            };
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_COUNTRY', {}, 'Ayuda de Búsqueda - País Destino', config);
+        }
+        else if (searchType === 'sublocation_dest_qr') {
+            const targetInput = currentRow.querySelector('input[data-field="SUB_LOC2"]');
+            const planta = centroInput.value.trim();
+            const almacen = almacenInput.value.trim();
+
+            if (!planta || !almacen) {
+                alert('Se requiere Planta y Almacén en los datos de cabecera para buscar la sub-ubicación destino.');
+                return;
+            }
+
+            const config = {
+                display: {'ZZ_SUB_UBIC': 'Sub Ubicacion', 'DESCRIPCION': 'Descripcion'},
+                order: ['ZZ_SUB_UBIC', 'DESCRIPCION'],
+                returnColumn: 'ZZ_SUB_UBIC'
+            };
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_SUBLOCATION', { IV_WERKS: planta, IV_LGORT: almacen }, 'Ayuda de Búsqueda - Sub Ubicación Destino', config);
+        }
 	});
 
     document.getElementById('searchPoButton').addEventListener('click', fetchPurchaseOrderItems);
@@ -1350,83 +1407,16 @@ document.addEventListener('DOMContentLoaded', () => {
     deleteIngresoButton.disabled = !isChecked || !hasItems;
     });
     
-  // --- MANEJADOR DE CLICS CORREGIDO PARA INGRESO ---
-ingresoItemsTableBody.addEventListener('click', (e) => {
-    // 1. Manejo de archivos (Certificados/Docs)
-    const fileBtn = e.target.closest('.select-file-ingreso-btn');
-    if (fileBtn) {
-        const fileInput = fileBtn.parentElement.querySelector('.file-ingreso-input');
-        if (fileInput) fileInput.click();
-        return; // Salimos para no ejecutar la lógica de búsqueda
-    }
-
-    // 2. Manejo de Botón Dividir Posición (Split)
-    const splitBtn = e.target.closest('.split-item-btn');
-    if (splitBtn) {
-        openSplitModal(splitBtn.dataset.pos);
-        return;
-    }
-
-    // 3. Manejo de MATCHCODES (Búsquedas)
-    const searchButton = e.target.closest('.search-btn');
-    if (searchButton) {
-        const searchType = searchButton.dataset.searchType;
-        const currentRow = searchButton.closest('tr');
-        const pos = currentRow.dataset.pos;
-        
-        // Buscamos la data del item en nuestro array global
-        const itemData = poItemsData.find(d => d.EBELP === pos);
-        if (!itemData) return;
-
-        const planta = itemData.WERKS;
-
-        if (searchType === 'lote') {
-            const targetInput = currentRow.querySelector('input[name="lote"]');
-            const material = itemData.MATNR;
-            if (!material || !planta) {
-                alert('Se requiere Material y Planta para buscar el lote.');
-                return;
+  ingresoItemsTableBody.addEventListener('click', (e) => {
+        const fileBtn = e.target.closest('.select-file-ingreso-btn');
+        if (fileBtn) {
+            // Busca el input file hermano oculto
+            const fileInput = fileBtn.parentElement.querySelector('.file-ingreso-input');
+            if (fileInput) {
+                fileInput.click();
             }
-            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_BATCH', { IV_MATNR: material, IV_WERKS: planta }, 'Ayuda de Búsqueda - Lotes');
-        } 
-        else if (searchType === 'sublocation') {
-            const targetInput = currentRow.querySelector('input[name="sublocation"]');
-            const almacen = currentRow.querySelector('input[name="almacen"]').value;
-            if (!planta || !almacen) {
-                alert('Se requiere Planta y Almacén para buscar la sub-ubicación.');
-                return;
-            }
-            const config = {
-                display: {'ZZ_SUB_UBIC': 'Sub Ubicacion', 'DESCRIPCION': 'Descripcion'},
-                order: ['ZZ_SUB_UBIC', 'DESCRIPCION'],
-                returnColumn: 'ZZ_SUB_UBIC'
-            };
-            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_SUBLOCATION', { IV_WERKS: planta, IV_LGORT: almacen }, 'Ayuda de Búsqueda - Sub Ubicaciones', config);
         }
-        else if (searchType === 'almacen') {
-            const targetInput = currentRow.querySelector('input[name="almacen"]');
-            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_LGORT', { IV_WERKS: planta }, 'Ayuda de Búsqueda - Almacén');
-        }
-        else if (searchType === 'tag') {
-            const targetInput = currentRow.querySelector('input[name="tag"]');
-            const config = {
-                display: {'ZZUBICACION': 'TAG', 'DESCRIPCION': 'Descripcion'},
-                order: ['ZZUBICACION', 'DESCRIPCION'],
-                returnColumn: 'ZZUBICACION'
-            };
-            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_TAG', { IV_WERKS: planta }, 'Ayuda de Búsqueda - TAG', config);
-        }
-        else if (searchType === 'pais') {
-            const targetInput = currentRow.querySelector('input[name="pais"]');
-            const config = {
-                display: {'ZZ_PAIS': 'Pais', 'DESCRIPCION': 'Descripcion'},
-                order: ['ZZ_PAIS', 'DESCRIPCION'],
-                returnColumn: 'ZZ_PAIS'
-            };
-            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_COUNTRY', {}, 'Ayuda de Búsqueda - País', config);
-        }
-    }
-});
+        });
 
         ingresoItemsTableBody.addEventListener('change', (e) => {
         if (e.target.classList.contains('file-ingreso-input')) {
@@ -1610,7 +1600,7 @@ ingresoItemsTableBody.addEventListener('click', (e) => {
         if (rfcName.startsWith('local_')) {
             let localData = [];
             if (rfcName === 'local_cl_movimiento') {
-                localData = [{ 'CL_MOV': '101' }, { 'CL_MOV': '221' }, { 'CL_MOV': '231' }, { 'CL_MOV': '601' },  { 'CL_MOV': '311' }];
+                localData = [{ 'CL_MOV': '101' }, { 'CL_MOV': '221' }, { 'CL_MOV': '231' }, { 'CL_MOV': '311' },  { 'CL_MOV': '601' }];
             } else if (rfcName === 'local_stock_especial') {
                 localData = [{ 'STOCK_ESP': '' }, { 'STOCK_ESP': 'Q' }, { 'STOCK_ESP': 'E' }];
             }
@@ -1793,9 +1783,8 @@ ingresoItemsTableBody.addEventListener('click', (e) => {
                 const userToShow = isGuest ? (result.guest_user || 'Invitado') : connectionParamsForThisAttempt.user;
                 loginSection.style.display = 'none';
                 modeSelectionSection.style.display = 'block';
+
                 const selectedClient = sapClientInput.value.trim();
-
-
                 const displayText = `${getText('user')}: ${userToShow.toUpperCase()} (${sapEnvSelect.value} ${selectedClient})`;
                 loggedInUserDisplays.forEach(display => {
                     display.textContent = displayText;
@@ -1982,8 +1971,6 @@ ingresoItemsTableBody.addEventListener('click', (e) => {
             return;
         }
         showSpinner();
-        const currentMoveType = clMovimientoInput.value.trim();
-        const currentCentro = centroInput.value.trim();
         const payload = {
             connection_params: sapConnection,
             rfc_params: { ...rfc_params, moveType: clMovimientoInput.value, specialStockIndicator: specialStockIndicatorInput.value },
@@ -1996,20 +1983,9 @@ ingresoItemsTableBody.addEventListener('click', (e) => {
             if (result.success) {
                 setScanStatus(getText('validationSuccess'), "success");
                 playSound('beep');
-            const key = `${rfc_params.documentNumber}-${rfc_params.documentYear}-${rfc_params.item}`;
-            let msegData = result.msegData;
-
-            // --- Lógica de valor por defecto ---
-            // Si es movimiento 101 y centro 4000, forzamos la sub-ubicación a 00.00
-            if (currentMoveType === '101' && currentCentro === '4000') {
-                msegData.SUB_LOC = '00.00';
-            }
-              if (currentMoveType === '101' && currentCentro === '2000') {
-                msegData.SUB_LOC = '2000';
-            }
-
-            scannedCodes.set(key, msegData);
-            renderTable();
+                const key = `${rfc_params.documentNumber}-${rfc_params.documentYear}-${rfc_params.item}`;
+                scannedCodes.set(key, result.msegData);
+                renderTable();
             } else {
                 setScanStatus(result.error || "Error.", "error");
                 playSound('error');
@@ -2040,6 +2016,7 @@ ingresoItemsTableBody.addEventListener('click', (e) => {
 msegTableBody.innerHTML = '';
     
     const currentMoveType = clMovimientoInput.value.trim();
+    const is311 = currentMoveType === '311';
 
     scannedCodes.forEach((sapData, key) => {
         const [doc, year, item] = key.split('-');
@@ -2050,9 +2027,7 @@ msegTableBody.innerHTML = '';
 
         const rawPedido2 = sapData.EBELN2 ? sapData.EBELN2.trim() : '';
         let rawPos2 = sapData.EBELP2 ? sapData.EBELP2.trim() : '';
-
         let displayPos2 = rawPos2;
-
         if (!rawPedido2 || rawPos2 === '00000' || rawPos2 === '0') {
             displayPos2 = '';
         }
@@ -2072,7 +2047,31 @@ msegTableBody.innerHTML = '';
             // Para cualquier otro movimiento, creamos una celda <td> normal
             sublocationCellHtml = `<td class="cell-subLocCol">${sapData.SUB_LOC || ''}</td>`;
         }
+         
+        let sublocationDestCellHtml = `
+            <td class="cell-subLocDestCol ${is311 ? '' : 'd-none'}">
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control form-control-sm" value="${sapData.SUB_LOC2 || ''}" data-key="${key}" data-field="SUB_LOC2" ${isReadOnly}>
+                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="sublocation_dest_qr" ${isReadOnly}><i class="bi bi-search"></i></button>
+                </div>
+            </td>
+        `;
 
+        let cells311Html = `
+            <td class="cell-tagDestCol ${is311 ? '' : 'd-none'}">
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control form-control-sm" value="${sapData.ZZUBICACION2 || ''}" data-key="${key}" data-field="ZZUBICACION2" ${isReadOnly}>
+                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="tag_dest_qr" ${isReadOnly}><i class="bi bi-search"></i></button>
+                </div>
+            </td>
+           <td class="cell-paisCol ${is311 ? '' : 'd-none'}">${sapData.ZZPAIS || ''}</td>
+            <td class="cell-paisDestCol ${is311 ? '' : 'd-none'}">
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control form-control-sm" value="${sapData.ZZPAIS_DEST || ''}" data-key="${key}" data-field="ZZPAIS_DEST" ${isReadOnly}>
+                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="pais_dest_qr" ${isReadOnly}><i class="bi bi-search"></i></button>
+                </div>
+            </td>
+        `;
         // Construimos la fila completa
         tr.innerHTML = `
             <td><input type="checkbox" class="form-check-input qr-item-checkbox" data-key="${key}"></td>
@@ -2106,8 +2105,15 @@ msegTableBody.innerHTML = '';
                 </div>
             </td>
             <td class="cell-itemTextCol"><input type="text" class="form-control form-control-sm" value="${sapData.SGTXT || ''}" data-key="${key}" data-field="SGTXT" ${isReadOnly}></td>
-            <td class="cell-tagCol">${sapData.TAG || ''}</td>
+            <td class="cell-tagCol">${sapData.ZZUBICACION || ''}</td>
+            ${cells311Html}
             ${sublocationCellHtml}
+            <td class="cell-subLocDestCol ${is311 ? '' : 'd-none'}">
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control form-control-sm" value="${sapData.SUB_LOC2 || ''}" data-key="${key}" data-field="SUB_LOC2" ${isReadOnly}>
+                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="sublocation_dest_qr" ${isReadOnly}><i class="bi bi-search"></i></button>
+                </div>
+            </td>
             <td class="cell-areaCol">${sapData.SUBMI || ''}</td>
             <td class="cell-orderNoCol">${sapData.EBELN || ''}</td>
             <td data-column="poItemCol1" class="text-center align-middle cell-poItemCol1">${sapData.EBELP || ''}</td>
@@ -2185,7 +2191,7 @@ const moveType = clMovimientoInput.value.trim();
     const centro = centroInput.value.trim();
 
     // Verificamos la condición especial: Movimiento 101 y Centro 4000
-    if (moveType === '101' && ( centro === '4000' || centro === '2000' )) {
+    if (moveType === '101' && centro === '4000') {
         // Si se cumple, OCULTAMOS el Despachador y el Tamaño de Etiqueta
         despachadorSelect.parentElement.style.display = 'none';
         labelSizeContainer.style.display = 'none';
@@ -2374,16 +2380,16 @@ const moveType = clMovimientoInput.value.trim();
         if (isGuestMode || !sapConnection) { alert("Acción no permitida."); return; }
         setScanStatus(getText('preparingData'), "info");
         showSpinner();
+
+        try {
         const formData = new FormData();
         const headerData = {
             clMovimiento: clMovimientoInput.value, almacen: almacenInput.value, centro: centroInput.value,
             textoCabecera: textoCabeceraInput.value, fechaContab: fechaContabInput.value,
             specialStockIndicator: specialStockIndicatorInput.value, isReservaChecked: reservaCheckbox.checked
         };
-const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => {
+    const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => {
     const [documentNumber, documentYear, item] = key.split('-');
-
-    // Buscamos la fila correspondiente en la tabla para leer los datos actuales
     const row = msegTableBody.querySelector(`tr[data-key="${key}"]`);
 
     let subLocValue = sapData.SUB_LOC; // Valor por defecto
@@ -2394,13 +2400,19 @@ const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => 
         const sgtxtInput = row.querySelector('input[data-field="SGTXT"]');
         const subLocInput = row.querySelector('input[data-field="SUB_LOC"]');
         const rsnumInput = row.querySelector('input[data-field="RSNUM"]');
+        const subLoc2Input = row.querySelector('input[data-field="SUB_LOC2"]');
+        const tagDestInput = row.querySelector('input[data-field="ZZUBICACION2"]');
+        const paisDestInput = row.querySelector('input[data-field="ZZPAIS_DEST"]');
 
         // Actualizamos los datos del objeto 'sapData' con los valores actuales de la tabla
         // Esto asegura que cualquier cambio se capture
         if (mengeInput) sapData.MENGE = mengeInput.value;
         if (sgtxtInput) sapData.SGTXT = sgtxtInput.value;
         if (subLocInput) sapData.SUB_LOC = subLocInput.value; // <-- Aquí capturamos la sub-ubicación editada
+        if (subLoc2Input) sapData.SUB_LOC2 = subLoc2Input.value;
         if (rsnumInput) sapData.RSNUM = rsnumInput.value;
+        if (tagDestInput) sapData.ZZUBICACION2 = tagDestInput.value;
+        if (paisDestInput) sapData.ZZPAIS_DEST = paisDestInput.value;
     }
 
     return {
@@ -2411,8 +2423,12 @@ const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => 
         MEINS: sapData.MEINS,
         CHARG: sapData.CHARG,
         SGTXT: sapData.SGTXT, // Se usa el valor actualizado
-        TAG: sapData.TAG, // Corregido para usar 'TAG' que sí existe en el objeto
+        ZZUBICACION: sapData.ZZUBICACION, // Corregido para usar 'TAG' que sí existe en el objeto
+        ZZUBICACION2: sapData.ZZUBICACION2,
+        ZZPAIS: sapData.ZZPAIS,
+        ZZPAIS_DEST: sapData.ZZPAIS_DEST,
         SUB_LOC: sapData.SUB_LOC, // Se usa el valor actualizado
+        SUB_LOC2: sapData.SUB_LOC2,
         SUBMI: sapData.SUBMI,
         EBELN: sapData.EBELN,
         EBELP: sapData.EBELP, // Posición Pedido 1
@@ -2424,16 +2440,6 @@ const itemsForJson = Array.from(scannedCodes.entries()).map(([key, sapData]) => 
         RSNUM: sapData.RSNUM // Se usa el valor actualizado
     };
 });
-console.log("Datos de posiciones enviados a SAP (itemsForJson):", itemsForJson);
-
-
-// --- INSPECCIÓN EN CONSOLA (CDM) ---
-    console.group("DEBUG: Datos enviados a SAP");
-    console.log("CABECERA:", headerData);
-    console.table(itemsForJson); // Muestra las posiciones en una tabla bonita en la consola
-    console.groupEnd();
-
-    
         const jsonDataPayload = {
             connection_params: sapConnection,
             header: headerData,
@@ -2453,7 +2459,7 @@ console.log("Datos de posiciones enviados a SAP (itemsForJson):", itemsForJson);
         });
         formData.append('file_metadata', JSON.stringify(fileMetadata));
         setScanStatus(getText('savingData'), "info");
-        try {
+       
             const response = await fetch(`${API_BASE_URL}/saveDataToSap`, { method: "POST", body: formData });
             const result = await response.json();
             if (result.success) {
@@ -2503,8 +2509,15 @@ console.log("Datos de posiciones enviados a SAP (itemsForJson):", itemsForJson);
         msegTableBody.innerHTML = '';
         scannedCodes.clear();
         qrContentElement.textContent = '';
+
+        clMovimientoInput.value = '';
+        specialStockIndicatorInput.value = '';
+        centroInput.value = '';
+        almacenInput.value = '';
         textoCabeceraInput.value = '';
+        fechaContabInput.valueAsDate = new Date(); 
         reservaCheckbox.checked = false;
+
         setScanStatus("", "");
         selectAllQrCheckbox.checked = false;
         updateButtonsVisibility();
@@ -2588,12 +2601,38 @@ function toggleSpecialColumnsVisibility() {
     const moveType = clMovimientoInput.value.trim();
     const centro = centroInput.value.trim();
     const isSpecialPlant = (centro === '4000' || centro === '2000');
+    const is311 = (moveType === '311'); // NUEVA VARIABLE PARA 311
 
-    // Referencias a los checkboxes del menú (Layout)
+    // Referencias a los checkboxes del menú (Layout) originales
     const checkPedido2 = document.querySelector('input[data-column="orderNo2Col"]');
     const checkPos2 = document.querySelector('input[data-column="poItemCol2"]');
     const checkSales = document.querySelector('input[data-column="salesOrderCol"]');
     const checkSalesItem = document.querySelector('input[data-column="salesOrderItemCol"]');
+
+    // --- LÓGICA PARA COLUMNAS DEL MOVIMIENTO 311 ---
+    // 1. Actualizar el "cerebro" (estado de visibilidad)
+    msegColumnVisibility['tagDestCol'] = is311;
+    msegColumnVisibility['paisCol'] = is311;
+    msegColumnVisibility['paisDestCol'] = is311;
+
+    // 2. Marcar/Desmarcar los checkboxes en el modal de Layout (si el modal ya fue abierto)
+    const checkTagDest = document.getElementById('check-tagDestCol');
+    const checkPais = document.getElementById('check-paisCol');
+    const checkPaisDest = document.getElementById('check-paisDestCol');
+    
+    if (checkTagDest) checkTagDest.checked = is311;
+    if (checkPais) checkPais.checked = is311;
+    if (checkPaisDest) checkPaisDest.checked = is311;
+
+    // 3. Mostrar/Ocultar columnas y celdas correspondientes en la tabla visualmente
+    document.querySelectorAll('[data-column="tagDestCol"], .cell-tagDestCol')
+        .forEach(el => el.classList.toggle('d-none', !is311));
+    document.querySelectorAll('[data-column="paisCol"], .cell-paisCol')
+        .forEach(el => el.classList.toggle('d-none', !is311));
+    document.querySelectorAll('[data-column="paisDestCol"], .cell-paisDestCol')
+        .forEach(el => el.classList.toggle('d-none', !is311));
+    document.querySelectorAll('[data-column="subLocDestCol"], .cell-subLocDestCol')
+        .forEach(el => el.classList.toggle('d-none', !is311));
 
     // --- LÓGICA PARA PLANTAS ESPECIALES (2000 / 4000) ---
     if (isSpecialPlant) {
@@ -2664,6 +2703,7 @@ function toggleSpecialColumnsVisibility() {
     document.querySelectorAll('[data-column="wbsCol"], .cell-wbsCol')
         .forEach(el => el.classList.toggle('d-none', !msegColumnVisibility['wbsCol']));
 }
+
     function updateTableVisibility(tableId, visibilityObject) {
         for (const columnKey in visibilityObject) {
            const isVisible = visibilityObject[columnKey];
@@ -2951,7 +2991,7 @@ const sapItems = result.items; // Datos frescos de SAP
             
             if (poItemsData.length === 0 || poItemsData[0].EBELN !== poNumber) {
                 poItemsData = sapItems; 
-                setIngresoStatus(getText('poLoadedSuccess') , 'success');
+                setIngresoStatus(getText('poLoadedSuccess', 'Pedido cargado exitosamente.'), 'success');
             } else {
                 // Hay datos locales para el mismo pedido. Hacemos la fusión.
                 
@@ -2968,12 +3008,9 @@ const sapItems = result.items; // Datos frescos de SAP
                 if (missingPositions.length > 0) {
                     // 3. Añadir las posiciones faltantes (que el usuario eliminó) al final de poItemsData.
                     poItemsData.push(...missingPositions);
-                    const msg = getText('poMergedSuccess')
-                    .replace('{count}', missingPositions.length)
-                    .replace('{po}', poNumber);
-                   setIngresoStatus(msg, 'warning');
+                    setIngresoStatus(getText('poMergedSuccess', `${missingPositions.length} posición(es) reincorporada(s) del pedido ${poNumber}.`), 'warning');
                 } else {
-                    setIngresoStatus(getText('poLoadedSuccess'), 'success');
+                    setIngresoStatus(getText('poLoadedSuccess', 'Pedido cargado exitosamente.'), 'success');
                 }
             }
     
@@ -3059,7 +3096,6 @@ function renderIngresoItemsTable(items) {
          if (planta === '2000') {
             defaultSublocation = '2000';
         }
-
         // 2b. SOBREESCRIBIR con la lógica especial si se cumplen las condiciones
         if (planta === '1000' && stockIndicator === 'E') {
             if (bednr === 'SAL GY') {
@@ -3142,8 +3178,26 @@ function renderIngresoItemsTable(items) {
             </td>
             <td class="cell-tagCol">
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control" name="tag" value="${tagValue}" ${readonlyForSplits}>
+                    <input type="text" class="form-control" name="tag" value="${sapData.ZZUBICACION || ''}"data-key="${key}" data-field="ZZUBICACION" ${readonlyForSplits}>
                     <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="tag" ${readonlyForSplits}><i class="bi bi-search"></i></button>
+                </div>
+            </td>
+            </td>
+            <td class="cell-tagDestCol ${is311 ? '' : 'd-none'}">
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control form-control-sm" value="${sapData.ZZUBICACION2 || ''}" data-key="${key}" data-field="ZZUBICACION2" ${isReadOnly}>
+                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="tag_dest_qr" ${isReadOnly}><i class="bi bi-search"></i></button>
+                </div>
+            </td>
+            <td class="cell-paisCol ${is311 ? '' : 'd-none'}">
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control form-control-sm" value="${sapData.ZZPAIS || ''}" data-key="${key}" data-field="ZZPAIS" readonly>
+                </div>
+            </td>
+            <td class="cell-paisDestCol ${is311 ? '' : 'd-none'}">
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control form-control-sm" value="${sapData.ZZPAIS_DEST || ''}" data-key="${key}" data-field="ZZPAIS_DEST" ${isReadOnly}>
+                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="pais_dest_qr" ${isReadOnly}><i class="bi bi-search"></i></button>
                 </div>
             </td>
             
@@ -3192,11 +3246,6 @@ function renderIngresoItemsTable(items) {
     async function saveIngresoData(signatureData) {
         syncTableInputsToData();
         const selectedItems = [];
-        const posMapping = {};
-       const selectedRows = ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked');
-
-   
-        
         ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
             const tr = checkbox.closest('tr');
             const pos = tr.dataset.pos;
