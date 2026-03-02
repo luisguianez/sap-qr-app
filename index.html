@@ -2051,7 +2051,7 @@ msegTableBody.innerHTML = '';
         let sublocationDestCellHtml = `
             <td class="cell-subLocDestCol ${is311 ? '' : 'd-none'}">
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control form-control-sm" value="${sapData.SUB_LOC2 || ''}" data-key="${key}" data-field="SUB_LOC2" ${isReadOnly}>
+                    <input type="text" class="form-control form-control-sm" value="${sapData.SUB_LOC2 || ''}"  data-field="SUB_LOC2" ${isReadOnly}>
                     <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="sublocation_dest_qr" ${isReadOnly}><i class="bi bi-search"></i></button>
                 </div>
             </td>
@@ -2060,14 +2060,14 @@ msegTableBody.innerHTML = '';
         let cells311Html = `
             <td class="cell-tagDestCol ${is311 ? '' : 'd-none'}">
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control form-control-sm" value="${sapData.ZZUBICACION2 || ''}" data-key="${key}" data-field="ZZUBICACION2" ${isReadOnly}>
+                    <input type="text" class="form-control form-control-sm" value="${sapData.ZZUBICACION2 || ''}" data-field="ZZUBICACION2" ${isReadOnly}>
                     <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="tag_dest_qr" ${isReadOnly}><i class="bi bi-search"></i></button>
                 </div>
             </td>
            <td class="cell-paisCol ${is311 ? '' : 'd-none'}">${sapData.ZZPAIS || ''}</td>
             <td class="cell-paisDestCol ${is311 ? '' : 'd-none'}">
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control form-control-sm" value="${sapData.ZZPAIS_DEST || ''}" data-key="${key}" data-field="ZZPAIS_DEST" ${isReadOnly}>
+                    <input type="text" class="form-control form-control-sm" value="${sapData.ZZPAIS_DEST || ''}" data-field="ZZPAIS_DEST" ${isReadOnly}>
                     <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="pais_dest_qr" ${isReadOnly}><i class="bi bi-search"></i></button>
                 </div>
             </td>
@@ -3178,26 +3178,25 @@ function renderIngresoItemsTable(items) {
             </td>
             <td class="cell-tagCol">
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control" name="tag" value="${sapData.ZZUBICACION || ''}"data-key="${key}" data-field="ZZUBICACION" ${readonlyForSplits}>
+                    <input type="text" class="form-control" name="tag" value="${item.ZZUBICACION || ''}" data-field="ZZUBICACION" ${readonlyForSplits}>
                     <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="tag" ${readonlyForSplits}><i class="bi bi-search"></i></button>
                 </div>
             </td>
-            </td>
-            <td class="cell-tagDestCol ${is311 ? '' : 'd-none'}">
+            <td class="cell-tagDestCol d-none">
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control form-control-sm" value="${sapData.ZZUBICACION2 || ''}" data-key="${key}" data-field="ZZUBICACION2" ${isReadOnly}>
-                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="tag_dest_qr" ${isReadOnly}><i class="bi bi-search"></i></button>
+                    <input type="text" class="form-control form-control-sm" value="${item.ZZUBICACION2 || ''}" data-field="ZZUBICACION2" readonly>
+                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="tag_dest_qr" disabled><i class="bi bi-search"></i></button>
                 </div>
             </td>
-            <td class="cell-paisCol ${is311 ? '' : 'd-none'}">
+            <td class="cell-paisCol d-none">
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control form-control-sm" value="${sapData.ZZPAIS || ''}" data-key="${key}" data-field="ZZPAIS" readonly>
+                    <input type="text" class="form-control form-control-sm" value="${item.ZZPAIS || ''}" data-field="ZZPAIS" readonly>
                 </div>
             </td>
-            <td class="cell-paisDestCol ${is311 ? '' : 'd-none'}">
+            <td class="cell-paisDestCol d-none">
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control form-control-sm" value="${sapData.ZZPAIS_DEST || ''}" data-key="${key}" data-field="ZZPAIS_DEST" ${isReadOnly}>
-                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="pais_dest_qr" ${isReadOnly}><i class="bi bi-search"></i></button>
+                    <input type="text" class="form-control form-control-sm" value="${item.ZZPAIS_DEST || ''}" data-field="ZZPAIS_DEST" readonly>
+                    <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="pais_dest_qr" disabled><i class="bi bi-search"></i></button>
                 </div>
             </td>
             
