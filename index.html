@@ -860,6 +860,8 @@ document.addEventListener('DOMContentLoaded', () => {
             paisCol: "Country",
             paisFromCol: "Dest. Country",
             selectAtLeastOneItem: "You must select at least one item to save.",
+            poLoadedSuccess: "Purchase Order loaded successfully.",
+            poMergedSuccess: "{count} position(s) reincorporated from Purchase Order {poNumber}.",
         },
         es: {
             // General
@@ -1019,6 +1021,8 @@ document.addEventListener('DOMContentLoaded', () => {
             paisCol: "País",
             paisFromCol: "País Destino",
             selectAtLeastOneItem: "Debe seleccionar al menos una posición para guardar.",
+            poLoadedSuccess: "Pedido cargado exitosamente.",
+            poMergedSuccess: "Se reincorporaron {count} posición(es) del pedido {poNumber}.",
         }
     };
 
@@ -2991,7 +2995,7 @@ const sapItems = result.items; // Datos frescos de SAP
             
             if (poItemsData.length === 0 || poItemsData[0].EBELN !== poNumber) {
                 poItemsData = sapItems; 
-                setIngresoStatus(getText('poLoadedSuccess', 'Pedido cargado exitosamente.'), 'success');
+                setIngresoStatus(getText('poLoadedSuccess') , 'success');
             } else {
                 // Hay datos locales para el mismo pedido. Hacemos la fusión.
                 
@@ -3008,11 +3012,14 @@ const sapItems = result.items; // Datos frescos de SAP
                 if (missingPositions.length > 0) {
                     // 3. Añadir las posiciones faltantes (que el usuario eliminó) al final de poItemsData.
                     poItemsData.push(...missingPositions);
-                    setIngresoStatus(getText('poMergedSuccess', `${missingPositions.length} posición(es) reincorporada(s) del pedido ${poNumber}.`), 'warning');
-                } else {
-                    setIngresoStatus(getText('poLoadedSuccess', 'Pedido cargado exitosamente.'), 'success');
-                }
-            }
+                    let msgMerged = getText('poMergedSuccess')
+            .replace('{count}', missingPositions.length)
+            .replace('{poNumber}', poNumber);
+        setIngresoStatus(msgMerged, 'warning');
+    } else {
+        setIngresoStatus(getText('poLoadedSuccess'), 'success');
+    }
+}
     
             // 4. Re-renderizar la tabla con los datos fusionados (que incluyen splits y ediciones locales).
             renderIngresoItemsTable(poItemsData);
