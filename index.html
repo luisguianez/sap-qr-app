@@ -1312,6 +1312,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		// Obtenemos el tipo de búsqueda y la fila actual
 		const searchType = searchButton.dataset.searchType;
 		const currentRow = searchButton.closest('tr');
+        
 		
 		if (searchType === 'sublocation_qr') {
 			// Obtenemos el campo de texto de la sub-ubicación en esta fila
@@ -1412,15 +1413,81 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
   ingresoItemsTableBody.addEventListener('click', (e) => {
-        const fileBtn = e.target.closest('.select-file-ingreso-btn');
-        if (fileBtn) {
-            // Busca el input file hermano oculto
-            const fileInput = fileBtn.parentElement.querySelector('.file-ingreso-input');
-            if (fileInput) {
-                fileInput.click();
+    // 1. Manejo de archivos (Certificados/Docs)
+    const fileBtn = e.target.closest('.select-file-ingreso-btn');
+    if (fileBtn) {
+        const fileInput = fileBtn.parentElement.querySelector('.file-ingreso-input');
+        if (fileInput) fileInput.click();
+        return; // Salimos para no ejecutar la lógica de búsqueda
+    }
+
+    // 2. Manejo de Botón Dividir Posición (Split)
+    const splitBtn = e.target.closest('.split-item-btn');
+    if (splitBtn) {
+        openSplitModal(splitBtn.dataset.pos);
+        return;
+    }
+
+    // 3. Manejo de MATCHCODES (Búsquedas)
+    const searchButton = e.target.closest('.search-btn');
+    if (searchButton) {
+        const searchType = searchButton.dataset.searchType;
+        const currentRow = searchButton.closest('tr');
+        const pos = currentRow.dataset.pos;
+        
+        // Buscamos la data del item en nuestro array global
+        const itemData = poItemsData.find(d => d.EBELP === pos);
+        if (!itemData) return;
+
+        const planta = itemData.WERKS;
+
+        if (searchType === 'lote') {
+            const targetInput = currentRow.querySelector('input[name="lote"]');
+            const material = itemData.MATNR;
+            if (!material || !planta) {
+                alert('Se requiere Material y Planta para buscar el lote.');
+                return;
             }
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_BATCH', { IV_MATNR: material, IV_WERKS: planta }, 'Ayuda de Búsqueda - Lotes');
+        } 
+        else if (searchType === 'sublocation') {
+            const targetInput = currentRow.querySelector('input[name="sublocation"]');
+            const almacen = currentRow.querySelector('input[name="almacen"]').value;
+            if (!planta || !almacen) {
+                alert('Se requiere Planta y Almacén para buscar la sub-ubicación.');
+                return;
+            }
+            const config = {
+                display: {'ZZ_SUB_UBIC': 'Sub Ubicacion', 'DESCRIPCION': 'Descripcion'},
+                order: ['ZZ_SUB_UBIC', 'DESCRIPCION'],
+                returnColumn: 'ZZ_SUB_UBIC'
+            };
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_SUBLOCATION', { IV_WERKS: planta, IV_LGORT: almacen }, 'Ayuda de Búsqueda - Sub Ubicaciones', config);
         }
-        });
+        else if (searchType === 'almacen') {
+            const targetInput = currentRow.querySelector('input[name="almacen"]');
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_LGORT', { IV_WERKS: planta }, 'Ayuda de Búsqueda - Almacén');
+        }
+        else if (searchType === 'tag') {
+            const targetInput = currentRow.querySelector('input[name="tag"]');
+            const config = {
+                display: {'ZZUBICACION': 'TAG', 'DESCRIPCION': 'Descripcion'},
+                order: ['ZZUBICACION', 'DESCRIPCION'],
+                returnColumn: 'ZZUBICACION'
+            };
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_TAG', { IV_WERKS: planta }, 'Ayuda de Búsqueda - TAG', config);
+        }
+        else if (searchType === 'pais') {
+            const targetInput = currentRow.querySelector('input[name="pais"]');
+            const config = {
+                display: {'ZZ_PAIS': 'Pais', 'DESCRIPCION': 'Descripcion'},
+                order: ['ZZ_PAIS', 'DESCRIPCION'],
+                returnColumn: 'ZZ_PAIS'
+            };
+            openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_COUNTRY', {}, 'Ayuda de Búsqueda - País', config);
+        }
+    }
+});
 
         ingresoItemsTableBody.addEventListener('change', (e) => {
         if (e.target.classList.contains('file-ingreso-input')) {
