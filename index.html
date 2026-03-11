@@ -2195,7 +2195,7 @@ const moveType = clMovimientoInput.value.trim();
     const centro = centroInput.value.trim();
 
     // Verificamos la condición especial: Movimiento 101 y Centro 4000
-    if (moveType === '101' && centro === '4000' || centro === '2000' ) {
+    if (moveType === '101' && ( centro === '4000' || centro === '2000' )) {
         // Si se cumple, OCULTAMOS el Despachador y el Tamaño de Etiqueta
         despachadorSelect.parentElement.style.display = 'none';
         labelSizeContainer.style.display = 'none';
