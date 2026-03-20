@@ -2519,6 +2519,7 @@ const moveType = clMovimientoInput.value.trim();
             signature_data: signatureData
         };
         formData.append('json_data', JSON.stringify(jsonDataPayload));
+        formData.append('user_lang', navigator.language || navigator.userLanguage);
         const fileMetadata = [];
         scannedCodes.forEach((sapData, key) => {
             ['CERTIFICADO', 'DOCUMENTO', 'INSPECCION'].forEach(field => {
@@ -3361,6 +3362,7 @@ function renderIngresoItemsTable(items) {
             connection_params: sapConnection, is_guest: isGuestMode, header: headerData, items: selectedItems,
             signature_data: signatureData
         }));
+        formData.append('user_lang', navigator.language || navigator.userLanguage);
         const fileMetadata = [];
         ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
             const tr = checkbox.closest('tr');
@@ -3434,8 +3436,9 @@ function renderIngresoItemsTable(items) {
                 const pdfBlob = new Blob([Uint8Array.from(atob(result.pdf_data), c => c.charCodeAt(0))], { type: 'application/pdf' });
                 const pdfUrl = URL.createObjectURL(pdfBlob);
                 const anchor = document.createElement('a');
-    anchor.style.display = 'none';
-    anchor.href = pdfUrl;
+                anchor.style.display = 'none';
+                anchor.href = pdfUrl;
+                anchor.target = "_blank";
 
     // 2. Asignarle un nombre de archivo para la descarga
     anchor.download = 'Etiquetas.pdf';
@@ -3486,6 +3489,7 @@ function renderIngresoItemsTable(items) {
                 const anchor = document.createElement('a');
     anchor.style.display = 'none';
     anchor.href = pdfUrl;
+    anchor.target = "_blank";
     anchor.download = 'Documento_Material.pdf'; // Nombre de archivo para este caso
 
     document.body.appendChild(anchor);
@@ -3917,6 +3921,15 @@ function addSplitLine() {
     ingresoColumnVisibility['salesOrderItemCol'] = false; // Forzar a Oculto
     sublocationColumnVisibility = initializeColumnVisibility('sublocationTable');
     ingresoColumnVisibility['countryCol'] = false;
+
+    clearAllScreens();
+
+    window.addEventListener('pageshow', function(event) {
+        // Si event.persisted es true, significa que Safari restauró la página desde su memoria interna
+        if (event.persisted) {
+            handleLogout(); // Destruye la sesión y limpia la pantalla por seguridad
+        }
+    });
     
 });
 </script>
