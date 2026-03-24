@@ -1108,6 +1108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSearchHelpTargetRowInput = null;
     let lastSavedIngresoData = null;
     let lastSavedQRData = null;
+    let isViewingPDF = false;
 
     // --- Referencias al DOM ---
     const spinner = document.getElementById('spinner-overlay');
@@ -1390,16 +1391,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ingresoSaveButton.addEventListener('click', openIngresoSignatureModal);
     document.getElementById('ingresoFilterInput').addEventListener('input', filterIngresoItemsTable);
     
-    ingresoItemsTableBody.addEventListener('change', e => {
-        if (e.target.classList.contains('item-checkbox')) {
-            const checkedCount = ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked').length;
-            ingresoSaveButton.disabled = checkedCount === 0;
-            const totalCheckboxes = ingresoItemsTableBody.querySelectorAll('.item-checkbox').length;
-            selectAllIngresoItemsCheckbox.checked = totalCheckboxes > 0 && totalCheckboxes === checkedCount;
-            deleteIngresoButton.style.display = checkedCount > 0 ? 'inline-block' : 'none';
-            deleteIngresoButton.disabled = checkedCount === 0;
-        }
-    });
+
     selectAllIngresoItemsCheckbox.addEventListener('change', e => {
         const isChecked = e.target.checked;
         ingresoItemsTableBody.querySelectorAll('.item-checkbox').forEach(checkbox => checkbox.checked = isChecked);
@@ -1489,88 +1481,94 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-        ingresoItemsTableBody.addEventListener('change', (e) => {
+     ingresoItemsTableBody.addEventListener('change', (e) => {
         if (e.target.classList.contains('file-ingreso-input')) {
-            const fileName = e.target.files[0] ? e.target.files[0].name : '';
-            // Busca el input de texto hermano
-            const textInput = e.target.parentElement.querySelector('.filename-display');
-            if (textInput) {
-                textInput.value = fileName;
-                // Feedback visual: Verde suave si tiene archivo, blanco si no
-                textInput.style.backgroundColor = fileName ? "#d1e7dd" : "";
+            // Validamos que se haya subido un archivo real
+            if (e.target.files && e.target.files.length > 0) {
+                
+                // ¡AQUÍ ESTÁ EL QUE FALTABA!
+                const archivoFisico = e.target.files[0]; 
+                const nombreArchivo = archivoFisico.name;
+                
+                // Pinta la cajita de verde y pone el nombre
+                const textInput = e.target.parentElement.querySelector('.filename-display');
+                if (textInput) {
+                    textInput.value = nombreArchivo;
+                    textInput.style.backgroundColor = "#d1e7dd";
+                }
+
+                // Lo guarda silenciosamente en la memoria
+                const tr = e.target.closest('tr');
+                if (tr) {
+                    const pos = tr.dataset.pos; 
+                    const fieldName = e.target.name; 
+                    const item = poItemsData.find(d => String(d.EBELP) === String(pos));
+                    
+                    if (item) {
+                        item[`file_${fieldName}`] = archivoFisico;
+                    }
+                }
             }
+            return; // Corta la ejecución para que no interfiera con los matchcodes
         }
     
+        // ▼▼▼ 2. TUS MATCHCODES (Totalmente Intactos) ▼▼▼
+        const searchButton = e.target.closest('.search-btn');
+        if (searchButton) {
+            const searchType = searchButton.dataset.searchType;
+            const currentRow = searchButton.closest('tr');
+            const pos = currentRow.dataset.pos;
+            
+            const originalItem = poItemsData.find(d => String(d.EBELP) === String(pos));
+            if (!originalItem) return;
 
-		// Si no fue un split, revisa si se hizo clic en un botón de búsqueda
-		const searchButton = e.target.closest('.search-btn');
-		if (searchButton) {
-			const searchType = searchButton.dataset.searchType;
-			const currentRow = searchButton.closest('tr');
-			const pos = currentRow.dataset.pos;
-			// La lógica para buscar el 'originalItem' debe estar aquí dentro
-			const originalItem = poItemsData.find(d => d.EBELP === pos);
-			if (!originalItem) return; // Si no encuentra el item, no continúa
-
-			if (searchType === 'lote') {
-				const material = originalItem.MATNR;
-				const planta = originalItem.WERKS;
-				const targetInput = currentRow.querySelector('input[name="lote"]');
-				if (!material || !planta) {
-					alert('Se requiere Material y Planta en la posición para buscar el lote.');
-					return;
-				}
-				openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_BATCH', { IV_MATNR: material, IV_WERKS: planta }, 'Ayuda de Búsqueda - Lotes');
-			} 
-			else if (searchType === 'sublocation') {
-				const planta = originalItem.WERKS;
-				const almacen = currentRow.querySelector('input[name="almacen"]').value;
-				const targetInput = currentRow.querySelector('input[name="sublocation"]');
-				if (!planta || !almacen) {
-					alert('Se requiere Planta y Almacén para buscar la sub-ubicación.');
-					return;
-				}
-				const config = {
-					display: {'ZZ_SUB_UBIC': 'Sub Ubicacion', 'DESCRIPCION': 'Descripcion'},
-					order: ['ZZ_SUB_UBIC', 'DESCRIPCION'],
-					returnColumn: 'ZZ_SUB_UBIC'
-				};
-				openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_SUBLOCATION', { IV_WERKS: planta, IV_LGORT: almacen }, 'Ayuda de Búsqueda - Sub Ubicaciones', config);
-			}
-			else if (searchType === 'almacen') {
-				const planta = originalItem.WERKS;
-				const targetInput = currentRow.querySelector('input[name="almacen"]');
-				if (!planta) {
-					alert('Se requiere la Planta para buscar el almacén.');
-					return;
-				}
-				openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_LGORT', { IV_WERKS: planta }, 'Ayuda de Búsqueda - Almacén');
-			}
-			else if (searchType === 'tag') {
-				const planta = originalItem.WERKS;
-				const targetInput = currentRow.querySelector('input[name="tag"]');
-				if (!planta) {
-					alert('Se requiere la Planta para buscar el TAG.');
-					return;
-				}
-				const config = {
-					display: {'ZZUBICACION': 'TAG', 'DESCRIPCION': 'Descripcion'},
-					order: ['ZZUBICACION', 'DESCRIPCION'],
-					returnColumn: 'ZZUBICACION'
-				};
-				openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_TAG', { IV_WERKS: planta }, 'Ayuda de Búsqueda - TAG', config);
-			}
-			else if (searchType === 'pais') {
-				const targetInput = currentRow.querySelector('input[name="pais"]');
-				const config = {
-					display: {'ZZ_PAIS': 'Pais', 'DESCRIPCION': 'Descripcion'},
-					order: ['ZZ_PAIS', 'DESCRIPCION'],
-					returnColumn: 'ZZ_PAIS'
-				};
-				openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_COUNTRY', {}, 'Ayuda de Búsqueda - País', config);
-			}
-		}
-	});
+            if (searchType === 'lote') {
+                const material = originalItem.MATNR;
+                const planta = originalItem.WERKS;
+                const targetInput = currentRow.querySelector('input[name="lote"]');
+                if (!material || !planta) {
+                    alert('Se requiere Material y Planta en la posición para buscar el lote.');
+                    return;
+                }
+                openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_BATCH', { IV_MATNR: material, IV_WERKS: planta }, 'Ayuda de Búsqueda - Lotes');
+            } 
+            else if (searchType === 'sublocation') {
+                const planta = originalItem.WERKS;
+                const almacen = currentRow.querySelector('input[name="almacen"]').value;
+                const targetInput = currentRow.querySelector('input[name="sublocation"]');
+                if (!planta || !almacen) {
+                    alert('Se requiere Planta y Almacén para buscar la sub-ubicación.');
+                    return;
+                }
+                const config = { display: {'ZZ_SUB_UBIC': 'Sub Ubicacion', 'DESCRIPCION': 'Descripcion'}, order: ['ZZ_SUB_UBIC', 'DESCRIPCION'], returnColumn: 'ZZ_SUB_UBIC' };
+                openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_SUBLOCATION', { IV_WERKS: planta, IV_LGORT: almacen }, 'Ayuda de Búsqueda - Sub Ubicaciones', config);
+            }
+            else if (searchType === 'almacen') {
+                const planta = originalItem.WERKS;
+                const targetInput = currentRow.querySelector('input[name="almacen"]');
+                if (!planta) {
+                    alert('Se requiere la Planta para buscar el almacén.');
+                    return;
+                }
+                openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_LGORT', { IV_WERKS: planta }, 'Ayuda de Búsqueda - Almacén');
+            }
+            else if (searchType === 'tag') {
+                const planta = originalItem.WERKS;
+                const targetInput = currentRow.querySelector('input[name="tag"]');
+                if (!planta) {
+                    alert('Se requiere la Planta para buscar el TAG.');
+                    return;
+                }
+                const config = { display: {'ZZUBICACION': 'TAG', 'DESCRIPCION': 'Descripcion'}, order: ['ZZUBICACION', 'DESCRIPCION'], returnColumn: 'ZZUBICACION' };
+                openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_TAG', { IV_WERKS: planta }, 'Ayuda de Búsqueda - TAG', config);
+            }
+            else if (searchType === 'pais') {
+                const targetInput = currentRow.querySelector('input[name="pais"]');
+                const config = { display: {'ZZ_PAIS': 'Pais', 'DESCRIPCION': 'Descripcion'}, order: ['ZZ_PAIS', 'DESCRIPCION'], returnColumn: 'ZZ_PAIS' };
+                openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_COUNTRY', {}, 'Ayuda de Búsqueda - País', config);
+            }
+        }
+    });
 
     clMovimientoInput.addEventListener('input', () => {
         if (scannedCodes.size > 0) {
@@ -2290,6 +2288,7 @@ const moveType = clMovimientoInput.value.trim();
                 body: JSON.stringify({
                     connection_params: sapConnection,
                     centro: centroInput.value.trim(),
+                    move_type: moveType,
                     is_guest: isGuestMode
                 })
             });
@@ -2382,6 +2381,7 @@ const moveType = clMovimientoInput.value.trim();
         labelSizeSelect.value = '';
         setIngresoStatus(getText('loadingData'), "info");
         showSpinner();
+        const moveTypeIngreso = document.getElementById('ingresoTipoMovimiento').value.trim();
         try {
             const response = await fetch(`${API_BASE_URL}/getModalData`, {
                 method: 'POST',
@@ -2389,6 +2389,7 @@ const moveType = clMovimientoInput.value.trim();
                 body: JSON.stringify({
                     connection_params: sapConnection,
                     centro: centroParaModal,
+                    move_type: moveTypeIngreso,
                     is_guest: isGuestMode
                 })
             });
@@ -3202,6 +3203,10 @@ function renderIngresoItemsTable(items) {
         const paisValue = item.userInput_Pais ?? ''; 
         const sgtxtValue = item.userInput_Sgtxt ?? '';
 
+        const certFileName = (item.file_certificado && item.file_certificado.name) ? item.file_certificado.name : '';
+        const docFileName = (item.file_documentos && item.file_documentos.name) ? item.file_documentos.name : '';
+        const inspFileName = (item.file_inspeccion && item.file_inspeccion.name) ? item.file_inspeccion.name : '';
+
 
         let rowHtml = `
             <td class="cell-selectCol"><input type="checkbox" class="form-check-input item-checkbox" ${checkboxChecked || ''}></td>
@@ -3289,23 +3294,23 @@ function renderIngresoItemsTable(items) {
             </td>
             <td class="cell-itemTextCol">
             <input type="text" class="form-control form-control-sm" name="sgtxt" value="${sgtxtValue}"></td>
-<td class="cell-certCol">
+            <td class="cell-certCol">
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control form-control-sm filename-display" placeholder="" readonly>
+                    <input type="text" class="form-control form-control-sm filename-display" value="${certFileName}" style="${certFileName ? 'background-color: #d1e7dd;' : ''}" readonly>
                     <button class="btn btn-outline-secondary select-file-ingreso-btn" type="button" ${readonlyForSplits}>...</button>
                     <input type="file" class="d-none file-ingreso-input" name="certificado">
                 </div>
             </td>
             <td class="cell-docsCol">
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control form-control-sm filename-display" placeholder="" readonly>
+                    <input type="text" class="form-control form-control-sm filename-display" value="${docFileName}" style="${docFileName ? 'background-color: #d1e7dd;' : ''}" readonly>
                     <button class="btn btn-outline-secondary select-file-ingreso-btn" type="button" ${readonlyForSplits}>...</button>
                     <input type="file" class="d-none file-ingreso-input" name="documentos">
                 </div>
             </td>
             <td class="cell-inspCol">
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control form-control-sm filename-display" placeholder="" readonly>
+                    <input type="text" class="form-control form-control-sm filename-display" value="${inspFileName}" style="${inspFileName ? 'background-color: #d1e7dd;' : ''}" readonly>
                     <button class="btn btn-outline-secondary select-file-ingreso-btn" type="button" ${readonlyForSplits}>...</button>
                     <input type="file" class="d-none file-ingreso-input" name="inspeccion">
                 </div>
@@ -3333,6 +3338,7 @@ function renderIngresoItemsTable(items) {
             if (originalItem) {
             const posToSend = originalItem.EBELP_ORIGINAL || originalItem.EBELP;
                 selectedItems.push({
+                    unique_id: pos,
                     posicion: posToSend,
                     stock_especial: originalItem.SOBKZ || '',
                     material: originalItem.MATNR,
@@ -3343,7 +3349,7 @@ function renderIngresoItemsTable(items) {
                     cantidad: originalItem.MENGE, // 'MENGE' ya se actualiza desde el input
                     lote: originalItem.userInput_Batch ?? (isSplitLine ? originalItem.CHARG_NUEVO : ''),
                     sublocation: originalItem.userInput_Sublocation ?? (isSplitLine ? originalItem.SUBLOCATION_NUEVA : ''),
-                    tag: originalItem.userInput_Tag ?? (isSplitLine ? originalItem.TAG_NUEVO : ''),
+                    tag: originalItem.userInput_Tag ?? originalItem.ZZUBICACION ?? '',
                     pais: originalItem.userInput_Pais ?? '',
                     sgtxt: originalItem.userInput_Sgtxt ?? ''
                 });
@@ -3373,12 +3379,13 @@ function renderIngresoItemsTable(items) {
         ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
             const tr = checkbox.closest('tr');
             const pos = tr.dataset.pos;
-            const certFile = tr.querySelector('[name="certificado"]').files[0];
-            const docFile = tr.querySelector('[name="documentos"]').files[0];
-            const inspFile = tr.querySelector('[name="inspeccion"]').files[0];
-            if (certFile) { formData.append('files[]', certFile); fileMetadata.push({ posicion: pos, field: 'certificado', filename: certFile.name }); }
-            if (docFile) { formData.append('files[]', docFile); fileMetadata.push({ posicion: pos, field: 'documentos', filename: docFile.name }); }
-            if (inspFile) { formData.append('files[]', inspFile); fileMetadata.push({ posicion: pos, field: 'inspeccion', filename: inspFile.name }); }
+
+          const item = poItemsData.find(d => String(d.EBELP) === String(pos));
+            if (item) {
+                if (item.file_certificado) { formData.append('files[]', item.file_certificado); fileMetadata.push({ posicion: pos, field: 'certificado', filename: item.file_certificado.name }); }
+                if (item.file_documentos) { formData.append('files[]', item.file_documentos); fileMetadata.push({ posicion: pos, field: 'documentos', filename: item.file_documentos.name }); }
+                if (item.file_inspeccion) { formData.append('files[]', item.file_inspeccion); fileMetadata.push({ posicion: pos, field: 'inspeccion', filename: item.file_inspeccion.name }); }
+            }
         });
         formData.append('file_metadata', JSON.stringify(fileMetadata));
         setIngresoStatus(getText('savingData'), 'info');
@@ -3451,6 +3458,7 @@ function renderIngresoItemsTable(items) {
 
     // 3. Añadirlo a la página, simular un clic y removerlo
     document.body.appendChild(anchor);
+    isViewingPDF = true;
     anchor.click();
     setTimeout(() => {
     window.URL.revokeObjectURL(pdfUrl); // Limpiar la URL del objeto
@@ -3499,6 +3507,7 @@ function renderIngresoItemsTable(items) {
     anchor.download = 'Documento_Material.pdf'; // Nombre de archivo para este caso
 
     document.body.appendChild(anchor);
+    isViewingPDF = true;
     anchor.click();
     setTimeout(() => {
     window.URL.revokeObjectURL(pdfUrl);
@@ -3545,6 +3554,7 @@ async function handlePrintDocMaterialMain() {
                 anchor.download = 'Documento_Material_QR.pdf'; 
 
                 document.body.appendChild(anchor);
+                isViewingPDF = true;
                 anchor.click();
                 setTimeout(() => {
                     window.URL.revokeObjectURL(pdfUrl);
@@ -3697,21 +3707,37 @@ function clearIngresoForm(clearAll = true) {
     }
 
     function syncTableInputsToData() {
-        const rows = ingresoItemsTableBody.getElementsByTagName('tr');
-        for (const row of rows) {
-            const pos = row.dataset.pos;
-            const item = poItemsData.find(d => d.EBELP === pos);
+       ingresoItemsTableBody.querySelectorAll('tr').forEach(tr => {
+            const pos = tr.dataset.pos;
+            const item = poItemsData.find(d => String(d.EBELP) === String(pos));
             if (item) {
-                // Guardamos el estado actual de los inputs en el objeto
-                item.userInput_Almacen = row.querySelector('input[name="almacen"]').value;
-                item.MENGE = row.querySelector('input[name="cantidad"]').value;
-                item.userInput_Batch = row.querySelector('input[name="lote"]').value;
-                item.userInput_Sublocation = row.querySelector('input[name="sublocation"]').value;
-                item.userInput_Tag = row.querySelector('input[name="tag"]').value;
-                item.userInput_Pais = row.querySelector('input[name="pais"]').value;
-                item.userInput_Sgtxt = row.querySelector('input[name="sgtxt"]').value;
+                // Sincronizamos SOLO los campos de texto para no perder lo que escribas en la tabla
+                const qtyInput = tr.querySelector('input[name="cantidad"]');
+                if (qtyInput) item.MENGE = qtyInput.value;
+
+                const batchInput = tr.querySelector('input[name="lote"]');
+                if (batchInput) item.userInput_Batch = batchInput.value;
+
+                const storageInput = tr.querySelector('input[name="almacen"]');
+                if (storageInput) item.userInput_Almacen = storageInput.value;
+
+                const sublocInput = tr.querySelector('input[name="sublocation"]');
+                if (sublocInput) item.userInput_Sublocation = sublocInput.value;
+
+                const tagInput = tr.querySelector('input[name="tag"]');
+                if (tagInput) item.userInput_Tag = tagInput.value;
+
+                const paisInput = tr.querySelector('input[name="pais"]');
+                if (paisInput) item.userInput_Pais = paisInput.value;
+
+                const sgtxtInput = tr.querySelector('input[name="sgtxt"]');
+                if (sgtxtInput) item.userInput_Sgtxt = sgtxtInput.value;
+
+                // ¡CRÍTICO: NO TOCAR LOS ARCHIVOS AQUÍ!
+                // Al sacarlos de esta función, los protegemos de ser borrados 
+                // por el navegador justo antes de hacer el Split.
             }
-        }
+        });
     }
     
     async function fetchAndShowLongText(materialNumber) {
@@ -3896,6 +3922,8 @@ function addSplitLine() {
         splitItemData.SUBLOCATION_NUEVA = lineData.sublocation;
         splitItemData.TAG_NUEVO = lineData.tag;
 
+        
+
         splitItemData.isSelected = true;
         splitItemData.userInput_Almacen = undefined;
         splitItemData.userInput_Batch = undefined;           
@@ -3904,10 +3932,17 @@ function addSplitLine() {
         splitItemData.userInput_Sgtxt = undefined;
         splitItemData.userInput_Pais = undefined;
 
+        splitItemData.file_certificado = originalItemData.file_certificado;
+        splitItemData.file_documentos  = originalItemData.file_documentos;
+        splitItemData.file_inspeccion  = originalItemData.file_inspeccion;
+
+
         poItemsData.splice(insertionPointBaseIndex + linesAdded + 1, 0, splitItemData);
 
         linesAdded++; // Incrementar el contador para la siguiente vuelta
     });
+
+    console.log("Revisando memoria antes de dibujar:", poItemsData);
 
     // 3. Volver a renderizar toda la tabla
     renderIngresoItemsTable(poItemsData);
@@ -3933,7 +3968,12 @@ function addSplitLine() {
     window.addEventListener('pageshow', function(event) {
         // Si event.persisted es true, significa que Safari restauró la página desde su memoria interna
         if (event.persisted) {
-            handleLogout(); // Destruye la sesión y limpia la pantalla por seguridad
+            if (isViewingPDF) {
+                // Venimos de regresar del visor de PDF del iPad. No cerramos sesión.
+                isViewingPDF = false; // Apagamos la bandera para la próxima vez
+            } else {
+                handleLogout(); // Es un retroceso normal, destruye la sesión por seguridad
+            }
         }
     });
     
