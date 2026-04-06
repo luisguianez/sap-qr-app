@@ -764,6 +764,8 @@ document.addEventListener('DOMContentLoaded', () => {
             smallLabel: "S - Small",
             mediumLabel: "M - Medium",
             largeLabel: "L - Large",
+            selectReceiver: "Select a receiver...",      
+            selectDispatcher: "Select a dispatcher...",
             confirmAndSaveButton: "Confirm and Save",
             // Table Headers
             docCol: "Document", yearCol: "Year", posCol: "Item", materialCol: "Material", materialDescCol: "Material Text", qtyCol: "Quantity",
@@ -926,6 +928,8 @@ document.addEventListener('DOMContentLoaded', () => {
             smallLabel: "S - Pequeña",
             mediumLabel: "M - Mediana",
             largeLabel: "L - Grande",
+            selectReceiver: "Seleccione un receptor...",     
+            selectDispatcher: "Seleccione un despachador...", 
             confirmAndSaveButton: "Confirmar y Guardar",
             // Table Headers
             docCol: "Documento", yearCol: "Año", posCol: "Pos.", materialCol: "Material", materialDescCol: "Texto Material", qtyCol: "Cantidad",
@@ -2265,17 +2269,22 @@ const moveType = clMovimientoInput.value.trim();
     // --- Lógica condicional para mostrar/ocultar campos ---
     const centro = centroInput.value.trim();
 
-    // Verificamos la condición especial: Movimiento 101 y Centro 4000
-    if (moveType === '101' && ( centro === '4000' || centro === '2000' )) {
-        // Si se cumple, OCULTAMOS el Despachador y el Tamaño de Etiqueta
+    if (moveType === '311') {
+        //  Para 311 ocultar Despachador y mostrar Tamaño de Etiqueta
+        despachadorSelect.parentElement.style.display = 'none';
+        labelSizeContainer.style.display = 'block';
+    } 
+    else if (moveType === '101' && (centro === '4000' || centro === '2000')) {
+        //  Movimiento 101 en centros específicos oculta ambos
         despachadorSelect.parentElement.style.display = 'none';
         labelSizeContainer.style.display = 'none';
-    } else {
-        // Para cualquier otro caso, restauramos el comportamiento original
+    } 
+    else {
+        //  Para el resto de movimientos (221, 231, 601, etc.)
         despachadorSelect.parentElement.style.display = 'block';
         
-        // Mantenemos la lógica original para el tamaño de la etiqueta
-        const hideLabelSizeFor = ['221', '231', '601', '311'];
+        // Ocultamos el tamaño para estos 
+        const hideLabelSizeFor = ['221', '231', '601'];
         labelSizeContainer.style.display = hideLabelSizeFor.includes(moveType) ? 'none' : 'block';
     }
 
@@ -2294,33 +2303,46 @@ const moveType = clMovimientoInput.value.trim();
             });
             const result = await response.json();
             if (result.success) {
-                receptorSelect.innerHTML = `<option value="">${getText('selectSize')}</option>`;
+                // 1. Llenar la lista de Receptores
+                receptorSelect.innerHTML = `<option value="">${getText('selectReceiver')}</option>`;
                 result.receptores.forEach(r => {
                     const option = new Option(r.RECEPTOR, r.RECEPTOR);
                     receptorSelect.add(option);
                 });
-                if (result.currentUser && result.currentUser.fullName) {
-                    const userFullName = result.currentUser.fullName;
-                    const userExistsInList = result.receptores.some(r => r.RECEPTOR === userFullName);
-                    if (userExistsInList) {
-                        receptorSelect.value = userFullName;
-                    } else {
-                        const option = new Option(userFullName, userFullName);
-                        receptorSelect.add(option);
-                        receptorSelect.value = userFullName;
-                    }
-                }
+
+                // 2. Llenar la lista de Despachadores
                 despachadorSelect.innerHTML = `<option value="">${getText('selectDispatcher')}</option>`;
                 result.despachadores.forEach(d => {
                     const option = new Option(d.RECEPTOR, d.RECEPTOR);
                     despachadorSelect.add(option);
                 });
+
+                // 3. Lógica Inteligente para auto-seleccionar al usuario
+                if (result.currentUser && result.currentUser.fullName) {
+                    const userFullName = result.currentUser.fullName;
+                    
+                    // Si el movimiento es de Salida/Consumo (221, 231, 601)
+                    const isIssueMovement = ['221', '231', '601'].includes(moveType);
+
+                    if (isIssueMovement) {
+                        // El usuario actual se coloca como DESPACHADOR
+                        const userExistsInDisp = result.despachadores.some(d => d.RECEPTOR === userFullName);
+                        if (!userExistsInDisp) {
+                            despachadorSelect.add(new Option(userFullName, userFullName));
+                        }
+                        despachadorSelect.value = userFullName;
+                    } else {
+                        // Para el resto (101, 311), el usuario actual se coloca como RECEPTOR
+                        const userExistsInRec = result.receptores.some(r => r.RECEPTOR === userFullName);
+                        if (!userExistsInRec) {
+                            receptorSelect.add(new Option(userFullName, userFullName));
+                        }
+                        receptorSelect.value = userFullName;
+                    }
+                }
+
                 setScanStatus("", "");
                 signatureModal.show();
-            } else {
-                setScanStatus(`${getText('loadingData')}: ${result.error}`, "error");
-                playSound('error');
-                alert(`${getText('confirmWindowError')}:\n${result.error}`);
             }
         } catch (e) {
             setScanStatus(`${getText('networkError')}: ${e.message}`, "error");
