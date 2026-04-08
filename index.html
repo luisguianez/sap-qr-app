@@ -3534,7 +3534,7 @@ function renderIngresoItemsTable(items) {
     setTimeout(() => {
     window.URL.revokeObjectURL(pdfUrl);
     document.body.removeChild(anchor);
-    }, 100);
+    }, 5000);
                 setIngresoStatus(getText('materialDocGenerated', 'Documento generado.'), 'success');
             } else {
                 throw new Error(result.error || "No se recibieron datos del PDF desde el servidor.");
@@ -3581,7 +3581,7 @@ async function handlePrintDocMaterialMain() {
                 setTimeout(() => {
                     window.URL.revokeObjectURL(pdfUrl);
                     document.body.removeChild(anchor);
-                }, 100);
+                }, 5000);
 
                 setScanStatus(getText('materialDocGenerated', 'Documento generado.'), 'success');
             } else {
