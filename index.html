@@ -3455,6 +3455,12 @@ function renderIngresoItemsTable(items) {
             alert("No hay datos del último guardado para imprimir.");
             return;
         }
+
+        const pdfWindow = window.open('', '_blank');
+        if (pdfWindow) {
+            pdfWindow.document.write('<html><body><h3 style="font-family: sans-serif; text-align: center; margin-top: 50px; color: #333;">Generando Etiquetas... por favor espere.</h3></body></html>');
+        }
+
         setIngresoStatus(getText('generatingLabels', 'Generando etiquetas...'), 'info');
         showSpinner();
         try {
@@ -3467,32 +3473,29 @@ function renderIngresoItemsTable(items) {
                 })
             });
             const result = await response.json();
+
             if (result.success && result.pdf_data) {
                 const pdfBlob = new Blob([Uint8Array.from(atob(result.pdf_data), c => c.charCodeAt(0))], { type: 'application/pdf' });
                 const pdfUrl = URL.createObjectURL(pdfBlob);
-                const anchor = document.createElement('a');
-                anchor.style.display = 'none';
-                anchor.href = pdfUrl;
-                anchor.target = "_blank";
 
-    // 2. Asignarle un nombre de archivo para la descarga
-    anchor.download = 'Etiquetas.pdf';
-
-    // 3. Añadirlo a la página, simular un clic y removerlo
-    document.body.appendChild(anchor);
-    isViewingPDF = true;
-    anchor.click();
-    setTimeout(() => {
-    window.URL.revokeObjectURL(pdfUrl); // Limpiar la URL del objeto
-    document.body.removeChild(anchor);
-    }, 5000);
-
-    setIngresoStatus(getText('labelsGenerated'), 'success');
-                setIngresoStatus(getText('labelsGenerated'), 'success');
+                if (pdfWindow) {
+                    pdfWindow.location.href = pdfUrl;
+                } else {
+                    // Fallback por si bloquean popups
+                    const anchor = document.createElement('a');
+                    anchor.href = pdfUrl;
+                    anchor.download = 'Etiquetas.pdf';
+                    document.body.appendChild(anchor);
+                    anchor.click();
+                    document.body.removeChild(anchor);
+                }
+                setIngresoStatus(getText('labelsGenerated', 'Etiquetas generadas.'), 'success');
             } else {
+                if (pdfWindow) pdfWindow.close();
                 throw new Error(result.error || "No se recibieron datos del PDF desde el servidor.");
             }
         } catch (err) {
+            if (pdfWindow) pdfWindow.close();
             setIngresoStatus(`${getText('printingError', 'Error al imprimir')}: ${err.message}`, 'error');
             playSound('error');
             alert(`${getText('printingError', 'Error al generar etiquetas')}: ${err.message}`);
@@ -3506,6 +3509,12 @@ function renderIngresoItemsTable(items) {
             alert("No hay datos del último guardado para imprimir.");
             return;
         }
+
+        const pdfWindow = window.open('', '_blank');
+        if (pdfWindow) {
+            pdfWindow.document.write('<html><body><h3 style="font-family: sans-serif; text-align: center; margin-top: 50px; color: #333;">Generando Documento... por favor espere.</h3></body></html>');
+        }
+
         setIngresoStatus(getText('generatingMaterialDoc', 'Generando Documento de Material...'), 'info');
         showSpinner();
         try {
@@ -3522,24 +3531,23 @@ function renderIngresoItemsTable(items) {
             if (result.success && result.pdf_data) {
                 const pdfBlob = new Blob([Uint8Array.from(atob(result.pdf_data), c => c.charCodeAt(0))], { type: 'application/pdf' });
                 const pdfUrl = URL.createObjectURL(pdfBlob);
-                const anchor = document.createElement('a');
-    anchor.style.display = 'none';
-    anchor.href = pdfUrl;
-    anchor.target = "_blank";
-    anchor.download = 'Documento_Material.pdf'; // Nombre de archivo para este caso
-
-    document.body.appendChild(anchor);
-    isViewingPDF = true;
-    anchor.click();
-    setTimeout(() => {
-    window.URL.revokeObjectURL(pdfUrl);
-    document.body.removeChild(anchor);
-    }, 5000);
+                if (pdfWindow) {
+                    pdfWindow.location.href = pdfUrl;
+                } else {
+                    const anchor = document.createElement('a');
+                    anchor.href = pdfUrl;
+                    anchor.download = 'Documento_Material.pdf';
+                    document.body.appendChild(anchor);
+                    anchor.click();
+                    document.body.removeChild(anchor);
+                }
                 setIngresoStatus(getText('materialDocGenerated', 'Documento generado.'), 'success');
             } else {
+                if (pdfWindow) pdfWindow.close();
                 throw new Error(result.error || "No se recibieron datos del PDF desde el servidor.");
             }
         } catch (err) {
+            if (pdfWindow) pdfWindow.close();
             setIngresoStatus(`${getText('printingError', 'Error al imprimir')}: ${err.message}`, 'error');
             playSound('error');
             alert(`${getText('printingError', 'Error al generar documento')}: ${err.message}`);
@@ -3553,6 +3561,12 @@ async function handlePrintDocMaterialMain() {
             alert("No hay datos del último guardado para imprimir.");
             return;
         }
+
+        const pdfWindow = window.open('', '_blank');
+        if (pdfWindow) {
+            pdfWindow.document.write('<html><body><h3 style="font-family: sans-serif; text-align: center; margin-top: 50px; color: #333;">Generando Documento... por favor espere.</h3></body></html>');
+        }
+
         setScanStatus(getText('generatingMaterialDoc', 'Generando Documento de Material...'), 'info');
         showSpinner();
         try {
@@ -3569,25 +3583,23 @@ async function handlePrintDocMaterialMain() {
             if (result.success && result.pdf_data) {
                 const pdfBlob = new Blob([Uint8Array.from(atob(result.pdf_data), c => c.charCodeAt(0))], { type: 'application/pdf' });
                 const pdfUrl = URL.createObjectURL(pdfBlob);
-                const anchor = document.createElement('a');
-                anchor.style.display = 'none';
-                anchor.href = pdfUrl;
-                anchor.target = "_blank";
-                anchor.download = 'Documento_Material_QR.pdf'; 
-
-                document.body.appendChild(anchor);
-                isViewingPDF = true;
-                anchor.click();
-                setTimeout(() => {
-                    window.URL.revokeObjectURL(pdfUrl);
+               if (pdfWindow) {
+                    pdfWindow.location.href = pdfUrl;
+                } else {
+                    const anchor = document.createElement('a');
+                    anchor.href = pdfUrl;
+                    anchor.download = 'Documento_Material_QR.pdf';
+                    document.body.appendChild(anchor);
+                    anchor.click();
                     document.body.removeChild(anchor);
-                }, 5000);
-
+                }
                 setScanStatus(getText('materialDocGenerated', 'Documento generado.'), 'success');
             } else {
+                if (pdfWindow) pdfWindow.close();
                 throw new Error(result.error || "No se recibieron datos del PDF desde el servidor.");
             }
         } catch (err) {
+            if (pdfWindow) pdfWindow.close();
             setScanStatus(`${getText('printingError', 'Error al imprimir')}: ${err.message}`, 'error');
             playSound('error');
             alert(`${getText('printingError', 'Error al generar documento')}: ${err.message}`);
