@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SAP WEB LND</title>
+    <link rel="icon" href="/static/logolnd.png" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
@@ -48,18 +49,19 @@
             cursor: not-allowed;
         }
 
-        #ingresoItemsTable thead th {
+        /* ▼ Cabeceras fijas para TODAS las tablas ▼ */
+        #msegTable thead th, #sublocationTable thead th, #ingresoItemsTable thead th {
             position: -webkit-sticky; /* Para compatibilidad con Safari */
             position: sticky;
             top: 0; 
             z-index: 10; 
-            
-            background-color: #f8f9fa; /* (Este es el mismo color de fondo de tu app) */
+            background-color: #f8f9fa; /* Mismo color de fondo de la app */
+            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); /* Pequeña sombra para diferenciar el scroll */
         }
         
-        #ingresoItemsTable tbody td {
-            position: relative; /* Las forzamos a tener un contexto de apilamiento */
-            z-index: 1;         /* Las ponemos en Capa 1 (Abajo) */
+        #msegTable tbody td, #sublocationTable tbody td, #ingresoItemsTable tbody td {
+            position: relative; 
+            z-index: 1;         
         }
         
         #searchHelpModal {
@@ -92,9 +94,31 @@
     line-height: 1.5; 
     padding-top: 8px !important; 
 }
+
+.login-header {
+    position: relative; 
+    text-align: center; 
+    width: 100%;
+    padding: 30px 0;
+}
+
+.header-icon {
+    position: absolute;
+    right: 10px; 
+    top: 5%;
+    transform: translateY(-50%); 
+    width: 60px;
+}
+body.login-bg {
+    background-image: url('/static/fondo.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
     </style>
 </head>
-<body>
+<body class="login-bg">
 <div id="spinner-overlay">
     <div class="spinner-border text-light" role="status">
         <span class="visually-hidden" data-translate="loading">Cargando...</span>
@@ -108,17 +132,38 @@
                 <div class="card">
                     <div class="card-body shadow-sm">
                         <h3 class="card-title text-center mb-4" data-translate="loginTitle">Login SAP</h3>
+                        <img src="/static/logolnd.png" alt="Logo" class="header-icon">
                         <div class="mb-3">
                             <label for="sapEnvSelect" class="form-label" data-translate="sapEnvironmentLabel">Entorno SAP</label>
                             <select class="form-select" id="sapEnvSelect">
                                 <option value="PRD" data-host="172.16.17.32" data-sysnr="00" data-translate="prdEnvironment">Producción (PRD)</option>
                                 <option value="QAS" data-host="172.16.16.10" data-sysnr="00" data-translate="qasEnvironment">Calidad (QAS)</option>
-                                <option value="DEV" data-host="172.16.16.11" data-sysnr="00" data-translate="devEnvironment">Desarrollo (DEV)</option>
+                                <option value="DEV" data-host="172.16.16.11" data-sysnr="00" data-translate="devEnvironment">Desarrollo (DEV)</option>  
                             </select>
                         </div>
-                        <div class="mb-3"><label for="sapClientInput" class="form-label" data-translate="clientLabel">Mandante</label><input type="text" class="form-control" id="sapClientInput"></div>
+                        <div class="mb-3">
+                            <label for="sapClientInput" class="form-label" data-translate="clientLabel">Mandante</label>
+                            <select class="form-select" id="sapClientInput"></select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sapPlantSelect" class="form-label" data-translate="loginPlantLabel">Centro (Planta)</label>
+                            <select class="form-select" id="sapPlantSelect">
+                                <option value="1000">1000 Lindsayca Inc.</option>
+                                <option value="2000">2000 Lindsayca Guyana Inc.</option>
+                                <option value="2000">2100 Commowealth Procurement</option>
+                                <option value="4000">4000 Energia 2000, S.A.</option>
+                            </select>
+                        </div>
                         <div class="mb-3"><label for="sapUserInput" class="form-label" data-translate="userLabel">Usuario SAP</label><input type="text" class="form-control" id="sapUserInput"></div>
-                        <div class="mb-3"><label for="sapPassInput" class="form-label" data-translate="passwordLabel">Contraseña</label><input type="password" class="form-control" id="sapPassInput"></div>
+                        <div class="mb-3">
+    <label for="sapPassInput" class="form-label" data-translate="passwordLabel">Contraseña</label>
+    <div class="input-group">
+        <input type="password" class="form-control" id="sapPassInput">
+        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+            <i class="bi bi-eye"></i>
+        </button>
+    </div>
+</div>
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="useSapRouter">
                             <label class="form-check-label" for="useSapRouter" data-translate="useSapRouterLabel">Usar SAP Router</label>
@@ -195,10 +240,7 @@
                         </div>
                         <div class="col-md-2">
                             <label for="centro" data-translate="plantLabel">Centro:</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="centro">
-                                <button class="btn btn-outline-secondary" type="button" id="searchCentro"><i class="bi bi-search"></i></button>
-                            </div>
+                            <input type="text" class="form-control bg-light" id="centro" readonly>
                         </div>
                         <div class="col-md-2">
                             <label for="almacen" data-translate="storageLocationLabel">Almacén:</label>
@@ -279,53 +321,80 @@
                 <button id="logoutButtonSub" class="btn btn-danger" data-translate="logoutButton">Logout</button>
             </div>
         </div>
-        <div class="p-3 border rounded bg-light mb-4">
-            <div class="row align-items-end">
-                <div class="col-lg-8">
-                    <h4 class="mb-3" data-translate="searchFiltersTitle">Filtros de Búsqueda</h4>
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label for="sublocationCentro" data-translate="plantLabel">Centro:</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="sublocationCentro">
-                                <button class="btn btn-outline-secondary" type="button" id="searchSublocationCentro"><i class="bi bi-search"></i></button>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="sublocationAlmacen" data-translate="storageLocationLabel">Almacén:</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="sublocationAlmacen">
-                                <button class="btn btn-outline-secondary" type="button" id="searchSublocationAlmacen"><i class="bi bi-search"></i></button>
-                            </div>
-                        </div>
+
+        <div class="row align-items-end">
+            <div class="col-lg-8">
+                <h4 class="mb-3" data-translate="searchFiltersTitle">Filtros de Búsqueda</h4>
+                
+                <div class="mb-3 pb-2 border-bottom">
+                    <label class="form-label fw-bold me-3" data-translate="searchMethodLabel">Método de Búsqueda:</label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="sublocationSearchMethod" id="searchByQr" value="qr" checked>
+                        <label class="form-check-label" for="searchByQr" data-translate="searchByQrLabel">Por Código QR</label>
                     </div>
-                    <div class="row g-3 mt-2" id="sublocationAreaContainer" style="display: none;">
-                        <div class="col-12">
-                            <label class="form-label" data-translate="areaLabel">Área:</label>
-                            <div>
-                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="sublocationArea" id="areaTodos" value="00" checked><label class="form-check-label" for="areaTodos" data-translate="allLabel">Todos</label></div>
-                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="sublocationArea" id="area01" value="01"><label class="form-check-label" for="area01">01</label></div>
-                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="sublocationArea" id="area02" value="02"><label class="form-check-label" for="area02">02</label></div>
-                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="sublocationArea" id="area03" value="03"><label class="form-check-label" for="area03">03</label></div>
-                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="sublocationArea" id="area04" value="04"><label class="form-check-label" for="area04">04</label></div>
-                                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="sublocationArea" id="area05" value="05"><label class="form-check-label" for="area05">05</label></div>
-                            </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="sublocationSearchMethod" id="searchByMaterial" value="material">
+                        <label class="form-check-label" for="searchByMaterial" data-translate="searchByMaterialLabel">Por Material</label>
+                    </div>
+                </div>
+                
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="sublocationCentro" data-translate="plantLabel">Centro:</label>
+                        <input type="text" class="form-control bg-light" id="sublocationCentro" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="sublocationAlmacen" data-translate="storageLocationLabel">Almacén:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="sublocationAlmacen">
+                            <button class="btn btn-outline-secondary" type="button" id="searchSublocationAlmacen"><i class="bi bi-search"></i></button>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4">
+                <div class="row g-3 mt-2" id="sublocationAreaContainer" style="display: none;">
+                    <div class="col-12">
+                        <label class="form-label" data-translate="areaLabel">Área:</label>
+                        <div>
+                            <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="sublocationArea" id="areaTodos" value="00" checked><label class="form-check-label" for="areaTodos" data-translate="allLabel">Todos</label></div>
+                            <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="sublocationArea" id="area01" value="01"><label class="form-check-label" for="area01">01</label></div>
+                            <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="sublocationArea" id="area02" value="02"><label class="form-check-label" for="area02">02</label></div>
+                            <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="sublocationArea" id="area03" value="03"><label class="form-check-label" for="area03">03</label></div>
+                            <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="sublocationArea" id="area04" value="04"><label class="form-check-label" for="area04">04</label></div>
+                            <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="sublocationArea" id="area05" value="05"><label class="form-check-label" for="area05">05</label></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div id="sublocationQrContainer">
                     <label for="sublocationQrContent" data-translate="lastQrLabel">Último QR leído:</label>
                     <p id="sublocationQrContent" class="form-control-plaintext border p-2 bg-light rounded mb-2"></p>
                     <div id="sublocationReader" style="display: none;"><span class="qr-message p-3"></span></div>
                     <button id="startSublocationScanButton" class="btn btn-primary mt-2" data-translate="activateCameraButton">Activar Cámara</button>
                     <button id="stopSublocationScanButton" class="btn btn-danger mt-2" style="display: none;" data-translate="stopCameraButton">Detener Cámara</button>
-                    <p id="sublocationScanStatus" class="lead mt-2"></p>
                 </div>
+
+                <div id="sublocationMaterialContainer" style="display: none;">
+                    <label for="sublocationMaterialInput" class="form-label fw-bold" data-translate="materialInputLabel">Número de Material:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control text-uppercase" id="sublocationMaterialInput" placeholder="Ej: 10000045">
+                        <button class="btn btn-outline-secondary" type="button" id="searchSublocationMaterial"><i class="bi bi-search"></i></button>
+                        <button class="btn btn-primary" type="button" id="btnSearchMaterialSublocation">
+                            <span data-translate="searchButton">Buscar</span>
+                        </button>
+                    </div>
+                </div>
+
+                <p id="sublocationScanStatus" class="lead mt-2"></p>
             </div>
         </div>
+
         <div class="d-flex justify-content-between align-items-center">
             <h4 class="mt-4" data-translate="searchResultsTitle">Resultados de la Búsqueda</h4>
             <div class="d-flex align-items-center">
+                <button id="clearSublocationButton" class="btn btn-warning me-2" data-translate="clearButton">Borrar Datos</button>
+                
                 <input type="text" id="filterInput" class="form-control me-2" placeholder="Filtrar resultados..." data-translate="filterPlaceholder">
                 <button id="exportToExcelButton" class="btn btn-success"><i class="bi bi-file-earmark-excel"></i></button>
                 <button id="layoutButtonSub" class="btn btn-info ms-2" data-bs-toggle="tooltip" title="Seleccionar Columnas"><i class="bi bi-layout-three-columns"></i></button>
@@ -367,8 +436,7 @@
             </table>
         </div>
     </div>
-
-<div id="ingresoContent" style="display: none;">
+    <div id="ingresoContent" style="display: none;">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="mb-0" data-translate="ingresoTitle">Ingreso de Materiales por Pedido</h2>
         <div>
@@ -449,6 +517,84 @@
                 </button>
             </div>
              <p id="ingresoStatus" class="mt-3 text-center"></p>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="initialQrSetupModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-gear-fill me-2"></i><span data-translate="quickSetupTitle">Configuración Rápida</span></h5>
+            </div>
+            <div class="modal-body">
+                <div id="initialQrLoading" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted" data-translate="searchingPlant">Buscando tu planta en SAP...</p>
+                </div>
+                <div id="initialQrError" class="alert alert-danger" style="display: none;"></div>
+                
+                <div id="initialQrForm" style="display: none;">
+                    <div class="mb-4">
+                        <label class="form-label text-muted small mb-0" data-translate="assignedPlant">Planta Asignada:</label>
+                        <input type="text" id="initialQrPlant" class="form-control fw-bold bg-light" readonly>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold mb-3" data-translate="movementTypeLabel">Tipo de Entrada (Movimiento):</label>
+                        
+                        <!-- INGRESOS -->
+                        <div class="form-check mb-3">
+                            <input class="form-check-input movement-radio" type="radio" name="initialQrMovement" id="m1" value="101|Q" style="transform: scale(1.3); margin-right: 10px;">
+                            <label class="form-check-label text-primary fw-bold" for="m1" data-translate="movGRProject">Goods Receipt Project</label>
+                        </div>
+                        <div class="form-check mb-4">
+                            <input class="form-check-input movement-radio" type="radio" name="initialQrMovement" id="m2" value="101|E" style="transform: scale(1.3); margin-right: 10px;">
+                            <label class="form-check-label text-primary fw-bold" for="m2" data-translate="movGRSales">Goods Receipt Sales</label>
+                        </div>
+
+                        <!-- CONSUMOS -->
+                        <div class="form-check mb-3">
+                            <input class="form-check-input movement-radio" type="radio" name="initialQrMovement" id="m3" value="221|Q" style="transform: scale(1.3); margin-right: 10px;">
+                            <label class="form-check-label text-danger fw-bold" for="m3" data-translate="movGIProject">Goods Issue Project</label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input movement-radio" type="radio" name="initialQrMovement" id="m4" value="231|E" style="transform: scale(1.3); margin-right: 10px;">
+                            <label class="form-check-label text-danger fw-bold" for="m4" data-translate="movGISales">Goods Issue Sales</label>
+                        </div>
+                        <div class="form-check mb-4">
+                            <!-- Nota: Al pasarle la 'R' al final, el JS sabrá que debe marcar la casilla de Reserva -->
+                            <input class="form-check-input movement-radio" type="radio" name="initialQrMovement" id="m5" value="221|Q|R" style="transform: scale(1.3); margin-right: 10px;">
+                            <label class="form-check-label text-danger fw-bold" for="m5" data-translate="movGIReservation">Goods Issue Reservation</label>
+                        </div>
+
+                        <!-- TRASPASOS -->
+                        <div class="form-check mb-3">
+                            <input class="form-check-input movement-radio" type="radio" name="initialQrMovement" id="m6" value="311|Q" style="transform: scale(1.3); margin-right: 10px;">
+                            <label class="form-check-label text-success fw-bold" for="m6" data-translate="movTFProject">Transfer posting Project</label>
+                        </div>
+                        <div class="form-check mb-3"> <input class="form-check-input movement-radio" type="radio" name="initialQrMovement" id="m7" value="311|E" style="transform: scale(1.3); margin-right: 10px;">
+                            <label class="form-check-label text-success fw-bold" for="m7" data-translate="movTFSales">Transfer posting Sales</label>
+                        </div>
+                        <div class="form-check mb-4">
+                            <input class="form-check-input movement-radio" type="radio" name="initialQrMovement" id="m9" value="311|" style="transform: scale(1.3); margin-right: 10px;">
+                            <label class="form-check-label text-success fw-bold" for="m9" data-translate="movTFGeneral">Transfer posting (311)</label>
+                        </div>
+
+                        <hr>
+                        <!-- OTRO -->
+                        <div class="form-check mb-2">
+                            <input class="form-check-input movement-radio" type="radio" name="initialQrMovement" id="m8" value="manual" style="transform: scale(1.3); margin-right: 10px;">
+                            <label class="form-check-label text-muted" for="m8" data-translate="movManual">Otro (Llenar manualmente)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" id="btnCancelInitialQr" data-translate="backToMenuBtn">Volver al Menú</button>
+                <button type="button" class="btn btn-primary px-4" id="btnConfirmInitialQr" disabled>
+                    <span data-translate="continueBtn">Continuar</span> <i class="bi bi-arrow-right"></i>
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -696,15 +842,17 @@
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
-        ? ''
-        : 'https://api.lndsap.com';
+    // const API_BASE_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
+   //     ? ''
+  //      : 'https://api.lndsap.com';
 
+        const API_BASE_URL = window.location.origin;
     const translations = {
         en: {
             // General
             loading: "Loading...",
             user: "User",
+            plantText: "Plant",
             logoutButton: "Logout",
             continueButton: "Continue",
             cancelButton: "Cancel",
@@ -727,6 +875,7 @@ document.addEventListener('DOMContentLoaded', () => {
             passwordLabel: "Password",
             useSapRouterLabel: "Use SAP Router",
             guestLoginButton: "Guest Login",
+            loginPlantLabel: "Plant",
             // Mode Selection
             selectModeTitle: "Select a Mode",
             labelReadingMode: "Label Reading (QR)",
@@ -864,11 +1013,38 @@ document.addEventListener('DOMContentLoaded', () => {
             selectAtLeastOneItem: "You must select at least one item to save.",
             poLoadedSuccess: "Purchase Order loaded successfully.",
             poMergedSuccess: "{count} position(s) reincorporated from Purchase Order {poNumber}.",
+            // Quick Setup Modal
+            quickSetupTitle: "Quick Setup",
+            searchingPlant: "Searching your plant in SAP...",
+            assignedPlant: "Assigned Plant:",
+            movementTypeLabel: "Entry Type (Movement):",
+            movGRProject: "Goods Receipt Project (101 - Q)",
+            movGRSales: "Goods Receipt Sales (101 - E)",
+            movGIProject: "Goods Issue Project (221 - Q)",
+            movGISales: "Goods Issue Sales (231 - E)",
+            movGIReservation: "Goods Issue Reservation",
+            movTFProject: "Transfer posting Project (311 - Q)",
+            movTFSales: "Transfer posting Sales (311 - E)",
+            movTFGeneral: "Transfer posting (311)",
+            movManual: "Other (Fill manually)",
+            backToMenuBtn: "Back to Menu",
+            continueBtn: "Continue",
+            // Sublocation Query Program
+            searchMethodLabel: "Search Method:",
+            searchByQrLabel: "By QR Code",
+            searchByMaterialLabel: "By Material",
+            materialInputLabel: "Material Number:",
+            searchButton: "Search",
+            searchingMaterial: "Searching material",
+            "No hay stock disponible para este material con los criterios seleccionados.": "No stock available for this material with the selected criteria.",
+            "El material no existe en la planta.": "The material does not exist in the plant.",
+            "Error de configuración en SAP: No se encontró un formato de visualización (Layout).": "SAP configuration error: No display layout found.",
         },
         es: {
             // General
             loading: "Cargando...",
             user: "Usuario",
+            plantText: "Planta",
             logoutButton: "Logout",
             continueButton: "Continuar",
             cancelButton: "Cancelar",
@@ -891,6 +1067,7 @@ document.addEventListener('DOMContentLoaded', () => {
             passwordLabel: "Contraseña",
             useSapRouterLabel: "Usar SAP Router",
             guestLoginButton: "Login de Invitado",
+            loginPlantLabel: "Centro (Planta)",
             // Mode Selection
             selectModeTitle: "Seleccione un Modo",
             labelReadingMode: "Lectura de Etiqueta (QR)",
@@ -1027,6 +1204,32 @@ document.addEventListener('DOMContentLoaded', () => {
             selectAtLeastOneItem: "Debe seleccionar al menos una posición para guardar.",
             poLoadedSuccess: "Pedido cargado exitosamente.",
             poMergedSuccess: "Se reincorporaron {count} posición(es) del pedido {poNumber}.",
+            // Quick Setup Modal
+            quickSetupTitle: "Configuración Rápida",
+            searchingPlant: "Buscando tu planta en SAP...",
+            assignedPlant: "Planta Asignada:",
+            movementTypeLabel: "Tipo de Entrada (Movimiento):",
+            movGRProject: "Entrada para Proyecto (101 - Q)",
+            movGRSales: "Entrada para Pedido Cliente (101 - E)",
+            movGIProject: "Consumo para Proyecto (221 - Q)",
+            movGISales: "Consumo para Pedido Cliente (231 - E)",
+            movGIReservation: "Consumo por Reserva",
+            movTFProject: "Traspaso para Proyecto (311 - Q)",
+            movTFSales: "Traspaso para Pedido Cliente (311 - E)",
+            movTFGeneral: "Traspaso (311)",
+            movManual: "Otro (Llenar manualmente)",
+            backToMenuBtn: "Volver al Menú",
+            continueBtn: "Continuar",
+            // Sublocation Query Program
+            searchMethodLabel: "Método de Búsqueda:",
+            searchByQrLabel: "Por Código QR",
+            searchByMaterialLabel: "Por Material",
+            materialInputLabel: "Número de Material:",
+            searchButton: "Buscar",
+            searchingMaterial: "Buscando material",
+            "No hay stock disponible para este material con los criterios seleccionados.": "No hay stock disponible para este material con los criterios seleccionados.",
+            "El material no existe en la planta.": "El material no existe en la planta.",
+            "Error de configuración en SAP: No se encontró un formato de visualización (Layout).": "Error de configuración en SAP: No se encontró un formato de visualización (Layout).",
         }
     };
 
@@ -1114,6 +1317,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastSavedQRData = null;
     let isViewingPDF = false;
 
+    // --- Mapeo Planta → Almacén por defecto ---
+    function getDefaultAlmacen(plant) {
+        const plantAlmacenMap = {
+            '1000': 'LI01',
+            '2000': '2000',
+            '4000': '4004'
+        };
+        return plantAlmacenMap[plant] || '';
+    }
+
     // --- Referencias al DOM ---
     const spinner = document.getElementById('spinner-overlay');
     const loginSection = document.getElementById('loginSection');
@@ -1127,6 +1340,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutButtons = document.querySelectorAll('#logoutButton, #logoutButtonSub, #logoutButtonIngreso');
     const backButtons = document.querySelectorAll('#backButtonMain, #backButtonSub, #backButtonIngreso');
     const sapEnvSelect = document.getElementById('sapEnvSelect');
+    const sapPlantSelect = document.getElementById('sapPlantSelect');
     const sapClientInput = document.getElementById('sapClientInput');
     const sapUserInput = document.getElementById('sapUserInput');
     const sapPassInput = document.getElementById('sapPassInput');
@@ -1201,6 +1415,108 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectAllQrCheckbox = document.getElementById('selectAllQrCheckbox'); 
     const printDocMaterialButtonMain = document.getElementById('printDocMaterialButtonMain');
 
+    // Variables de la nueva Búsqueda de Material
+    const searchByQrRadio = document.getElementById('searchByQr');
+    const searchByMaterialRadio = document.getElementById('searchByMaterial');
+    const sublocationQrContainer = document.getElementById('sublocationQrContainer');
+    const sublocationMaterialContainer = document.getElementById('sublocationMaterialContainer');
+    const sublocationMaterialInput = document.getElementById('sublocationMaterialInput');
+    const btnSearchMaterialSublocation = document.getElementById('btnSearchMaterialSublocation');
+
+    // Eventos para cambiar entre QR y Material
+    searchByQrRadio.addEventListener('change', () => {
+        sublocationQrContainer.style.display = 'block';
+        sublocationMaterialContainer.style.display = 'none';
+        sublocationScanStatus.textContent = ''; // Limpiamos mensajes
+    });
+
+    searchByMaterialRadio.addEventListener('change', async () => {
+        sublocationQrContainer.style.display = 'none';
+        sublocationMaterialContainer.style.display = 'block';
+        sublocationScanStatus.textContent = ''; // Limpiamos mensajes
+        if (isSublocationScanning) { await stopSublocationScanner(); } // Apagamos cámara por seguridad
+    });
+
+  // Evento Matchcode Material en Sububicación
+    document.getElementById('searchSublocationMaterial').addEventListener('click', () => {
+        const planta = sublocationCentroInput.value.trim();
+        if (!planta) {
+            alert('Se requiere el Centro para buscar el material.');
+            return;
+        }
+
+        // Capturamos lo que el usuario haya escrito antes de darle a la lupa
+        const textoBusqueda = document.getElementById('sublocationMaterialInput').value.trim().toUpperCase();
+
+        // AQUÍ ESTÁ LA MAGIA: Le decimos el orden y cuál es la columna que debe devolver (MATNR)
+        const config = {
+            display: {'MATNR': 'Material', 'MAKTX': 'Descripción', 'WERKS': 'Centro'},
+            order: ['MATNR', 'MAKTX', 'WERKS'],
+            returnColumn: 'MATNR'
+        };
+
+        // Le enviamos a SAP el Centro y también el texto de búsqueda (IV_MATNR)
+        openSearchHelp('sublocationMaterialInput', 'Z_SEARCH_HELP_MATNR', { IV_WERKS: planta, IV_MATNR: textoBusqueda }, 'Ayuda de Búsqueda - Material', config);
+    });
+
+    btnSearchMaterialSublocation.addEventListener('click', async () => {
+        const material = sublocationMaterialInput.value.trim().toUpperCase();
+        if (!material) {
+            alert(getText('materialInputLabel', 'Por favor ingrese un número de material.'));
+            return;
+        }
+        if (!areSublocationFiltersFilled()) {
+            alert(getText('completeFiltersToScan'));
+            return;
+        }
+
+        // ▼ AJUSTE 1: Mensaje correcto de "Buscando material" ▼
+        sublocationScanStatus.textContent = `${getText('searchingMaterial', 'Buscando material')}: ${material}...`;
+        sublocationScanStatus.className = "lead mt-2";
+        showSpinner();
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/getSublocationData`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    connection_params: sapConnection,
+                    centro: sublocationCentroInput.value.trim(),
+                    almacen: sublocationAlmacenInput.value.trim(),
+                    material: material, 
+                    area: (['1000', '2000', '4000'].includes(sublocationCentroInput.value.trim())) ? document.querySelector('input[name="sublocationArea"]:checked').value : null,
+                    is_guest: isGuestMode
+                })
+            });
+            const result = await response.json();
+            if (result.success) {
+                sublocationData = result.data.map(item => {
+                    if (item.PSPNR) item.PS_PSP_PNR = item.PSPNR;
+                    if (item.ZZSUB_UBIC) item.ZZSUB_UBICACION = item.ZZSUB_UBIC;
+                    return item;
+                });
+                
+                sortState = { column: null, direction: 'asc' };
+                sublocationScanStatus.textContent = getText('recordsFound').replace('{count}', sublocationData.length);
+                sublocationScanStatus.className = "lead mt-2 message-success";
+                filterAndRender();
+                playSound('beep');
+            } else {
+                throw new Error(result.error);
+            }
+        } catch (err) {
+            // ▼ AJUSTE 2: Hacemos que el error sea muy visible con un Alert ▼
+            const errorMsg = getText(err.message);
+            sublocationScanStatus.textContent = errorMsg; 
+            sublocationScanStatus.className = "lead mt-2 message-error";
+            alert(errorMsg); // <-- Esto forzará una ventana emergente en el navegador
+            playSound('error');
+            renderSublocationTable([]);
+        } finally {
+            hideSpinner();
+        }
+    });
+
     // --- FUNCIONES DEL SPINNER ---
     function showSpinner() { spinner.style.display = 'flex'; }
     function hideSpinner() { spinner.style.display = 'none'; }
@@ -1213,7 +1529,109 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- REGISTRO DE EVENTOS ---
     loginButton.addEventListener('click', () => handleLogin(false));
+    sapClientInput.addEventListener('change', (e) => {
+        const clientValue = e.target.value;
+        const plantSelect = document.getElementById('sapPlantSelect');
+        const currentSelection = plantSelect.value; 
+
+        const plantDescriptions = {
+            '1000': '1000 Lindsayca Inc.',
+            '2000': '2000 Lindsayca Guyana Inc.',
+            '2100': '2100 Commowealth Procurement',
+            '4000': '4000 Energia 2000, S.A.'
+        };
+
+        // --- Evento para iniciar sesión con la tecla Enter ---
+    const triggerLoginOnEnter = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Evita que la tecla Enter haga saltos de línea u otras acciones no deseadas
+            loginButton.click(); // Simula el clic en el botón "Login"
+        }
+    };
+
+    // Le asignamos la función a los campos de Usuario y Contraseña
+    sapUserInput.addEventListener('keypress', triggerLoginOnEnter);
+    sapPassInput.addEventListener('keypress', triggerLoginOnEnter);
+        
+        plantSelect.innerHTML = ''; // Limpiamos la lista desplegable
+        let newOptions = [];
+        
+        // Aplicamos tus reglas de negocio
+        if (['110', '120', '610'].includes(clientValue)) {
+            newOptions = ['1000', '4000'];
+        } else if (['620', '220'].includes(clientValue)) { 
+            newOptions = ['2000'];
+         } else if (['630', '230'].includes(clientValue)) { 
+             newOptions = ['2100'];
+        } else {
+            // Mostrar todas por defecto si está vacío o no coincide
+            newOptions = ['1000', '2000', '2100', '4000'];
+        }
+        
+        // Llenamos la lista desplegable usando el diccionario
+        newOptions.forEach(opt => {
+            const optionElement = document.createElement('option');
+            optionElement.value = opt; 
+            optionElement.textContent = plantDescriptions[opt]; 
+            plantSelect.appendChild(optionElement);
+        });
+        
+        // Mantiene la selección previa si sigue siendo válida
+        if (newOptions.includes(currentSelection)) {
+            plantSelect.value = currentSelection;
+        }
+    });
+
+function updateClientOptions() {
+        const env = sapEnvSelect.value;
+        sapClientInput.innerHTML = ''; // Limpiar opciones anteriores
+
+        let clients = [];
+        
+        // Lógica de mandantes por entorno
+        if (env === 'DEV') {
+            clients = ['120', '220'];
+        } else if (env === 'QAS') {
+            clients = ['610', '620', '630'];
+        } else if (env === 'PRD') {
+            clients = ['610', '620', '630'];
+        }
+
+        // Llenar el <select>
+        clients.forEach(client => {
+            const option = document.createElement('option');
+            option.value = client;
+            option.textContent = client;
+            sapClientInput.appendChild(option);
+        });
+
+        // Disparar el evento 'change' para que se actualicen las plantas automáticamente
+        sapClientInput.dispatchEvent(new Event('change'));
+    }
+
+    // Escuchar cambios en el selector de Entorno
+    sapEnvSelect.addEventListener('change', updateClientOptions);
+
     guestLoginButton.addEventListener('click', () => handleLogin(true));
+    
+// --- Lógica para Mostrar/Ocultar Contraseña ---
+    const togglePassword = document.getElementById('togglePassword');
+    
+    if (togglePassword) {
+        togglePassword.addEventListener('click', function () {
+            // Cambiamos el tipo de input (password <-> text)
+            const type = sapPassInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            sapPassInput.setAttribute('type', type);
+            
+            // Cambiamos el ícono del ojo
+            const icon = this.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('bi-eye');
+                icon.classList.toggle('bi-eye-slash');
+            }
+        });
+    }
+
     logoutButtons.forEach(btn => btn.addEventListener('click', handleLogout));
     continueButton.addEventListener('click', handleModeSelection);
     backButtons.forEach(btn => btn.addEventListener('click', goBackToModeSelection));
@@ -1225,7 +1643,8 @@ document.addEventListener('DOMContentLoaded', () => {
     deleteIngresoButton.addEventListener('click', deleteSelectedIngresoRows);
     [sublocationCentroInput, sublocationAlmacenInput].forEach(input => input.addEventListener('input', manageSublocationScannerState));
     sublocationCentroInput.addEventListener('input', () => {
-        if (sublocationCentroInput.value.trim() === '4000') {
+        const centroActual = sublocationCentroInput.value.trim();
+        if (['1000', '2000', '4000'].includes(centroActual)) {
             sublocationAreaContainer.style.display = 'block';
         } else {
             sublocationAreaContainer.style.display = 'none';
@@ -1241,13 +1660,13 @@ document.addEventListener('DOMContentLoaded', () => {
     sublocationTableHead.addEventListener('click', handleSort);
     filterInput.addEventListener('input', filterAndRender);
     exportToExcelButton.addEventListener('click', exportToExcel);
+    const clearSublocationButton = document.getElementById('clearSublocationButton');
+    clearSublocationButton.addEventListener('click', clearSublocationForm);
     layoutButtonSub.addEventListener('click', () => openLayoutModal('sublocationTable', sublocationColumnVisibility, 'layoutModalTitle'));
     layoutButtonMseg.addEventListener('click', () => openLayoutModal('msegTable', msegColumnVisibility, 'layoutModalTitle'));
     layoutButtonIngreso.addEventListener('click', () => openLayoutModal('ingresoItemsTable', ingresoColumnVisibility, 'layoutModalTitle'));
     applyLayoutButton.addEventListener('click', applyLayoutChanges);
-    document.getElementById('searchCentro').addEventListener('click', () => openSearchHelp('centro', 'Z_SEARCH_HELP_WERKS', {}, 'searchHelpForPlant'));
     document.getElementById('searchAlmacen').addEventListener('click', () => openSearchHelp('almacen', 'Z_SEARCH_HELP_LGORT', { IV_WERKS: centroInput.value.trim() }, 'searchHelpForStorage'));
-    document.getElementById('searchSublocationCentro').addEventListener('click', () => openSearchHelp('sublocationCentro', 'Z_SEARCH_HELP_WERKS', {}, 'searchHelpForPlant'));
     document.getElementById('searchSublocationAlmacen').addEventListener('click', () => openSearchHelp('sublocationAlmacen', 'Z_SEARCH_HELP_LGORT', { IV_WERKS: sublocationCentroInput.value.trim() }, 'searchHelpForStorage'));
     document.getElementById('searchClMovimiento').addEventListener('click', () => openSearchHelp('clMovimiento', 'local_cl_movimiento', {}, 'searchHelpForMoveType'));
     document.getElementById('searchSpecialStock').addEventListener('click', () => openSearchHelp('specialStockIndicator', 'local_stock_especial', {}, 'searchHelpForSpecialStock'));
@@ -1661,6 +2080,114 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    const initialQrSetupModal = new bootstrap.Modal(document.getElementById('initialQrSetupModal'));
+    const initialQrPlant = document.getElementById('initialQrPlant');
+    const btnConfirmInitialQr = document.getElementById('btnConfirmInitialQr');
+    const movementRadios = document.querySelectorAll('.movement-radio');
+
+    async function openInitialQrSetup() {
+        // 1. Limpiamos y ocultamos cosas viejas (ya no hay bolita de carga)
+        document.getElementById('initialQrError').style.display = 'none';
+        document.getElementById('initialQrLoading').style.display = 'none';
+        btnConfirmInitialQr.disabled = true;
+        
+        // 2. Desmarcar todos los radios al abrir
+        movementRadios.forEach(r => r.checked = false);
+
+        const plant = currentPlant;
+        initialQrPlant.value = plant;
+        
+        // --- LÓGICA DE VISIBILIDAD (Ajustes 1 y 2) ---
+        // Primero, nos aseguramos de que todos estén visibles por defecto
+        document.querySelectorAll('.movement-radio').forEach(r => {
+            r.parentElement.style.display = 'block';
+        });
+
+        // REGLA 1: Si es Planta 1000 -> Ocultar 101 Q y 101 E
+        if (plant === '1000') {
+            document.getElementById('m1').parentElement.style.display = 'none';
+            document.getElementById('m2').parentElement.style.display = 'none';
+        }
+
+        // REGLA 2: Si es Planta 4000 o 2000 -> Ocultar las de ventas (E)
+        if (plant === '4000' || plant === '2000') {
+            document.getElementById('m2').parentElement.style.display = 'none'; // 101 E
+            document.getElementById('m4').parentElement.style.display = 'none'; // 231 E
+            document.getElementById('m7').parentElement.style.display = 'none'; // 311 E
+        }
+
+        // 4. Abrir el modal y mostrar formulario
+        initialQrSetupModal.show();
+        document.getElementById('initialQrForm').style.display = 'block';
+    }
+
+    // Habilitar botón de continuar solo cuando seleccionen un radio button
+    movementRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            btnConfirmInitialQr.disabled = false;
+        });
+    });
+
+    document.getElementById('btnCancelInitialQr').addEventListener('click', () => {
+        initialQrSetupModal.hide();
+        goBackToModeSelection();
+    });
+
+    btnConfirmInitialQr.addEventListener('click', async () => {
+        const selectedRadio = document.querySelector('input[name="initialQrMovement"]:checked');
+        if (!selectedRadio) return;
+
+        const selectedOpt = selectedRadio.value;
+        
+        // Referencias a los botones de búsqueda (lupas)
+        const btnSearchClMov = document.getElementById('searchClMovimiento');
+        const btnSearchStock = document.getElementById('searchSpecialStock');
+        
+        if (selectedOpt !== 'manual') {
+            // Extraemos Movimiento y Stock
+            const [mov, stock, isReserva] = selectedOpt.split('|');
+            clMovimientoInput.value = mov;
+            specialStockIndicatorInput.value = stock || '';
+            
+            if (isReserva === 'R') {
+                reservaCheckbox.checked = true;
+                toggleReservaColumn();
+            } else {
+                reservaCheckbox.checked = false;
+            }
+
+            // --- BLOQUEO DE CAMPOS (Ajuste 4) ---
+            clMovimientoInput.readOnly = true;
+            clMovimientoInput.classList.add('bg-light');
+            specialStockIndicatorInput.readOnly = true;
+            specialStockIndicatorInput.classList.add('bg-light');
+            btnSearchClMov.disabled = true;  // Desactiva lupa
+            btnSearchStock.disabled = true;  // Desactiva lupa
+
+        } else {
+            // --- DESBLOQUEO DE CAMPOS (Opción Manual) ---
+            clMovimientoInput.readOnly = false;
+            clMovimientoInput.classList.remove('bg-light');
+            specialStockIndicatorInput.readOnly = false;
+            specialStockIndicatorInput.classList.remove('bg-light');
+            btnSearchClMov.disabled = false; // Activa lupa
+            btnSearchStock.disabled = false; // Activa lupa
+        }
+        
+        if (initialQrPlant.value) {
+            centroInput.value = initialQrPlant.value;
+            // Proponer almacén según la planta (el usuario puede cambiarlo)
+            const suggestedAlmacen = getDefaultAlmacen(initialQrPlant.value);
+            if (suggestedAlmacen && !almacenInput.value.trim()) {
+                almacenInput.value = suggestedAlmacen;
+            }
+        }
+        
+        initialQrSetupModal.hide();
+        handleHeaderChange(); 
+        
+        await startScanner(); 
+    });
 
     // --- LÓGICA DE AYUDA DE BÚSQUEDA (MATCHCODE) ---
     async function openSearchHelp(targetInputId, rfcName, params, titleKey, columnConfig = null) {
@@ -1853,12 +2380,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
             if (result.success) {
                 sapConnection = connectionParamsForThisAttempt;
+                currentPlant = sapPlantSelect.value; // ▼ GUARDAMOS LA PLANTA GLOBALMENTE
+                
                 const userToShow = isGuest ? (result.guest_user || 'Invitado') : connectionParamsForThisAttempt.user;
                 loginSection.style.display = 'none';
                 modeSelectionSection.style.display = 'block';
 
                 const selectedClient = sapClientInput.value.trim();
-                const displayText = `${getText('user')}: ${userToShow.toUpperCase()} (${sapEnvSelect.value} ${selectedClient})`;
+                // ▼ AGREGAMOS LA PLANTA AL TEXTO VERDE DE ARRIBA A LA DERECHA
+                const displayText = `${getText('user')}: ${userToShow.toUpperCase()} (${sapEnvSelect.value} ${selectedClient} - ${getText('plantText')} ${currentPlant})`;
                 loggedInUserDisplays.forEach(display => {
                     display.textContent = displayText;
                 });
@@ -1888,6 +2418,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sapPassInput.value = '';
         setLoginStatus(getText('sessionClosed'), "info");
         clearAllScreens();
+        document.body.classList.add('login-bg');
     }
 
     function handleModeSelection() {
@@ -1896,29 +2427,34 @@ document.addEventListener('DOMContentLoaded', () => {
         mainContent.style.display = 'none';
         sublocationContent.style.display = 'none';
         ingresoContent.style.display = 'none';
+
+        document.body.classList.remove('login-bg');
+        
         if (selectedMode === 'etiqueta') {
             mainContent.style.display = 'block';
+            centroInput.value = currentPlant; // ▼ AUTO-LLENAR PLANTA
             if (isGuestMode) {
                 headerDataSection.style.display = 'none';
             } else {
                 headerDataSection.style.display = 'block';
                 fechaContabInput.valueAsDate = new Date();
+                openInitialQrSetup();
             }
             handleHeaderChange();
         } else if (selectedMode === 'sublocation') {
             sublocationContent.style.display = 'block';
+            sublocationCentroInput.value = currentPlant; // ▼ AUTO-LLENAR PLANTA
+            // Proponer almacén según la planta (el usuario puede cambiarlo)
+            const suggestedAlmacenSub = getDefaultAlmacen(currentPlant);
+            if (suggestedAlmacenSub && !sublocationAlmacenInput.value.trim()) {
+                sublocationAlmacenInput.value = suggestedAlmacenSub;
+            }
+            sublocationCentroInput.dispatchEvent(new Event('input')); // Dispara la validación del Área 4000
             manageSublocationScannerState();
         } else if (selectedMode === 'ingreso') {
             ingresoContent.style.display = 'block';
             document.getElementById('ingresoFechaDoc').valueAsDate = new Date();
             document.getElementById('ingresoFechaCont').valueAsDate = new Date();
-           // const countryHeader = document.querySelector('#ingresoItemsTable thead th[data-translate="countryHeader"]');
-            
-        //    if (countryHeader) {
-        //        countryHeader.style.display = 'none';
-        //    }
-
-            //updateIngresoTableVisibility();
         }
     }
 
@@ -1929,6 +2465,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ingresoContent.style.display = 'none';
         modeSelectionSection.style.display = 'block';
         clearAllScreens();
+        document.body.classList.add('login-bg');
     }
 
     function setLoginStatus(message, type) {
@@ -1964,7 +2501,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function areHeadersFilled() {
         if (isGuestMode) { return true; }
-        return clMovimientoInput.value.trim() && almacenInput.value.trim() && centroInput.value.trim() && fechaContabInput.value;
+        return clMovimientoInput.value.trim() && centroInput.value.trim() && fechaContabInput.value;
     }
     async function manageScannerState() {
         if (areHeadersFilled()) {
@@ -2302,7 +2839,7 @@ const moveType = clMovimientoInput.value.trim();
                 })
             });
             const result = await response.json();
-            if (result.success) {
+           if (result.success) {
                 // 1. Llenar la lista de Receptores
                 receptorSelect.innerHTML = `<option value="">${getText('selectReceiver')}</option>`;
                 result.receptores.forEach(r => {
@@ -2343,7 +2880,7 @@ const moveType = clMovimientoInput.value.trim();
 
                 setScanStatus("", "");
                 signatureModal.show();
-            }
+            } 
         } catch (e) {
             setScanStatus(`${getText('networkError')}: ${e.message}`, "error");
             playSound('error');
@@ -2611,9 +3148,6 @@ const moveType = clMovimientoInput.value.trim();
         scannedCodes.clear();
         qrContentElement.textContent = '';
 
-        clMovimientoInput.value = '';
-        specialStockIndicatorInput.value = '';
-        centroInput.value = '';
         almacenInput.value = '';
         textoCabeceraInput.value = '';
         fechaContabInput.valueAsDate = new Date(); 
@@ -2815,7 +3349,8 @@ function toggleSpecialColumnsVisibility() {
         }
     }
     function areSublocationFiltersFilled() {
-        return sublocationCentroInput.value.trim() && sublocationAlmacenInput.value.trim();
+        // Ahora solo exigimos el Centro. El Almacén es opcional.
+        return sublocationCentroInput.value.trim() !== "";
     }
     async function manageSublocationScannerState() {
         if (areSublocationFiltersFilled()) {
@@ -2878,7 +3413,7 @@ function toggleSpecialColumnsVisibility() {
                     centro: sublocationCentroInput.value.trim(),
                     almacen: sublocationAlmacenInput.value.trim(),
                     sublocation: decodedText,
-                    area: (sublocationCentroInput.value.trim() === '4000') ? selectedArea : null,
+                    area: (['1000', '2000', '4000'].includes(sublocationCentroInput.value.trim())) ? selectedArea : null,
                     is_guest: isGuestMode
                 })
             });
@@ -2894,7 +3429,7 @@ function toggleSpecialColumnsVisibility() {
                 throw new Error(result.error);
             }
         } catch (err) {
-            sublocationScanStatus.textContent = `Error: ${err.message}`;
+            sublocationScanStatus.textContent = getText(err.message); 
             sublocationScanStatus.className = "lead mt-2 message-error";
             playSound('error');
             renderSublocationTable([]);
@@ -3050,6 +3585,7 @@ function toggleSpecialColumnsVisibility() {
         toggleReservaColumn();
         sublocationCentroInput.value = '';
         sublocationAlmacenInput.value = '';
+        sublocationMaterialInput.value = '';
         sublocationQrContent.textContent = '';
         sublocationTableBody.innerHTML = '';
         sublocationScanStatus.textContent = '';
@@ -3065,6 +3601,37 @@ function toggleSpecialColumnsVisibility() {
         sublocationColumnVisibility = initializeColumnVisibility('sublocationTable');
         updateTableVisibility('msegTable', msegColumnVisibility);
         updateTableVisibility('sublocationTable', sublocationColumnVisibility);
+    }
+
+    function clearSublocationForm() {
+        // 1. Limpiar campos de texto
+        sublocationAlmacenInput.value = '';
+        sublocationMaterialInput.value = '';
+        
+        sublocationMaterialInput.value = '';
+        sublocationQrContent.textContent = '';
+        filterInput.value = '';
+        
+        // 2. Limpiar tabla y memoria
+        sublocationTableBody.innerHTML = '';
+        sublocationData = [];
+        
+        // 3. Resetear mensajes de estado
+        sublocationScanStatus.textContent = '';
+        sublocationScanStatus.className = "lead mt-2";
+        
+        // 4. Restaurar valores por defecto (Área y Orden)
+        document.getElementById('areaTodos').checked = true;
+        sortState = { column: null, direction: 'asc' };
+        updateSortArrows();
+        exportToExcelButton.disabled = true;
+
+        // 5. Reafirmar la planta global de inicio de sesión
+        sublocationCentroInput.value = currentPlant; 
+        sublocationCentroInput.dispatchEvent(new Event('input'));
+        
+        // 6. Validar estado del escáner
+        manageSublocationScannerState();
     }
   //  function updateIngresoTableVisibility() {
   //      const stockType = document.querySelector('input[name="ingresoStockEspecial"]:checked').value;
@@ -3145,12 +3712,7 @@ function renderIngresoItemsTable(items) {
     // PASO 1: Analizar todos los items para decidir qué columnas mostrar
     let showWbsColumn = false;
     let showSoColumn = false;
-    let defaultAlmacen = '';
     
-    if (items.length > 0) {
-        defaultAlmacen = items[0].LGORT;
-    }
-
     items.forEach(item => {
         if (item.SOBKZ === 'Q') showWbsColumn = true;
         if (item.SOBKZ === 'E') showSoColumn = true;
@@ -3180,14 +3742,9 @@ function renderIngresoItemsTable(items) {
         const planta = item.WERKS; // Centro de ESTE item
         const bednr = item.BEDNR || ''; // Nuevo campo AREA
         
-        // 1. Lógica para el Almacén por defecto
-        if (!defaultAlmacen) {
-            if (planta === '1000') {
-                defaultAlmacen = 'LI01';
-            } else if (planta === '4000') {
-                defaultAlmacen = '4004';
-            }
-        }
+        // 1. Lógica para el Almacén por defecto (según planta)
+        // Si el item ya trae LGORT de SAP lo usa, si no, propone según la planta
+        const defaultAlmacen = item.LGORT || getDefaultAlmacen(planta);
 
         // 2. Lógica para la Sub-Ubicación por defecto (CON TU VALIDACIÓN)
         let defaultSublocation = ''; // Default para todo
@@ -3996,7 +4553,7 @@ function addSplitLine() {
     ingresoColumnVisibility['salesOrderItemCol'] = false; // Forzar a Oculto
     sublocationColumnVisibility = initializeColumnVisibility('sublocationTable');
     ingresoColumnVisibility['countryCol'] = false;
-
+    updateClientOptions();
     clearAllScreens();
 
     window.addEventListener('pageshow', function(event) {
