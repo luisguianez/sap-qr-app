@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SAP WEB LND</title>
-    <link rel="icon" href="{{ url_for('static', filename='logolnd.png') }}" type="image/png">
+    <link rel="icon" href="static/logolnd.png" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
@@ -110,7 +110,7 @@
     width: 60px;
 }
 body.login-bg {
-       background-image: url("{{ url_for('static', filename='fondo.jpg') }}");
+      background-image: url("static/fondo.jpg");
        background-size: cover;
        background-position: center;
        background-repeat: no-repeat;
@@ -132,7 +132,7 @@ body.login-bg {
                 <div class="card">
                     <div class="card-body shadow-sm">
                         <h3 class="card-title text-center mb-4" data-translate="loginTitle">Login SAP</h3>
-                       <img src="{{ url_for('static', filename='logolnd.png') }}" alt="Logo" class="header-icon">
+                       <img src="static/logolnd.png" alt="Logo" class="header-icon">
                         <div class="mb-3">
                             <label for="sapEnvSelect" class="form-label" data-translate="sapEnvironmentLabel">Entorno SAP</label>
                             <select class="form-select" id="sapEnvSelect">
