@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SAP WEB LND</title>
-    <link rel="icon" href="static/logolnd.png" type="image/png">
+    <link rel="icon" href="/static/logolnd.png" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
@@ -31,7 +31,6 @@
             transform: translateY(-50%);
             opacity: 0.5;
         }
-        .wbs-col, .so-col { display: none; }
         #spinner-overlay {
             position: fixed;
             top: 0;
@@ -110,12 +109,12 @@
     width: 60px;
 }
 body.login-bg {
-      background-image: url("static/fondo.jpg");
-       background-size: cover;
-       background-position: center;
-       background-repeat: no-repeat;
-       background-attachment: fixed;
-   }
+    background-image: url('/static/fondo.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
     </style>
 </head>
 <body class="login-bg">
@@ -132,7 +131,7 @@ body.login-bg {
                 <div class="card">
                     <div class="card-body shadow-sm">
                         <h3 class="card-title text-center mb-4" data-translate="loginTitle">Login SAP</h3>
-                       <img src="static/logolnd.png" alt="Logo" class="header-icon">
+                        <img src="/static/logolnd.png" alt="Logo" class="header-icon">
                         <div class="mb-3">
                             <label for="sapEnvSelect" class="form-label" data-translate="sapEnvironmentLabel">Entorno SAP</label>
                             <select class="form-select" id="sapEnvSelect">
@@ -301,10 +300,10 @@ body.login-bg {
                     <th id="poItemCol1" data-column="poItemCol1" data-translate="poItemCol1" class="text-center align-middle" style="min-width: 80px;">Pos. Pedido 1</th>
                     <th data-column="orderNo2Col" class="cell-orderNo2Col d-none" data-translate="orderNo2Col">Pedido 2</th>
                     <th data-column="poItemCol2" class="cell-poItemCol2 d-none" data-translate="poItemCol2" style="min-width: 80px;">Pos. Pedido 2</th>
-                    <th data-column="wbsCol" data-translate="wbsCol">Elemento PEP</th>
+                    <th data-column="wbsCol" class="d-none" data-translate="wbsCol">Elemento PEP</th>
                     <th data-column="reservationCol" class="reserva-col d-none" data-translate="reservationCol">Reserva</th>
-                    <th data-column="salesOrderCol" data-translate="salesOrderCol">Pedido Cliente</th>
-                    <th data-column="salesOrderItemCol" data-translate="salesOrderItemCol">Pos. Pedido Cliente</th>
+                    <th data-column="salesOrderCol" class="d-none" data-translate="salesOrderCol">Pedido Cliente</th>
+                    <th data-column="salesOrderItemCol" class="d-none" data-translate="salesOrderItemCol">Pos. Pedido Cliente</th>
 
                 </tr></thead>
                 <tbody id="msegTableBody"></tbody>
@@ -481,9 +480,9 @@ body.login-bg {
         <th data-column="specialStockCol" data-translate="specialStockLabel">Ind. Stock Esp.</th>
         <th data-column="materialCol" data-translate="materialCol">Material</th>
         <th data-column="materialDescCol" data-translate="materialDescCol">Descripción</th>
-        <th data-column="wbsCol" class="wbs-col" data-translate="wbsCol">Elemento PEP (WBS)</th>
-        <th data-column="salesOrderCol" class="so-col" data-translate="salesOrderHeader">Pedido Venta</th>
-        <th data-column="salesOrderItemCol" class="so-col" data-translate="salesOrderItemHeader">Pos. Ped. Venta</th>
+        <th data-column="wbsCol" class="d-none" data-translate="wbsCol">Elemento PEP (WBS)</th>
+        <th data-column="salesOrderCol" class="d-none" data-translate="salesOrderHeader">Pedido Venta</th>
+        <th data-column="salesOrderItemCol" class="d-none" data-translate="salesOrderItemHeader">Pos. Ped. Venta</th>
         <th data-column="plantCol" data-translate="plantLabel">Planta</th>
         <th data-column="storageLocationCol" data-translate="storageLocationLabel">Almacén</th>
         <th data-column="qtyCol" data-translate="qtyCol">Cantidad</th>
@@ -842,11 +841,11 @@ body.login-bg {
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-     const API_BASE_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
-        ? ''
-        : 'https://api.lndsap.com';
+    // const API_BASE_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
+   //     ? ''
+  //      : 'https://api.lndsap.com';
 
-        //const API_BASE_URL = window.location.origin;
+        const API_BASE_URL = window.location.origin;
     const translations = {
         en: {
             // General
@@ -3226,9 +3225,9 @@ const moveType = clMovimientoInput.value.trim();
             visibilityObject[chk.value] = chk.checked;
         });
         updateTableVisibility(tableId, visibilityObject);
-       if (tableId === 'msegTable') { 
-        toggleSpecialColumnsVisibility(); 
-    }
+        if (tableId === 'msegTable') { 
+            toggleSpecialColumnsVisibility(); 
+        }
         layoutModal.hide();
     }
 
@@ -3805,18 +3804,18 @@ function renderIngresoItemsTable(items) {
         // Columnas WBS y Pedido Venta (lógica sin cambios)
         if (showWbsColumn) {
             const wbsContent = (stockIndicator === 'Q') ? (item.PS_PSP_PNR_D || '') : '';
-            rowHtml += `<td class="wbs-col cell-wbsCol">${wbsContent}</td>`;
+            rowHtml += `<td class="d-none cell-wbsCol">${wbsContent}</td>`;
         } else {
-            rowHtml += `<td class="wbs-col cell-wbsCol"></td>`; 
+            rowHtml += `<td class="d-none cell-wbsCol"></td>`; 
         }
         if (showSoColumn) {
             const soNumContent = (stockIndicator === 'E') ? (item.KDAUF || '') : '';
             const soItemContent = (stockIndicator === 'E') ? (item.KDPOS || '') : '';
-            rowHtml += `<td class="so-col cell-salesOrderCol">${soNumContent}</td>`;
-            rowHtml += `<td class="so-col cell-salesOrderItemCol">${soItemContent}</td>`;
+            rowHtml += `<td class="d-none cell-salesOrderCol">${soNumContent}</td>`;
+            rowHtml += `<td class="d-none cell-salesOrderItemCol">${soItemContent}</td>`;
         } else {
-             rowHtml += `<td class="so-col cell-salesOrderCol"></td>`; 
-             rowHtml += `<td class="so-col cell-salesOrderItemCol"></td>`; 
+             rowHtml += `<td class="d-none cell-salesOrderCol"></td>`; 
+             rowHtml += `<td class="d-none cell-salesOrderItemCol"></td>`; 
         }
         
         rowHtml += `
