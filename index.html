@@ -841,11 +841,11 @@ body.login-bg {
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // const API_BASE_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
-   //     ? ''
-  //      : 'https://api.lndsap.com';
+    // Configuración de la URL del API
+    const API_BASE_URL = (window.location.hostname === 'lndsap.com' || window.location.hostname === 'www.lndsap.com' || window.location.hostname.includes('pages.dev'))
+        ? 'https://api.lndsap.com'
+        : window.location.origin;
 
-        const API_BASE_URL = window.location.origin;
     const translations = {
         en: {
             // General
