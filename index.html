@@ -520,6 +520,37 @@ body.login-bg {
     </div>
 </div>
 
+<div id="deliveryTicketContent" style="display: none;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0" data-translate="deliveryTicketTitle">Impresión de Delivery Ticket</h2>
+        <div>
+            <button id="backButtonDeliveryTicket" class="btn btn-secondary me-2" data-translate="backButton">Volver</button>
+            <span id="loggedInUserDisplayDeliveryTicket" class="badge bg-success me-3"></span>
+            <button id="logoutButtonDeliveryTicket" class="btn btn-danger" data-translate="logoutButton">Logout</button>
+        </div>
+    </div>
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="card-title mb-0" data-translate="deliveryTicketTitle">Impresión de Delivery Ticket</h5>
+        </div>
+        <div class="card-body">
+            <div class="row align-items-end g-3">
+                <div class="col-md-4">
+                    <label for="deliveryTicketPoNumber" class="form-label fw-bold" data-translate="poNumberLabel">Nro de Pedido:</label>
+                    <input type="text" id="deliveryTicketPoNumber" class="form-control text-uppercase" placeholder="" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                </div>
+                <div class="col-md-3">
+                    <button id="printDeliveryTicketButton" class="btn btn-primary w-100">
+                        <i class="bi bi-printer"></i> <span data-translate="printDeliveryTicketButton">Imprimir Delivery Ticket</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <p id="deliveryTicketStatus" class="mt-3 text-center"></p>
+</div>
+
 <div class="modal fade" id="initialQrSetupModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content shadow-lg">
@@ -841,13 +872,11 @@ body.login-bg {
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // const API_BASE_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
+   //     ? ''
+  //      : 'https://api.lndsap.com';
 
-    // Configuración de la URL del API
-   const API_BASE_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
-    ? ''
-    : 'https://api.lndsap.com'; 
-
-    //const API_BASE_URL = window.location.origin;
+        const API_BASE_URL = window.location.origin;
     const translations = {
         en: {
             // General
@@ -994,6 +1023,12 @@ document.addEventListener('DOMContentLoaded', () => {
             poItemCol1: "P.O. Item 1",
             poItemCol2: "P.O. Item 2",
             filterPlaceholder: "Filter results...",
+            // Delivery Ticket
+            deliveryTicketMode: "Delivery Ticket Printing",
+            deliveryTicketTitle: "Delivery Ticket Printing",
+            printDeliveryTicketButton: "Print Delivery Ticket",
+            generatingDeliveryTicket: "Generating Delivery Ticket...",
+            deliveryTicketGenerated: "Delivery Ticket generated.",
             // Split Modal
             splitModalTitle: "Split Item",
             originalDataTitle: "Original Data",
@@ -1186,6 +1221,12 @@ document.addEventListener('DOMContentLoaded', () => {
             poItemCol1: "Pos. Pedido 1",
             poItemCol2: "Pos. Pedido 2",
             filterPlaceholder: "Filtrar resultados...",
+            // Delivery Ticket
+            deliveryTicketMode: "Impresión de Delivery Ticket",
+            deliveryTicketTitle: "Impresión de Delivery Ticket",
+            printDeliveryTicketButton: "Imprimir Delivery Ticket",
+            generatingDeliveryTicket: "Generando Delivery Ticket...",
+            deliveryTicketGenerated: "Delivery Ticket generado.",
             splitModalTitle: "Dividir Posición",
             originalDataTitle: "Datos Originales",
             remainingQtyLabel: "Cantidad Restante:",
@@ -1335,11 +1376,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainContent = document.getElementById('mainContent');
     const sublocationContent = document.getElementById('sublocationContent');
     const ingresoContent = document.getElementById('ingresoContent');
+    const deliveryTicketContent = document.getElementById('deliveryTicketContent');
     const loginButton = document.getElementById('loginButton');
     const guestLoginButton = document.getElementById('guestLoginButton');
     const continueButton = document.getElementById('continueButton');
-    const logoutButtons = document.querySelectorAll('#logoutButton, #logoutButtonSub, #logoutButtonIngreso');
-    const backButtons = document.querySelectorAll('#backButtonMain, #backButtonSub, #backButtonIngreso');
+    const logoutButtons = document.querySelectorAll('#logoutButton, #logoutButtonSub, #logoutButtonIngreso, #logoutButtonDeliveryTicket');
+    const backButtons = document.querySelectorAll('#backButtonMain, #backButtonSub, #backButtonIngreso, #backButtonDeliveryTicket');
     const sapEnvSelect = document.getElementById('sapEnvSelect');
     const sapPlantSelect = document.getElementById('sapPlantSelect');
     const sapClientInput = document.getElementById('sapClientInput');
@@ -1347,7 +1389,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sapPassInput = document.getElementById('sapPassInput');
     const useSapRouter = document.getElementById('useSapRouter');
     const loginStatus = document.getElementById('loginStatus');
-    const loggedInUserDisplays = document.querySelectorAll('#loggedInUserDisplay, #loggedInUserDisplaySub, #loggedInUserDisplayIngreso');
+    const loggedInUserDisplays = document.querySelectorAll('#loggedInUserDisplay, #loggedInUserDisplaySub, #loggedInUserDisplayIngreso, #loggedInUserDisplayDeliveryTicket');
     const headerDataSection = document.getElementById('headerDataSection');
     const clMovimientoInput = document.getElementById('clMovimiento');
     const almacenInput = document.getElementById('almacen');
@@ -1410,6 +1452,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectAllIngresoItemsCheckbox = document.getElementById('selectAllIngresoItemsCheckbox');
     const printLabelsButton = document.getElementById('printLabelsButton');
     const printDocMaterialButton = document.getElementById('printDocMaterialButton');
+    const printDeliveryTicketButton = document.getElementById('printDeliveryTicketButton');
     const longTextModal = new bootstrap.Modal(document.getElementById('longTextModal'));
     const splitItemModal = new bootstrap.Modal(document.getElementById('splitItemModal'));
     const deleteQrButton = document.getElementById('deleteQrButton'); 
@@ -1678,6 +1721,7 @@ function updateClientOptions() {
     startSublocationScanButton.addEventListener('click', startSublocationScanner);
     stopSublocationScanButton.addEventListener('click', stopSublocationScanner);
     printDocMaterialButtonMain.addEventListener('click', handlePrintDocMaterialMain);
+    printDeliveryTicketButton.addEventListener('click', handlePrintDeliveryTicket);
     msegTableBody.addEventListener('click', function(e) {
         if (e.target && e.target.classList.contains('select-file-btn')) {
             const fileInput = e.target.nextElementSibling;
@@ -2414,6 +2458,7 @@ function updateClientOptions() {
         mainContent.style.display = 'none';
         sublocationContent.style.display = 'none';
         ingresoContent.style.display = 'none';
+        deliveryTicketContent.style.display = 'none';
         modeSelectionSection.style.display = 'none';
         loginSection.style.display = 'block';
         sapPassInput.value = '';
@@ -2428,6 +2473,7 @@ function updateClientOptions() {
         mainContent.style.display = 'none';
         sublocationContent.style.display = 'none';
         ingresoContent.style.display = 'none';
+        deliveryTicketContent.style.display = 'none';
 
         document.body.classList.remove('login-bg');
         
@@ -2456,6 +2502,8 @@ function updateClientOptions() {
             ingresoContent.style.display = 'block';
             document.getElementById('ingresoFechaDoc').valueAsDate = new Date();
             document.getElementById('ingresoFechaCont').valueAsDate = new Date();
+        } else if (selectedMode === 'deliveryticket') {
+            deliveryTicketContent.style.display = 'block';
         }
     }
 
@@ -2464,6 +2512,7 @@ function updateClientOptions() {
         mainContent.style.display = 'none';
         sublocationContent.style.display = 'none';
         ingresoContent.style.display = 'none';
+        deliveryTicketContent.style.display = 'none';
         modeSelectionSection.style.display = 'block';
         clearAllScreens();
         document.body.classList.add('login-bg');
@@ -2704,21 +2753,21 @@ msegTableBody.innerHTML = '';
                 <div class="input-group input-group-sm">
                     <input type="text" class="form-control filename-display" value="${sapData.CERTIFICADO_FILENAME || ''}" readonly>
                     <button class="btn btn-outline-secondary select-file-btn" type="button" ${isReadOnly}>...</button>
-                    <input type="file" class="file-input" data-key="${key}" data-field="CERTIFICADO" style="display: none;">
+                    <input type="file" accept=".pdf, image/jpeg, image/jpg, image/png" class="file-input" data-key="${key}" data-field="CERTIFICADO" style="display: none;">
                 </div>
             </td>
             <td class="cell-docsCol">
                 <div class="input-group input-group-sm">
                     <input type="text" class="form-control filename-display" value="${sapData.DOCUMENTO_FILENAME || ''}" readonly>
                     <button class="btn btn-outline-secondary select-file-btn" type="button" ${isReadOnly}>...</button>
-                    <input type="file" class="file-input" data-key="${key}" data-field="DOCUMENTO" style="display: none;">
+                    <input type="file" accept=".pdf, image/jpeg, image/jpg, image/png" class="file-input" data-key="${key}" data-field="DOCUMENTO" style="display: none;">
                 </div>
             </td>
             <td class="cell-inspCol">
                 <div class="input-group input-group-sm">
                     <input type="text" class="form-control filename-display" value="${sapData.INSPECCION_FILENAME || ''}" readonly>
                     <button class="btn btn-outline-secondary select-file-btn" type="button" ${isReadOnly}>...</button>
-                    <input type="file" class="file-input" data-key="${key}" data-field="INSPECCION" style="display: none;">
+                    <input type="file" accept=".pdf, image/jpeg, image/jpg, image/png" class="file-input" data-key="${key}" data-field="INSPECCION" style="display: none;">
                 </div>
             </td>
             <td class="cell-itemTextCol"><input type="text" class="form-control form-control-sm" value="${sapData.SGTXT || ''}" data-key="${key}" data-field="SGTXT" ${isReadOnly}></td>
@@ -3090,9 +3139,18 @@ const moveType = clMovimientoInput.value.trim();
         const fileMetadata = [];
         scannedCodes.forEach((sapData, key) => {
             ['CERTIFICADO', 'DOCUMENTO', 'INSPECCION'].forEach(field => {
-                if (sapData[field] instanceof File) {
-                    formData.append('files[]', sapData[field]);
-                    fileMetadata.push({ key: key, field: field });
+                // Usamos la validación ajustada para el iPad
+                if (sapData[field] && sapData[field].name) {
+                    const uniqueKey = `file_${key}_${field}`;
+                    
+                    // Extraer extensión y forzar un nombre único para evitar colisiones en iOS/SAP
+                    const originalName = sapData[field].name;
+                    const ext = originalName.includes('.') ? originalName.split('.').pop() : 'jpg';
+                    const uniqueFileName = `${key}_${field}_${Date.now()}.${ext}`;
+                    
+                    // Usamos el nombre único en lugar del nombre original
+                    formData.append(uniqueKey, sapData[field], uniqueFileName);
+                    fileMetadata.push({ key: key, field: field, formKey: uniqueKey });
                 }
             });
         });
@@ -3227,9 +3285,9 @@ const moveType = clMovimientoInput.value.trim();
             visibilityObject[chk.value] = chk.checked;
         });
         updateTableVisibility(tableId, visibilityObject);
-        if (tableId === 'msegTable') { 
-            toggleSpecialColumnsVisibility(); 
-        }
+       if (tableId === 'msegTable') { 
+        toggleSpecialColumnsVisibility(); 
+    }
         layoutModal.hide();
     }
 
@@ -3880,21 +3938,21 @@ function renderIngresoItemsTable(items) {
                 <div class="input-group input-group-sm">
                     <input type="text" class="form-control form-control-sm filename-display" value="${certFileName}" style="${certFileName ? 'background-color: #d1e7dd;' : ''}" readonly>
                     <button class="btn btn-outline-secondary select-file-ingreso-btn" type="button" ${readonlyForSplits}>...</button>
-                    <input type="file" class="d-none file-ingreso-input" name="certificado">
+                    <input type="file" accept=".pdf, image/jpeg, image/jpg, image/png" class="d-none file-ingreso-input" name="certificado">
                 </div>
             </td>
             <td class="cell-docsCol">
                 <div class="input-group input-group-sm">
                     <input type="text" class="form-control form-control-sm filename-display" value="${docFileName}" style="${docFileName ? 'background-color: #d1e7dd;' : ''}" readonly>
                     <button class="btn btn-outline-secondary select-file-ingreso-btn" type="button" ${readonlyForSplits}>...</button>
-                    <input type="file" class="d-none file-ingreso-input" name="documentos">
+                    <input type="file" accept=".pdf, image/jpeg, image/jpg, image/png" class="d-none file-ingreso-input" name="documentos">
                 </div>
             </td>
             <td class="cell-inspCol">
                 <div class="input-group input-group-sm">
                     <input type="text" class="form-control form-control-sm filename-display" value="${inspFileName}" style="${inspFileName ? 'background-color: #d1e7dd;' : ''}" readonly>
                     <button class="btn btn-outline-secondary select-file-ingreso-btn" type="button" ${readonlyForSplits}>...</button>
-                    <input type="file" class="d-none file-ingreso-input" name="inspeccion">
+                    <input type="file" accept=".pdf, image/jpeg, image/jpg, image/png" class="d-none file-ingreso-input" name="inspeccion">
                 </div>
             </td>
         `;
@@ -3964,9 +4022,26 @@ function renderIngresoItemsTable(items) {
 
           const item = poItemsData.find(d => String(d.EBELP) === String(pos));
             if (item) {
-                if (item.file_certificado) { formData.append('files[]', item.file_certificado); fileMetadata.push({ posicion: pos, field: 'certificado', filename: item.file_certificado.name }); }
-                if (item.file_documentos) { formData.append('files[]', item.file_documentos); fileMetadata.push({ posicion: pos, field: 'documentos', filename: item.file_documentos.name }); }
-                if (item.file_inspeccion) { formData.append('files[]', item.file_inspeccion); fileMetadata.push({ posicion: pos, field: 'inspeccion', filename: item.file_inspeccion.name }); }
+                const ts = Date.now(); // Marca de tiempo única para que ningún archivo se llame igual
+                
+                if (item.file_certificado) { 
+                    const k = `file_${pos}_certificado`; 
+                    const ext = item.file_certificado.name.includes('.') ? item.file_certificado.name.split('.').pop() : 'jpg';
+                    formData.append(k, item.file_certificado, `${pos}_certificado_${ts}.${ext}`); 
+                    fileMetadata.push({ posicion: pos, field: 'certificado', formKey: k }); 
+                }
+                if (item.file_documentos) { 
+                    const k = `file_${pos}_documentos`; 
+                    const ext = item.file_documentos.name.includes('.') ? item.file_documentos.name.split('.').pop() : 'jpg';
+                    formData.append(k, item.file_documentos, `${pos}_documentos_${ts}.${ext}`); 
+                    fileMetadata.push({ posicion: pos, field: 'documentos', formKey: k }); 
+                }
+                if (item.file_inspeccion) { 
+                    const k = `file_${pos}_inspeccion`; 
+                    const ext = item.file_inspeccion.name.includes('.') ? item.file_inspeccion.name.split('.').pop() : 'jpg';
+                    formData.append(k, item.file_inspeccion, `${pos}_inspeccion_${ts}.${ext}`); 
+                    fileMetadata.push({ posicion: pos, field: 'inspeccion', formKey: k }); 
+                }
             }
         });
         formData.append('file_metadata', JSON.stringify(fileMetadata));
@@ -4570,7 +4645,66 @@ function addSplitLine() {
             }
         }
     });
-    
+
+    async function handlePrintDeliveryTicket() {
+        const poNumberInput = document.getElementById('deliveryTicketPoNumber');
+        const poNumber = poNumberInput.value.trim();
+        const statusElement = document.getElementById('deliveryTicketStatus');
+
+        if (!poNumber) {
+            alert(getText('poNumberLabel', 'Nro de Pedido') + " es obligatorio.");
+            return;
+        }
+
+        const pdfWindow = window.open('', '_blank');
+        if (pdfWindow) {
+            pdfWindow.document.write('<html><body><h3 style="font-family: sans-serif; text-align: center; margin-top: 50px; color: #333;">' + getText('generatingDeliveryTicket', 'Generando Delivery Ticket...') + '</h3></body></html>');
+        }
+
+        statusElement.textContent = getText('generatingDeliveryTicket', 'Generando Delivery Ticket...');
+        statusElement.className = "mt-3 text-center text-info";
+        showSpinner();
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/printDeliveryTicket`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    connection_params: sapConnection,
+                    po_number: poNumber
+                })
+            });
+            const result = await response.json();
+            if (result.success && result.pdf_data) {
+                const pdfBlob = new Blob([Uint8Array.from(atob(result.pdf_data), c => c.charCodeAt(0))], { type: 'application/pdf' });
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+                if (pdfWindow) {
+                    pdfWindow.location.href = pdfUrl;
+                } else {
+                    const anchor = document.createElement('a');
+                    anchor.href = pdfUrl;
+                    anchor.download = `Delivery_Ticket_${poNumber}.pdf`;
+                    document.body.appendChild(anchor);
+                    anchor.click();
+                    document.body.removeChild(anchor);
+                }
+                statusElement.textContent = getText('deliveryTicketGenerated', 'Delivery Ticket generado.');
+                statusElement.className = "mt-3 text-center text-success";
+            } else {
+                if (pdfWindow) pdfWindow.close();
+                throw new Error(result.error || "No se recibieron datos del PDF desde el servidor.");
+            }
+        } catch (err) {
+            if (pdfWindow) pdfWindow.close();
+            statusElement.textContent = `Error: ${err.message}`;
+            statusElement.className = "mt-3 text-center text-danger";
+            playSound('error');
+            alert(`Error: ${err.message}`);
+        } finally {
+            hideSpinner();
+        }
+    }
+
 });
 </script>
 
