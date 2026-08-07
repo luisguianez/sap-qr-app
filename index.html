@@ -3663,34 +3663,31 @@ function toggleSpecialColumnsVisibility() {
     }
 
     function clearSublocationForm() {
-        // 1. Limpiar campos de texto
-        sublocationAlmacenInput.value = '';
-        sublocationMaterialInput.value = '';
-        
-        sublocationMaterialInput.value = '';
-        sublocationQrContent.textContent = '';
-        filterInput.value = '';
-        
-        // 2. Limpiar tabla y memoria
-        sublocationTableBody.innerHTML = '';
-        sublocationData = [];
-        
-        // 3. Resetear mensajes de estado
-        sublocationScanStatus.textContent = '';
-        sublocationScanStatus.className = "lead mt-2";
-        
-        // 4. Restaurar valores por defecto (Área y Orden)
-        document.getElementById('areaTodos').checked = true;
-        sortState = { column: null, direction: 'asc' };
-        updateSortArrows();
-        exportToExcelButton.disabled = true;
+       // 1. Limpiar campos de texto (Se conserva Centro y Almacén)
+    sublocationMaterialInput.value = '';
+    sublocationQrContent.textContent = '';
+    filterInput.value = '';
+    
+    // 2. Limpiar tabla y memoria
+    sublocationTableBody.innerHTML = '';
+    sublocationData = [];
+    
+    // 3. Resetear mensajes de estado
+    sublocationScanStatus.textContent = '';
+    sublocationScanStatus.className = "lead mt-2";
+    
+    // 4. Restaurar valores por defecto (Área y Orden)
+    document.getElementById('areaTodos').checked = true;
+    sortState = { column: null, direction: 'asc' };
+    updateSortArrows();
+    exportToExcelButton.disabled = true;
 
-        // 5. Reafirmar la planta global de inicio de sesión
-        sublocationCentroInput.value = currentPlant; 
-        sublocationCentroInput.dispatchEvent(new Event('input'));
-        
-        // 6. Validar estado del escáner
-        manageSublocationScannerState();
+    // 5. Reafirmar la planta global de inicio de sesión (Conserva el Centro)
+    sublocationCentroInput.value = currentPlant; 
+    sublocationCentroInput.dispatchEvent(new Event('input'));
+    
+    // 6. Validar estado del escáner
+    manageSublocationScannerState();
     }
   //  function updateIngresoTableVisibility() {
   //      const stockType = document.querySelector('input[name="ingresoStockEspecial"]:checked').value;
