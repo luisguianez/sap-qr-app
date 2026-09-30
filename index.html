@@ -48,7 +48,7 @@
             cursor: not-allowed;
         }
 
-        /* ▼ Cabeceras fijas para TODAS las tablas ▼ */
+        /* Cabeceras fijas para TODAS las tablas  */
         #msegTable thead th, #sublocationTable thead th, #ingresoItemsTable thead th {
             position: -webkit-sticky; /* Para compatibilidad con Safari */
             position: sticky;
@@ -92,6 +92,19 @@
 .cell-poItemCol1, .cell-poItemCol2 {
     line-height: 1.5; 
     padding-top: 8px !important; 
+}
+
+.signature-canvas {
+    border: 2px dashed #0d6efd;
+    border-radius: 8px;
+    background-color: #ffffff;
+    touch-action: none; /* Vital para dibujar en iPad/tablet sin hacer scroll */
+    cursor: crosshair;
+    width: 100%;
+    max-width: 500px;
+    height: 140px;
+    display: block;
+    margin: 0 auto;
 }
 
 .login-header {
@@ -200,6 +213,10 @@ body.login-bg {
                             <input class="form-check-input" type="radio" name="appMode" id="modeIngreso" value="ingreso">
                             <label class="form-check-label" for="modeIngreso" data-translate="goodsReceiptMode">Ingreso de Materiales por Pedido</label>
                         </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="appMode" id="modeDeliveryTicket" value="deliveryticket">
+                            <label class="form-check-label" for="modeDeliveryTicket" data-translate="deliveryTicketMode">Impresión de Delivery Ticket</label>
+                        </div>
                         <div class="d-grid gap-2 mt-4">
                             <button id="continueButton" class="btn btn-primary" data-translate="continueButton">Continuar</button>
                         </div>
@@ -226,7 +243,15 @@ body.login-bg {
                         <div class="col-md-4">
                             <label for="clMovimiento" data-translate="moveTypeLabel">Cl.Movimiento:</label>
                             <div class="input-group">
-                                <input type="text" class="form-control" id="clMovimiento">
+                                <input type="text" class="form-control" id="clMovimiento" list="clMovimientoOptions">
+                                <datalist id="clMovimientoOptions">
+                                    <option value="101" data-translate="movGRProject">101 - Entrada para Proyecto (101 - Q)</option>
+                                    <option value="221" data-translate="movGIProject">221 - Consumo para Proyecto (221 - Q)</option>
+                                    <option value="231" data-translate="movGISales">231 - Consumo para Pedido Cliente (231 - E)</option>
+                                    <option value="309" data-translate="movTFBatch">Traslado Lote a Lote (309)</option>
+                                    <option value="311" data-translate="movTFGeneral">311 - Traspaso (311)</option>
+                                    <option value="601">601 - Entrega</option>
+                                </datalist>
                                 <button class="btn btn-outline-secondary" type="button" id="searchClMovimiento"><i class="bi bi-search"></i></button>
                             </div>
                         </div>
@@ -248,8 +273,17 @@ body.login-bg {
                                 <button class="btn btn-outline-secondary" type="button" id="searchAlmacen"><i class="bi bi-search"></i></button>
                             </div>
                         </div>
-                        <div class="col-md-8"><label for="textoCabecera" data-translate="headerTextLabel">Texto Cabecera:</label><input type="text" class="form-control" id="textoCabecera"  maxlength="25"></div>
+                        <div class="col-md-6"><label for="textoCabecera" data-translate="headerTextLabel">Texto Cabecera:</label><input type="text" class="form-control" id="textoCabecera"  maxlength="25"></div>
                         <div class="col-md-6"><label for="fechaContab" data-translate="postingDateLabel">Fecha Contab.:</label><input type="date" class="form-control" id="fechaContab"></div>
+                        <div class="col-md-6" id="qrHeaderDocContainer" style="display: none;">
+                            <label for="qrHeaderDocFilename" class="form-label" data-translate="headerDocLabel">Documentos (Cabecera):</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control filename-display" id="qrHeaderDocFilename" readonly placeholder="Seleccionar documento...">
+                                <button class="btn btn-outline-secondary" type="button" id="qrHeaderDocBtn">...</button>
+                                <button class="btn btn-outline-danger" type="button" id="qrHeaderDocClearBtn" style="display: none;"><i class="bi bi-x"></i></button>
+                                <input type="file" accept=".pdf, image/jpeg, image/jpg, image/png" id="qrHeaderDocInput" style="display: none;">
+                            </div>
+                        </div>
                         <div class="col-md-6 checkbox-container" id="reservaCheckboxContainer">
                             <div class="form-check pt-4"><input class="form-check-input" type="checkbox" id="reservaCheckbox"><label class="form-check-label" for="reservaCheckbox" data-translate="reservationLabel">Reserva</label></div>
                         </div>
@@ -285,6 +319,7 @@ body.login-bg {
                     <th data-column="qtyCol" data-translate="qtyCol">Cantidad</th>
                     <th data-column="unitCol" data-translate="unitCol">Unidad</th>
                     <th data-column="batchCol" data-translate="batchCol">Lote</th>
+                    <th data-column="batchDestCol" style="min-width: 150px;" class="cell-309 d-none" data-translate="destBatchLabel">Lote Destino</th>
                     <th data-column="certCol" style="min-width: 200px;" data-translate="certCol">Certificado</th>
                     <th data-column="docsCol" style="min-width: 200px;" data-translate="docsCol">Documentos</th>
                     <th data-column="inspCol" style="min-width: 200px;" data-translate="inspCol">Inspección</th>
@@ -335,6 +370,10 @@ body.login-bg {
                         <input class="form-check-input" type="radio" name="sublocationSearchMethod" id="searchByMaterial" value="material">
                         <label class="form-check-label" for="searchByMaterial" data-translate="searchByMaterialLabel">Por Material</label>
                     </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="sublocationSearchMethod" id="searchByAlmacen" value="almacen">
+                        <label class="form-check-label" for="searchByAlmacen" data-translate="searchByAlmacenLabel">Por Almacén</label>
+                    </div>
                 </div>
                 
                 <div class="row g-3">
@@ -383,6 +422,13 @@ body.login-bg {
                             <span data-translate="searchButton">Buscar</span>
                         </button>
                     </div>
+                </div>
+
+                <div id="sublocationAlmacenContainer" style="display: none;">
+                    <label class="form-label fw-bold d-block" data-translate="searchAlmacenLabel">Consulta General:</label>
+                    <button class="btn btn-primary w-100" type="button" id="btnSearchAlmacenSublocation">
+                        <i class="bi bi-search me-1"></i> <span data-translate="searchAlmacenButton">Consultar Almacén</span>
+                    </button>
                 </div>
 
                 <p id="sublocationScanStatus" class="lead mt-2"></p>
@@ -456,7 +502,17 @@ body.login-bg {
 							<i class="bi bi-search"></i>
 							<span class="d-none d-sm-inline" data-translate="searchPOButton"> Buscar Pedido</span>
 						</button>
+                        <button class="btn btn-secondary" type="button" id="startIngresoScanButton" title="Escanear QR">
+                            <i class="bi bi-qr-code-scan"></i>
+                        </button>
 					</div>
+                    <div id="ingresoReaderContainer" class="mt-2" style="display: none; position: relative; max-width: 350px;">
+                        <button id="stopIngresoScanButton" class="btn btn-danger btn-sm" style="position: absolute; top: 5px; right: 5px; z-index: 10;" data-translate="stopCameraButton" title="Detener Cámara">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                        <div id="ingresoReader" style="width: 100%;"></div>
+                        <p id="ingresoScanStatus" class="lead mt-2 text-center"></p>
+                    </div>
                 </div>
                 <div class="col-md-2"><label for="ingresoTipoMovimiento" class="form-label" data-translate="moveTypeLabel">Tipo de Movimiento</label><input type="text" class="form-control" id="ingresoTipoMovimiento" value="101" readonly></div>
                 <div class="col-md-3"><label for="ingresoFechaDoc" class="form-label" data-translate="docDateLabel">Fecha de Documento</label><input type="date" class="form-control" id="ingresoFechaDoc"></div>
@@ -464,6 +520,15 @@ body.login-bg {
                 <div class="col-md-3"><label for="ingresoMaterialSlip" class="form-label" data-translate="materialSlipLabel">Material Slip</label><input type="text" class="form-control" id="ingresoMaterialSlip"></div>
                 <div class="col-md-3"><label for="ingresoBillOfLading" class="form-label" data-translate="billOfLadingLabel">Bill of Lading</label><input type="text" class="form-control" id="ingresoBillOfLading"> </div>
                 <div class="col-md-3"><label for="ingresoTextoCabecera" class="form-label" data-translate="headerTextLabel">Texto de Cabecera</label><input type="text" class="form-control" id="ingresoTextoCabecera"  maxlength="25"></div>
+                <div class="col-md-3" id="ingresoHeaderDocContainer">
+                    <label for="ingresoHeaderDocFilename" class="form-label" data-translate="headerDocLabel">Documentos (Cabecera)</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control form-control-sm filename-display" id="ingresoHeaderDocFilename" readonly placeholder="Seleccionar documento...">
+                        <button class="btn btn-outline-secondary btn-sm" type="button" id="ingresoHeaderDocBtn">...</button>
+                        <button class="btn btn-outline-danger btn-sm" type="button" id="ingresoHeaderDocClearBtn" style="display: none;"><i class="bi bi-x"></i></button>
+                        <input type="file" accept=".pdf, image/jpeg, image/jpg, image/png" id="ingresoHeaderDocInput" style="display: none;">
+                    </div>
+                </div>
             </div>
             <h4 class="mb-3 mt-4" data-translate="poItemsTitle">Posiciones del Pedido</h4>
             <div class="row mb-2">
@@ -513,6 +578,9 @@ body.login-bg {
                 </button>
                  <button id="printDocMaterialButton" class="btn btn-primary" style="display: none;">
                     <i class="bi bi-file-earmark-pdf"></i> <span data-translate="printMaterialDocButton">Imprimir Doc. Material</span>
+                </button>
+                <button id="printDeliveryTicketButtonIngreso" class="btn btn-secondary ms-2" style="display: none;">
+                    <i class="bi bi-printer"></i> <span data-translate="printDeliveryTicketButton">Imprimir Delivery Ticket</span>
                 </button>
             </div>
              <p id="ingresoStatus" class="mt-3 text-center"></p>
@@ -602,12 +670,17 @@ body.login-bg {
                             <input class="form-check-input movement-radio" type="radio" name="initialQrMovement" id="m6" value="311|Q" style="transform: scale(1.3); margin-right: 10px;">
                             <label class="form-check-label text-success fw-bold" for="m6" data-translate="movTFProject">Transfer posting Project</label>
                         </div>
-                        <div class="form-check mb-3"> <input class="form-check-input movement-radio" type="radio" name="initialQrMovement" id="m7" value="311|E" style="transform: scale(1.3); margin-right: 10px;">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input movement-radio" type="radio" name="initialQrMovement" id="m7" value="311|E" style="transform: scale(1.3); margin-right: 10px;">
                             <label class="form-check-label text-success fw-bold" for="m7" data-translate="movTFSales">Transfer posting Sales</label>
                         </div>
-                        <div class="form-check mb-4">
+                        <div class="form-check mb-3">
                             <input class="form-check-input movement-radio" type="radio" name="initialQrMovement" id="m9" value="311|" style="transform: scale(1.3); margin-right: 10px;">
                             <label class="form-check-label text-success fw-bold" for="m9" data-translate="movTFGeneral">Transfer posting (311)</label>
+                        </div>
+                        <div class="form-check mb-4">
+                            <input class="form-check-input movement-radio" type="radio" name="initialQrMovement" id="m10" value="309|" style="transform: scale(1.3); margin-right: 10px;">
+                            <label class="form-check-label text-success fw-bold" for="m10" data-translate="movTFBatch">Traslado Lote a Lote (309)</label>
                         </div>
 
                         <hr>
@@ -650,32 +723,52 @@ body.login-bg {
 </div>
 
 <div class="modal fade" id="signatureModal" tabindex="-1" aria-labelledby="signatureModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow">
+            <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="signatureModalLabel" data-translate="additionalConfirmationTitle">Confirmación Adicional</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p data-translate="completeFollowingData">Por favor, complete los siguientes datos para finalizar el guardado.</p>
                 <div id="modal-error-message" class="alert alert-danger" style="display: none;"></div>
 
-                <div class="mb-3">
-                    <label for="receptorSelect" class="form-label" data-translate="receiverLabel">Receptor:</label>
-                    <select id="receptorSelect" class="form-select" required>
-                        <option value="" data-translate="loading">Cargando...</option>
-                    </select>
+                <div class="mb-3" id="receptorContainer">
+                    <label for="receptorSelect" class="form-label fw-bold" data-translate="receiverLabel">Receptor:</label>
+                    <div class="d-flex align-items-center gap-2">
+                        <select id="receptorSelect" class="form-select" required>
+                            <option value="" data-translate="loading">Cargando...</option>
+                        </select>
+                        <button type="button" class="btn btn-outline-primary text-nowrap" id="btnOpenCanvasReceptor">
+                            <i class="bi bi-pen"></i> <span data-translate="signReceiverBtn">Firmar Receptor</span>
+                        </button>
+                    </div>
+                    <div class="mt-1">
+                        <span id="firmaReceptorBadge" class="badge bg-success d-none">
+                            <i class="bi bi-check-circle"></i> <span data-translate="receiverSignReady">Firma Receptor lista</span>
+                        </span>
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="despachadorSelect" class="form-label" data-translate="dispatcherLabel">Despachador:</label>
-                    <select id="despachadorSelect" class="form-select" required>
-                        <option value="" data-translate="loading">Cargando...</option>
-                    </select>
+                <div class="mb-3" id="despachadorContainer">
+                    <label for="despachadorSelect" class="form-label fw-bold" data-translate="dispatcherLabel">Despachador:</label>
+                    <div class="d-flex align-items-center gap-2">
+                        <select id="despachadorSelect" class="form-select" required>
+                            <option value="" data-translate="loading">Cargando...</option>
+                        </select>
+                        <button type="button" class="btn btn-outline-primary text-nowrap" id="btnOpenCanvasDespachador">
+                            <i class="bi bi-pen"></i> <span data-translate="signDispatcherBtn">Firmar Despachador</span>
+                        </button>
+                    </div>
+                    <div class="mt-1">
+                        <span id="firmaDespachadorBadge" class="badge bg-success d-none">
+                            <i class="bi bi-check-circle"></i> <span data-translate="dispatcherSignReady">Firma Despachador lista</span>
+                        </span>
+                    </div>
                 </div>
 
                 <div class="mb-3" id="labelSizeContainer">
-                    <label for="labelSizeSelect" class="form-label" data-translate="labelSizeLabel">Tamaño de Etiqueta:</label>
+                    <label for="labelSizeSelect" class="form-label fw-bold" data-translate="labelSizeLabel">Tamaño de Etiqueta:</label>
                     <select id="labelSizeSelect" class="form-select" required>
                         <option value="" data-translate="selectSize">Seleccione un tamaño...</option>
                         <option value="S" data-translate="smallLabel">S - Pequeña</option>
@@ -685,8 +778,33 @@ body.login-bg {
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close" data-translate="cancelButton">Cancelar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-translate="cancelButton">Cancelar</button>
                 <button type="button" id="confirmSaveButton" class="btn btn-primary" data-translate="confirmAndSaveButton">Confirmar y Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Flotante de Firma Digital (Overlay Independiente) -->
+<div id="firmaModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.65); z-index: 2000; align-items: center; justify-content: center;">
+    <div class="card shadow-lg border-0" style="width: 95%; max-width: 520px; border-radius: 12px; overflow: hidden;">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-2">
+            <h5 class="card-title mb-0" id="firmaModalTitle">Firma</h5>
+            <button type="button" class="btn-close btn-close-white" id="btnCloseFirmaOverlay" aria-label="Close"></button>
+        </div>
+        <div class="card-body text-center p-3">
+            <p class="text-muted small mb-2">Por favor, realice la firma en el recuadro:</p>
+            <canvas id="signatureCanvas" width="460" height="200" style="border: 2px dashed #0d6efd; border-radius: 8px; background-color: #ffffff; touch-action: none; cursor: crosshair; max-width: 100%; display: block; margin: 0 auto;"></canvas>
+        </div>
+        <div class="card-footer d-flex justify-content-between align-items-center py-2 bg-light">
+            <button type="button" class="btn btn-outline-danger btn-sm" id="btnClearSignature">
+                <i class="bi bi-trash"></i> Limpiar
+            </button>
+            <div>
+                <button type="button" class="btn btn-secondary btn-sm me-2" id="btnCancelFirmaOverlay" data-translate="cancelButton">Cancelar</button>
+                <button type="button" class="btn btn-success btn-sm" id="btnSaveSignature">
+                    <i class="bi bi-check-lg"></i> Guardar Firma
+                </button>
             </div>
         </div>
     </div>
@@ -867,16 +985,17 @@ body.login-bg {
 </div>
 
 
+
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-     const API_BASE_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
-        ? ''
-        : 'https://api.lndsap.com';
+    // const API_BASE_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
+   //     ? ''
+  //      : 'https://api.lndsap.com';
 
-       // const API_BASE_URL = window.location.origin;
+        const API_BASE_URL = window.location.origin;
     const translations = {
         en: {
             // General
@@ -925,6 +1044,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // Sublocation Query Program
             sublocationQueryTitle: "Query by Sublocation",
             searchFiltersTitle: "Search Filters",
+            searchMethodLabel: "Search Method:",
+            searchByQrLabel: "By QR Code",
+            searchByMaterialLabel: "By Material",
+            searchByAlmacenLabel: "By Storage Location",
+            searchAlmacenLabel: "General Query:",
+            searchAlmacenButton: "Search Storage Location",
+            materialInputLabel: "Material Number:",
+            searchButton: "Search",
             areaLabel: "Area:",
             allLabel: "All",
             scanSublocationQr: "Scan the Sublocation's QR code",
@@ -948,7 +1075,7 @@ document.addEventListener('DOMContentLoaded', () => {
             confirmAndSaveButton: "Confirm and Save",
             // Table Headers
             docCol: "Document", yearCol: "Year", posCol: "Item", materialCol: "Material", materialDescCol: "Material Text", qtyCol: "Quantity",
-            unitCol: "Unit", batchCol: "Batch", certCol: "Certificate", docsCol: "Documents", inspCol: "Inspection", itemTextCol: "Item Text",
+            unitCol: "Unit", batchCol: "Batch", certCol: "Certificate", docsCol: "Documents", headerDocLabel: "Documents (Header):", inspCol: "Inspection", itemTextCol: "Item Text",
             tagCol: "TAG", subLocCol: "Sublocation", areaCol: "Area", orderNoCol: "Order No.", orderNo2Col: "Order No. 2",wbsCol: "WBS Element", reservationCol: "Reservation",
             salesOrderCol: "Sales Order", salesOrderItemCol: "SO Item",
             // Sublocation Table Headers
@@ -1049,6 +1176,7 @@ document.addEventListener('DOMContentLoaded', () => {
             selectAtLeastOneItem: "You must select at least one item to save.",
             poLoadedSuccess: "Purchase Order loaded successfully.",
             poMergedSuccess: "{count} position(s) reincorporated from Purchase Order {poNumber}.",
+            duplicatePositionMessage: "The position is already added to the list.",
             // Quick Setup Modal
             quickSetupTitle: "Quick Setup",
             searchingPlant: "Searching your plant in SAP...",
@@ -1062,6 +1190,10 @@ document.addEventListener('DOMContentLoaded', () => {
             movTFProject: "Transfer posting Project (311 - Q)",
             movTFSales: "Transfer posting Sales (311 - E)",
             movTFGeneral: "Transfer posting (311)",
+            movTFBatch: "Batch-to-Batch Transfer (309)",
+            destBatchLabel: "Target Batch",
+            destBatchPlaceholder: "Target Batch...",
+            destBatchRequired: "The Target Batch field is required for movement 309.",
             movManual: "Other (Fill manually)",
             backToMenuBtn: "Back to Menu",
             continueBtn: "Continue",
@@ -1075,6 +1207,13 @@ document.addEventListener('DOMContentLoaded', () => {
             "No hay stock disponible para este material con los criterios seleccionados.": "No stock available for this material with the selected criteria.",
             "El material no existe en la planta.": "The material does not exist in the plant.",
             "Error de configuración en SAP: No se encontró un formato de visualización (Layout).": "SAP configuration error: No display layout found.",
+            sessionKilledByAdmin: "Your session has been terminated by the SAP Administrator.",
+            signReceiverBtn: "Sign Receiver",
+            signDispatcherBtn: "Sign Dispatcher",
+            receiverSignReady: "Receiver signature ready",
+            dispatcherSignReady: "Dispatcher signature ready",
+            signatureReceptorTitle: "Receiver Signature",
+            signatureDispatcherTitle: "Dispatcher Signature"
         },
         es: {
             // General
@@ -1146,7 +1285,7 @@ document.addEventListener('DOMContentLoaded', () => {
             confirmAndSaveButton: "Confirmar y Guardar",
             // Table Headers
             docCol: "Documento", yearCol: "Año", posCol: "Pos.", materialCol: "Material", materialDescCol: "Texto Material", qtyCol: "Cantidad",
-            unitCol: "Unidad", batchCol: "Lote", certCol: "Certificado", docsCol: "Documentos", inspCol: "Inspección", itemTextCol: "Texto Pos.",
+            unitCol: "Unidad", batchCol: "Lote", certCol: "Certificado", docsCol: "Documentos", headerDocLabel: "Documentos (Cabecera):", inspCol: "Inspección", itemTextCol: "Texto Pos.",
             tagCol: "TAG", subLocCol: "Sub Ubicacion", areaCol: "Área", orderNoCol: "Nro. Pedido", orderNo2Col: "Nro. Pedido 2", wbsCol: "Elemento PEP", reservationCol: "Reserva",
             salesOrderCol: "Pedido Cliente", salesOrderItemCol: "Pos. Pedido Cliente",
             // Sublocation Table Headers
@@ -1246,6 +1385,7 @@ document.addEventListener('DOMContentLoaded', () => {
             selectAtLeastOneItem: "Debe seleccionar al menos una posición para guardar.",
             poLoadedSuccess: "Pedido cargado exitosamente.",
             poMergedSuccess: "Se reincorporaron {count} posición(es) del pedido {poNumber}.",
+            duplicatePositionMessage: "La posición ya se encuentra agregada en la lista.",
             // Quick Setup Modal
             quickSetupTitle: "Configuración Rápida",
             searchingPlant: "Buscando tu planta en SAP...",
@@ -1259,6 +1399,10 @@ document.addEventListener('DOMContentLoaded', () => {
             movTFProject: "Traspaso para Proyecto (311 - Q)",
             movTFSales: "Traspaso para Pedido Cliente (311 - E)",
             movTFGeneral: "Traspaso (311)",
+            movTFBatch: "Traslado Lote a Lote (309)",
+            destBatchLabel: "Lote Destino",
+            destBatchPlaceholder: "Lote Destino...",
+            destBatchRequired: "El campo Lote Destino es obligatorio para el movimiento 309.",
             movManual: "Otro (Llenar manualmente)",
             backToMenuBtn: "Volver al Menú",
             continueBtn: "Continuar",
@@ -1272,6 +1416,13 @@ document.addEventListener('DOMContentLoaded', () => {
             "No hay stock disponible para este material con los criterios seleccionados.": "No hay stock disponible para este material con los criterios seleccionados.",
             "El material no existe en la planta.": "El material no existe en la planta.",
             "Error de configuración en SAP: No se encontró un formato de visualización (Layout).": "Error de configuración en SAP: No se encontró un formato de visualización (Layout).",
+            sessionKilledByAdmin: "Su sesión ha sido finalizada por el Administrador de SAP.",
+            signReceiverBtn: "Firmar Receptor",
+            signDispatcherBtn: "Firmar Despachador",
+            receiverSignReady: "Firma Receptor lista",
+            dispatcherSignReady: "Firma Despachador lista",
+            signatureReceptorTitle: "Firma del Receptor",
+            signatureDispatcherTitle: "Firma del Despachador"
         }
     };
 
@@ -1293,37 +1444,50 @@ document.addEventListener('DOMContentLoaded', () => {
         const sublocationTable = document.getElementById('sublocationTable');
         if (sublocationTable) {
             const thead = sublocationTable.querySelector('thead');
-            thead.querySelectorAll('th').forEach(th => {
-                const columnKey = th.dataset.column;
-                let translationKey = '';
-                if (columnKey === 'MATNR') translationKey = 'materialCol';
-                else if (columnKey === 'MAKTX') translationKey = 'materialDescCol';
-                else if (columnKey === 'WERKS') translationKey = 'plantLabel';
-                else if (columnKey === 'LGORT') translationKey = 'storageLocationLabel';
-                else if (columnKey === 'CHARG') translationKey = 'batchCol';
-                else if (columnKey === 'SOBKZ') translationKey = 'specialStockLabel';
-                else if (columnKey === 'KZBWS') translationKey = 'Val. Stock Esp.';
-                else if (columnKey === 'PS_PSP_PNR') translationKey = 'wbsCol';
-                else if (columnKey === 'ZZUBICACION') translationKey = 'tagCol';
-                else if (columnKey === 'ZZSUB_UBICACION') translationKey = 'sublocationCol';
-                else if (columnKey === 'ZZ_PAIS') translationKey = 'countryCol';
-                else if (columnKey === 'MEINS') translationKey = 'uomCol';
-                else if (columnKey === 'WAERS') translationKey = 'currencyCol';
-                else if (columnKey === 'LABST') translationKey = 'freeStockCol';
-                else if (columnKey === 'WLABS') translationKey = 'freeValueCol';
-                else if (columnKey === 'UMLME') translationKey = 'transferStockCol';
-                else if (columnKey === 'WUMLM') translationKey = 'transferValueCol';
-                else if (columnKey === 'INSME') translationKey = 'qualityStockCol';
-                else if (columnKey === 'WINSM') translationKey = 'qualityValueCol';
-                else if (columnKey === 'EINME') translationKey = 'nonFreeStockCol';
-                else if (columnKey === 'WEINM') translationKey = 'nonFreeValueCol';
-                else if (columnKey === 'SPEME') translationKey = 'blockedStockCol';
-                else if (columnKey === 'WSPEM') translationKey = 'blockedValueCol';
-                else if (columnKey === 'RETME') translationKey = 'returnsStockCol';
-                else if (columnKey === 'WRETM') translationKey = 'returnsValueCol';
+            if (thead) {
+                thead.querySelectorAll('th').forEach(th => {
+                    const columnKey = th.dataset ? th.dataset.column : th.getAttribute('data-column');
+                    if (!columnKey) return;
+                    let translationKey = '';
+                    if (columnKey === 'MATNR') translationKey = 'materialCol';
+                    else if (columnKey === 'MAKTX') translationKey = 'materialDescCol';
+                    else if (columnKey === 'WERKS') translationKey = 'plantLabel';
+                    else if (columnKey === 'LGORT') translationKey = 'storageLocationLabel';
+                    else if (columnKey === 'CHARG') translationKey = 'batchCol';
+                    else if (columnKey === 'SOBKZ') translationKey = 'specialStockLabel';
+                    else if (columnKey === 'KZBWS') translationKey = 'Val. Stock Esp.';
+                    else if (columnKey === 'PS_PSP_PNR') translationKey = 'wbsCol';
+                    else if (columnKey === 'ZZUBICACION') translationKey = 'tagCol';
+                    else if (columnKey === 'ZZSUB_UBICACION') translationKey = 'sublocationCol';
+                    else if (columnKey === 'ZZ_PAIS') translationKey = 'countryCol';
+                    else if (columnKey === 'MEINS') translationKey = 'uomCol';
+                    else if (columnKey === 'WAERS') translationKey = 'currencyCol';
+                    else if (columnKey === 'LABST') translationKey = 'freeStockCol';
+                    else if (columnKey === 'WLABS') translationKey = 'freeValueCol';
+                    else if (columnKey === 'UMLME') translationKey = 'transferStockCol';
+                    else if (columnKey === 'WUMLM') translationKey = 'transferValueCol';
+                    else if (columnKey === 'INSME') translationKey = 'qualityStockCol';
+                    else if (columnKey === 'WINSM') translationKey = 'qualityValueCol';
+                    else if (columnKey === 'EINME') translationKey = 'nonFreeStockCol';
+                    else if (columnKey === 'WEINM') translationKey = 'nonFreeValueCol';
+                    else if (columnKey === 'SPEME') translationKey = 'blockedStockCol';
+                    else if (columnKey === 'WSPEM') translationKey = 'blockedValueCol';
+                    else if (columnKey === 'RETME') translationKey = 'returnsStockCol';
+                    else if (columnKey === 'WRETM') translationKey = 'returnsValueCol';
 
-                th.childNodes[0].nodeValue = getText(translationKey) + ' ';
-            });
+                    if (translationKey) {
+                        try {
+                            if (th.childNodes && th.childNodes.length > 0 && th.childNodes[0].nodeType === 3) {
+                                th.childNodes[0].nodeValue = getText(translationKey) + ' ';
+                            } else {
+                                const arrow = th.querySelector('.sort-arrow');
+                                th.textContent = getText(translationKey) + ' ';
+                                if (arrow) th.appendChild(arrow);
+                            }
+                        } catch(e) {}
+                    }
+                });
+            }
         }
     }
 
@@ -1331,16 +1495,28 @@ document.addEventListener('DOMContentLoaded', () => {
         return (translations[currentLang] && translations[currentLang][key]) || fallback || key;
     }
 
-    const userLang = navigator.language.slice(0, 2).toLowerCase();
-    setLanguage(userLang === 'es' ? 'es' : 'en');
+    try {
+        const userLang = (navigator.language || 'es').slice(0, 2).toLowerCase();
+        setLanguage(userLang === 'es' ? 'es' : 'en');
+    } catch(eLang) {
+        console.warn("Idioma por defecto cargado con aviso:", eLang);
+    }
+
+    // --- VARIABLES GLOBALES DE FIRMA ---
+    let signatureReceptorBase64 = "";
+    let signatureDespachadorBase64 = "";
 
     // --- VARIABLES GLOBALES ---
     let sapConnection = null;
     let html5QrCode = null;
     let html5QrCodeSublocation = null;
+    let html5QrCodeIngreso = null;
     let isScanning = false;
     let isSublocationScanning = false;
+    let isIngresoScanning = false;
     let isGuestMode = false;
+    let currentSessionId = null;
+    let heartbeatInterval = null;
     const scannedCodes = new Map();
     const SAP_ROUTER_STRING = "/H/50.234.28.124/H/";
     const beepSound = new Audio("{{ url_for('static', filename='beep.mp3') }}");
@@ -1353,13 +1529,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let ingresoColumnVisibility = {};
     let currentLayoutConfig = {};
     let poItemsData = [];
+    let currentIngresoPO = '';
     let currentSaveHandler = null;
     let currentSearchHelpTargetRowInput = null;
     let lastSavedIngresoData = null;
     let lastSavedQRData = null;
     let isViewingPDF = false;
+    let headerQrDocFile = null;
+    let headerIngresoDocFile = null;
 
-    // --- Mapeo Planta → Almacén por defecto ---
+    // --- Mapeo Planta Almacén por defecto ---
     function getDefaultAlmacen(plant) {
         const plantAlmacenMap = {
             '1000': 'LI01',
@@ -1399,6 +1578,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const textoCabeceraInput = document.getElementById('textoCabecera');
     const reservaCheckboxContainer = document.getElementById('reservaCheckboxContainer');
     const reservaCheckbox = document.getElementById('reservaCheckbox');
+    const qrHeaderDocContainer = document.getElementById('qrHeaderDocContainer');
+    const qrHeaderDocFilename = document.getElementById('qrHeaderDocFilename');
+    const qrHeaderDocBtn = document.getElementById('qrHeaderDocBtn');
+    const qrHeaderDocClearBtn = document.getElementById('qrHeaderDocClearBtn');
+    const qrHeaderDocInput = document.getElementById('qrHeaderDocInput');
     const qrContentElement = document.getElementById("qr-content");
     const scanStatusElement = document.getElementById("scan-status");
     const resetButton = document.getElementById("reset-button");
@@ -1428,6 +1612,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const signatureModal = new bootstrap.Modal(signatureModalElement);
     const receptorSelect = document.getElementById('receptorSelect');
     const despachadorSelect = document.getElementById('despachadorSelect');
+    const receptorContainer = document.getElementById('receptorContainer');
+    const despachadorContainer = document.getElementById('despachadorContainer');
+    const firmaReceptorBadge = document.getElementById('firmaReceptorBadge');
+    const firmaDespachadorBadge = document.getElementById('firmaDespachadorBadge');
+    const btnOpenCanvasReceptor = document.getElementById('btnOpenCanvasReceptor');
+    const btnOpenCanvasDespachador = document.getElementById('btnOpenCanvasDespachador');
+    const firmaModalOverlay = document.getElementById('firmaModalOverlay');
+    const firmaModalTitle = document.getElementById('firmaModalTitle');
+    const btnCloseFirmaOverlay = document.getElementById('btnCloseFirmaOverlay');
+    const btnCancelFirmaOverlay = document.getElementById('btnCancelFirmaOverlay');
+    const btnClearSignature = document.getElementById('btnClearSignature');
+    const btnSaveSignature = document.getElementById('btnSaveSignature');
+    const signatureCanvas = document.getElementById('signatureCanvas');
     const labelSizeSelect = document.getElementById('labelSizeSelect');
     const labelSizeContainer = document.getElementById('labelSizeContainer');
     const confirmSaveButton = document.getElementById('confirmSaveButton');
@@ -1443,6 +1640,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const layoutModalBody = document.getElementById('layoutModalBody');
     const applyLayoutButton = document.getElementById('applyLayoutButton');
     const ingresoNroPedidoInput = document.getElementById('ingresoNroPedido');
+    const ingresoHeaderDocContainer = document.getElementById('ingresoHeaderDocContainer');
+    const ingresoHeaderDocFilename = document.getElementById('ingresoHeaderDocFilename');
+    const ingresoHeaderDocBtn = document.getElementById('ingresoHeaderDocBtn');
+    const ingresoHeaderDocClearBtn = document.getElementById('ingresoHeaderDocClearBtn');
+    const ingresoHeaderDocInput = document.getElementById('ingresoHeaderDocInput');
+    const startIngresoScanButton = document.getElementById('startIngresoScanButton');
+    const stopIngresoScanButton = document.getElementById('stopIngresoScanButton');
+    const ingresoReaderContainer = document.getElementById('ingresoReaderContainer');
+    const ingresoScanStatus = document.getElementById('ingresoScanStatus');
     const ingresoItemsTableBody = document.getElementById('ingresoItemsTableBody');
     const ingresoItemsTableContainer = document.querySelector('#ingresoContent .table-responsive');
     const ingresoSaveButton = document.getElementById('ingresoSaveButton');
@@ -1453,35 +1659,64 @@ document.addEventListener('DOMContentLoaded', () => {
     const printLabelsButton = document.getElementById('printLabelsButton');
     const printDocMaterialButton = document.getElementById('printDocMaterialButton');
     const printDeliveryTicketButton = document.getElementById('printDeliveryTicketButton');
+    const printDeliveryTicketButtonIngreso = document.getElementById('printDeliveryTicketButtonIngreso');
     const longTextModal = new bootstrap.Modal(document.getElementById('longTextModal'));
     const splitItemModal = new bootstrap.Modal(document.getElementById('splitItemModal'));
     const deleteQrButton = document.getElementById('deleteQrButton'); 
     const selectAllQrCheckbox = document.getElementById('selectAllQrCheckbox'); 
     const printDocMaterialButtonMain = document.getElementById('printDocMaterialButtonMain');
 
-    // Variables de la nueva Búsqueda de Material
+    // Variables de la Búsqueda de Sububicación (QR, Material, Almacén)
     const searchByQrRadio = document.getElementById('searchByQr');
     const searchByMaterialRadio = document.getElementById('searchByMaterial');
+    const searchByAlmacenRadio = document.getElementById('searchByAlmacen');
     const sublocationQrContainer = document.getElementById('sublocationQrContainer');
     const sublocationMaterialContainer = document.getElementById('sublocationMaterialContainer');
+    const sublocationAlmacenContainer = document.getElementById('sublocationAlmacenContainer');
     const sublocationMaterialInput = document.getElementById('sublocationMaterialInput');
     const btnSearchMaterialSublocation = document.getElementById('btnSearchMaterialSublocation');
+    const btnSearchAlmacenSublocation = document.getElementById('btnSearchAlmacenSublocation');
 
-    // Eventos para cambiar entre QR y Material
+    // Función auxiliar para actualizar visibilidad de áreas según planta
+    function updateSublocationAreaVisibility() {
+        const centroActual = sublocationCentroInput.value.trim();
+        if (searchByAlmacenRadio && searchByAlmacenRadio.checked) {
+            sublocationAreaContainer.style.display = 'none';
+        } else if (['1000', '2000', '4000'].includes(centroActual)) {
+            sublocationAreaContainer.style.display = 'block';
+        } else {
+            sublocationAreaContainer.style.display = 'none';
+        }
+    }
+
+    // Eventos para cambiar entre QR, Material y Almacén
     searchByQrRadio.addEventListener('change', () => {
         sublocationQrContainer.style.display = 'block';
         sublocationMaterialContainer.style.display = 'none';
+        sublocationAlmacenContainer.style.display = 'none';
+        updateSublocationAreaVisibility();
         sublocationScanStatus.textContent = ''; // Limpiamos mensajes
     });
 
     searchByMaterialRadio.addEventListener('change', async () => {
         sublocationQrContainer.style.display = 'none';
         sublocationMaterialContainer.style.display = 'block';
+        sublocationAlmacenContainer.style.display = 'none';
+        updateSublocationAreaVisibility();
         sublocationScanStatus.textContent = ''; // Limpiamos mensajes
         if (isSublocationScanning) { await stopSublocationScanner(); } // Apagamos cámara por seguridad
     });
 
-  // Evento Matchcode Material en Sububicación
+    searchByAlmacenRadio.addEventListener('change', async () => {
+        sublocationQrContainer.style.display = 'none';
+        sublocationMaterialContainer.style.display = 'none';
+        sublocationAreaContainer.style.display = 'none'; // Ocultar áreas
+        sublocationAlmacenContainer.style.display = 'block'; // Mostrar botón de consulta
+        sublocationScanStatus.textContent = ''; // Limpiamos mensajes
+        if (isSublocationScanning) { await stopSublocationScanner(); } // Apagamos cámara por seguridad
+    });
+
+    // Evento Matchcode Material en Sububicación
     document.getElementById('searchSublocationMaterial').addEventListener('click', () => {
         const planta = sublocationCentroInput.value.trim();
         if (!planta) {
@@ -1492,14 +1727,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Capturamos lo que el usuario haya escrito antes de darle a la lupa
         const textoBusqueda = document.getElementById('sublocationMaterialInput').value.trim().toUpperCase();
 
-        // AQUÍ ESTÁ LA MAGIA: Le decimos el orden y cuál es la columna que debe devolver (MATNR)
         const config = {
             display: {'MATNR': 'Material', 'MAKTX': 'Descripción', 'WERKS': 'Centro'},
             order: ['MATNR', 'MAKTX', 'WERKS'],
             returnColumn: 'MATNR'
         };
 
-        // Le enviamos a SAP el Centro y también el texto de búsqueda (IV_MATNR)
         openSearchHelp('sublocationMaterialInput', 'Z_SEARCH_HELP_MATNR', { IV_WERKS: planta, IV_MATNR: textoBusqueda }, 'Ayuda de Búsqueda - Material', config);
     });
 
@@ -1514,7 +1747,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // ▼ AJUSTE 1: Mensaje correcto de "Buscando material" ▼
         sublocationScanStatus.textContent = `${getText('searchingMaterial', 'Buscando material')}: ${material}...`;
         sublocationScanStatus.className = "lead mt-2";
         showSpinner();
@@ -1549,11 +1781,70 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(result.error);
             }
         } catch (err) {
-            // ▼ AJUSTE 2: Hacemos que el error sea muy visible con un Alert ▼
             const errorMsg = getText(err.message);
             sublocationScanStatus.textContent = errorMsg; 
             sublocationScanStatus.className = "lead mt-2 message-error";
-            alert(errorMsg); // <-- Esto forzará una ventana emergente en el navegador
+            alert(errorMsg);
+            playSound('error');
+            renderSublocationTable([]);
+        } finally {
+            hideSpinner();
+        }
+    });
+
+    // Evento para Consulta General Por Almacén
+    btnSearchAlmacenSublocation.addEventListener('click', async () => {
+        const centro = sublocationCentroInput.value.trim();
+        const almacen = sublocationAlmacenInput.value.trim();
+
+        if (!centro) {
+            alert(getText('completeFiltersToScan', 'Por favor complete los filtros necesarios.'));
+            return;
+        }
+        if (!almacen) {
+            alert('Por favor ingrese o seleccione un almacén.');
+            return;
+        }
+
+        sublocationScanStatus.textContent = `Consultando stock del almacén ${almacen}...`;
+        sublocationScanStatus.className = "lead mt-2";
+        showSpinner();
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/getSublocationData`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    connection_params: sapConnection,
+                    centro: centro,
+                    almacen: almacen,
+                    sublocation: '',
+                    material: '',
+                    area: null,
+                    is_guest: isGuestMode
+                })
+            });
+            const result = await response.json();
+            if (result.success) {
+                sublocationData = result.data.map(item => {
+                    if (item.PSPNR) item.PS_PSP_PNR = item.PSPNR;
+                    if (item.ZZSUB_UBIC) item.ZZSUB_UBICACION = item.ZZSUB_UBIC;
+                    return item;
+                });
+                
+                sortState = { column: null, direction: 'asc' };
+                sublocationScanStatus.textContent = getText('recordsFound').replace('{count}', sublocationData.length);
+                sublocationScanStatus.className = "lead mt-2 message-success";
+                filterAndRender();
+                playSound('beep');
+            } else {
+                throw new Error(result.error);
+            }
+        } catch (err) {
+            const errorMsg = getText(err.message);
+            sublocationScanStatus.textContent = errorMsg; 
+            sublocationScanStatus.className = "lead mt-2 message-error";
+            alert(errorMsg);
             playSound('error');
             renderSublocationTable([]);
         } finally {
@@ -1655,6 +1946,7 @@ function updateClientOptions() {
 
     // Escuchar cambios en el selector de Entorno
     sapEnvSelect.addEventListener('change', updateClientOptions);
+    updateClientOptions(); // Cargar los mandantes inmediatamente al iniciar la página
 
     guestLoginButton.addEventListener('click', () => handleLogin(true));
     
@@ -1686,14 +1978,7 @@ function updateClientOptions() {
     confirmSaveButton.addEventListener('click', handleConfirmSave);
     deleteIngresoButton.addEventListener('click', deleteSelectedIngresoRows);
     [sublocationCentroInput, sublocationAlmacenInput].forEach(input => input.addEventListener('input', manageSublocationScannerState));
-    sublocationCentroInput.addEventListener('input', () => {
-        const centroActual = sublocationCentroInput.value.trim();
-        if (['1000', '2000', '4000'].includes(centroActual)) {
-            sublocationAreaContainer.style.display = 'block';
-        } else {
-            sublocationAreaContainer.style.display = 'none';
-        }
-    });
+    sublocationCentroInput.addEventListener('input', updateSublocationAreaVisibility);
         almacenInput.addEventListener('input', (e) => {
     e.target.value = e.target.value.toUpperCase();
     });
@@ -1722,6 +2007,7 @@ function updateClientOptions() {
     stopSublocationScanButton.addEventListener('click', stopSublocationScanner);
     printDocMaterialButtonMain.addEventListener('click', handlePrintDocMaterialMain);
     printDeliveryTicketButton.addEventListener('click', handlePrintDeliveryTicket);
+    if (printDeliveryTicketButtonIngreso) printDeliveryTicketButtonIngreso.addEventListener('click', handlePrintDeliveryTicket);
     msegTableBody.addEventListener('click', function(e) {
         if (e.target && e.target.classList.contains('select-file-btn')) {
             const fileInput = e.target.nextElementSibling;
@@ -1735,6 +2021,64 @@ function updateClientOptions() {
         msegTableBody.querySelectorAll('.qr-item-checkbox').forEach(chk => chk.checked = isChecked);
         updateDeleteQrButtonState(); // Actualiza estado del botón eliminar
     });
+    if (qrHeaderDocBtn) {
+        qrHeaderDocBtn.addEventListener('click', () => {
+            if (qrHeaderDocInput) qrHeaderDocInput.click();
+        });
+    }
+
+    if (qrHeaderDocInput) {
+        qrHeaderDocInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files.length > 0) {
+                headerQrDocFile = e.target.files[0];
+                qrHeaderDocFilename.value = headerQrDocFile.name;
+                qrHeaderDocFilename.style.backgroundColor = '#d1e7dd';
+                qrHeaderDocClearBtn.style.display = 'inline-block';
+
+                scannedCodes.forEach((sapData, key) => {
+                    if (!sapData.DOCUMENTO_INDIVIDUAL) {
+                        sapData.DOCUMENTO_FILENAME = headerQrDocFile.name;
+                        const row = msegTableBody.querySelector(`tr[data-key="${key}"]`);
+                        if (row) {
+                            const docDisplay = row.querySelector('.cell-docsCol .filename-display');
+                            if (docDisplay) {
+                                docDisplay.value = headerQrDocFile.name;
+                                docDisplay.style.backgroundColor = '#d1e7dd';
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    if (qrHeaderDocClearBtn) {
+        qrHeaderDocClearBtn.addEventListener('click', () => {
+            headerQrDocFile = null;
+            if (qrHeaderDocInput) qrHeaderDocInput.value = '';
+            if (qrHeaderDocFilename) {
+                qrHeaderDocFilename.value = '';
+                qrHeaderDocFilename.style.backgroundColor = '';
+            }
+            qrHeaderDocClearBtn.style.display = 'none';
+
+            scannedCodes.forEach((sapData, key) => {
+                if (!sapData.DOCUMENTO_INDIVIDUAL) {
+                    sapData.DOCUMENTO_FILENAME = '';
+                    sapData.DOCUMENTO = null;
+                    const row = msegTableBody.querySelector(`tr[data-key="${key}"]`);
+                    if (row) {
+                        const docDisplay = row.querySelector('.cell-docsCol .filename-display');
+                        if (docDisplay) {
+                            docDisplay.value = '';
+                            docDisplay.style.backgroundColor = '';
+                        }
+                    }
+                }
+            });
+        });
+    }
+
     msegTableBody.addEventListener('change', function(e) {
         if (e.target && e.target.classList.contains('file-input')) {
             const fileInput = e.target;
@@ -1747,10 +2091,14 @@ function updateClientOptions() {
                     const sapData = scannedCodes.get(key);
                     sapData[field] = file;
                     sapData[`${field}_FILENAME`] = file.name;
+                    if (field === 'DOCUMENTO') {
+                        sapData.DOCUMENTO_INDIVIDUAL = true;
+                    }
                     scannedCodes.set(key, sapData);
                 }
                 if (displayNameInput) {
                     displayNameInput.value = file.name;
+                    displayNameInput.style.backgroundColor = '#d1e7dd';
                 }
             }
         }
@@ -1765,6 +2113,10 @@ function updateClientOptions() {
         if (e.target.tagName === 'INPUT' && e.target.type === 'text') {
             const key = e.target.dataset.key;
             const field = e.target.dataset.field;
+            if (field === 'UMCHA') {
+                e.target.value = e.target.value.toUpperCase();
+                e.target.classList.remove('is-invalid');
+            }
             const value = e.target.value;
             if (key && field && scannedCodes.has(key)) {
                 const data = scannedCodes.get(key);
@@ -1824,7 +2176,7 @@ function updateClientOptions() {
             };
             openSearchHelpForRow(targetInput, 'Z_SEARCH_HELP_TAG', { IV_WERKS: planta }, title, config);
         }
-        // ▼▼▼ AGREGA ESTO PARA PAÍS Y PAÍS DESTINO ▼▼▼
+        // AGREGA ESTO PARA PAÍS Y PAÍS DESTINO 
         else if (searchType === 'pais_dest_qr') {
             const targetInput = currentRow.querySelector('input[data-field="ZZPAIS_DEST"]');
             
@@ -1855,6 +2207,8 @@ function updateClientOptions() {
 	});
 
     document.getElementById('searchPoButton').addEventListener('click', fetchPurchaseOrderItems);
+    if (startIngresoScanButton) startIngresoScanButton.addEventListener('click', startIngresoScanner);
+    if (stopIngresoScanButton) stopIngresoScanButton.addEventListener('click', stopIngresoScanner);
     ingresoClearButton.addEventListener('click', () => clearIngresoForm(true));
     ingresoSaveButton.addEventListener('click', openIngresoSignatureModal);
     document.getElementById('ingresoFilterInput').addEventListener('input', filterIngresoItemsTable);
@@ -1949,7 +2303,62 @@ function updateClientOptions() {
     }
 });
 
-     ingresoItemsTableBody.addEventListener('change', (e) => {
+    if (ingresoHeaderDocBtn) {
+        ingresoHeaderDocBtn.addEventListener('click', () => {
+            if (ingresoHeaderDocInput) ingresoHeaderDocInput.click();
+        });
+    }
+
+    if (ingresoHeaderDocInput) {
+        ingresoHeaderDocInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files.length > 0) {
+                headerIngresoDocFile = e.target.files[0];
+                ingresoHeaderDocFilename.value = headerIngresoDocFile.name;
+                ingresoHeaderDocFilename.style.backgroundColor = '#d1e7dd';
+                ingresoHeaderDocClearBtn.style.display = 'inline-block';
+
+                poItemsData.forEach(item => {
+                    if (!item.file_documentos_individual) {
+                        const tr = ingresoItemsTableBody.querySelector(`tr[data-pos="${item.EBELP}"]`);
+                        if (tr) {
+                            const docDisplay = tr.querySelector('.cell-docsCol .filename-display');
+                            if (docDisplay) {
+                                docDisplay.value = headerIngresoDocFile.name;
+                                docDisplay.style.backgroundColor = '#d1e7dd';
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    if (ingresoHeaderDocClearBtn) {
+        ingresoHeaderDocClearBtn.addEventListener('click', () => {
+            headerIngresoDocFile = null;
+            if (ingresoHeaderDocInput) ingresoHeaderDocInput.value = '';
+            if (ingresoHeaderDocFilename) {
+                ingresoHeaderDocFilename.value = '';
+                ingresoHeaderDocFilename.style.backgroundColor = '';
+            }
+            ingresoHeaderDocClearBtn.style.display = 'none';
+
+            poItemsData.forEach(item => {
+                if (!item.file_documentos_individual) {
+                    const tr = ingresoItemsTableBody.querySelector(`tr[data-pos="${item.EBELP}"]`);
+                    if (tr) {
+                        const docDisplay = tr.querySelector('.cell-docsCol .filename-display');
+                        if (docDisplay) {
+                            docDisplay.value = '';
+                            docDisplay.style.backgroundColor = '';
+                        }
+                    }
+                }
+            });
+        });
+    }
+
+    ingresoItemsTableBody.addEventListener('change', (e) => {
         if (e.target.classList.contains('file-ingreso-input')) {
             // Validamos que se haya subido un archivo real
             if (e.target.files && e.target.files.length > 0) {
@@ -1974,13 +2383,16 @@ function updateClientOptions() {
                     
                     if (item) {
                         item[`file_${fieldName}`] = archivoFisico;
+                        if (fieldName === 'documentos') {
+                            item.file_documentos_individual = true;
+                        }
                     }
                 }
             }
             return; // Corta la ejecución para que no interfiera con los matchcodes
         }
     
-        // ▼▼▼ 2. TUS MATCHCODES (Totalmente Intactos) ▼▼▼
+        //  2. TUS MATCHCODES (Totalmente Intactos) 
         const searchButton = e.target.closest('.search-btn');
         if (searchButton) {
             const searchType = searchButton.dataset.searchType;
@@ -2042,11 +2454,47 @@ function updateClientOptions() {
         if (scannedCodes.size > 0) {
             renderTable();
         }
+        toggleSpecialColumnsVisibility();
     });
 
     ingresoItemsTableBody.addEventListener('input', (e) => {
-        if (e.target && e.target.getAttribute('name') === 'lote' || e.target.getAttribute('name') === 'almacen') {
-            e.target.value = e.target.value.toUpperCase();
+        const target = e.target;
+        if (!target) return;
+        const name = target.getAttribute('name');
+        if (name === 'lote' || name === 'almacen') {
+            target.value = target.value.toUpperCase();
+        }
+        const tr = target.closest('tr');
+        if (!tr) return;
+        const pos = tr.dataset.pos;
+        const item = poItemsData.find(d => String(d.EBELP) === String(pos));
+        if (!item) return;
+
+        if (name === 'cantidad') item.MENGE = target.value;
+        else if (name === 'lote') item.userInput_Batch = target.value;
+        else if (name === 'almacen') item.userInput_Almacen = target.value;
+        else if (name === 'sublocation') item.userInput_Sublocation = target.value;
+        else if (name === 'tag') item.userInput_Tag = target.value;
+        else if (name === 'pais') item.userInput_Pais = target.value;
+        else if (name === 'sgtxt') item.userInput_Sgtxt = target.value;
+    });
+
+    ingresoItemsTableBody.addEventListener('change', (e) => {
+        const target = e.target;
+        if (target && target.classList.contains('item-checkbox')) {
+            const tr = target.closest('tr');
+            if (!tr) return;
+            const pos = tr.dataset.pos;
+            const item = poItemsData.find(d => String(d.EBELP) === String(pos));
+            if (item) {
+                item.isSelected = target.checked;
+            }
+            const checkedCount = ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked').length;
+            const totalCount = ingresoItemsTableBody.querySelectorAll('.item-checkbox').length;
+            ingresoSaveButton.disabled = checkedCount === 0;
+            deleteIngresoButton.style.display = checkedCount > 0 ? 'inline-block' : 'none';
+            deleteIngresoButton.disabled = checkedCount === 0;
+            selectAllIngresoItemsCheckbox.checked = totalCount > 0 && checkedCount === totalCount;
         }
     });
 
@@ -2245,7 +2693,7 @@ function updateClientOptions() {
         if (rfcName.startsWith('local_')) {
             let localData = [];
             if (rfcName === 'local_cl_movimiento') {
-                localData = [{ 'CL_MOV': '101' }, { 'CL_MOV': '221' }, { 'CL_MOV': '231' }, { 'CL_MOV': '311' },  { 'CL_MOV': '601' }];
+                localData = [{ 'CL_MOV': '101' }, { 'CL_MOV': '221' }, { 'CL_MOV': '231' }, { 'CL_MOV': '309' }, { 'CL_MOV': '311' }, { 'CL_MOV': '601' }];
             } else if (rfcName === 'local_stock_especial') {
                 localData = [{ 'STOCK_ESP': '' }, { 'STOCK_ESP': 'Q' }, { 'STOCK_ESP': 'E' }];
             }
@@ -2420,30 +2868,37 @@ function updateClientOptions() {
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ connection_params: connectionParamsForThisAttempt })
+                body: JSON.stringify({ 
+                    connection_params: connectionParamsForThisAttempt,
+                    plant: sapPlantSelect.value
+                })
             });
             const result = await response.json();
             if (result.success) {
                 sapConnection = connectionParamsForThisAttempt;
-                currentPlant = sapPlantSelect.value; // ▼ GUARDAMOS LA PLANTA GLOBALMENTE
+                currentPlant = sapPlantSelect.value; // GUARDAMOS LA PLANTA GLOBALMENTE
+                currentSessionId = result.session_id || null;
+                startHeartbeat();
                 
                 const userToShow = isGuest ? (result.guest_user || 'Invitado') : connectionParamsForThisAttempt.user;
                 loginSection.style.display = 'none';
                 modeSelectionSection.style.display = 'block';
 
                 const selectedClient = sapClientInput.value.trim();
-                // ▼ AGREGAMOS LA PLANTA AL TEXTO VERDE DE ARRIBA A LA DERECHA
+                // AGREGAMOS LA PLANTA AL TEXTO VERDE DE ARRIBA A LA DERECHA
                 const displayText = `${getText('user')}: ${userToShow.toUpperCase()} (${sapEnvSelect.value} ${selectedClient} - ${getText('plantText')} ${currentPlant})`;
                 loggedInUserDisplays.forEach(display => {
                     display.textContent = displayText;
                 });
             } else {
                 sapConnection = null;
+                currentSessionId = null;
                 setLoginStatus(`Error: ${result.error}`, 'error');
                 playSound('error');
             }
         } catch (e) {
             sapConnection = null;
+            currentSessionId = null;
             setLoginStatus(`${getText('networkError')}: ${e.message}`, 'error');
             playSound('error');
         } finally {
@@ -2451,7 +2906,79 @@ function updateClientOptions() {
         }
     }
 
+    function startHeartbeat() {
+        stopHeartbeat();
+        heartbeatInterval = setInterval(async () => {
+            if (!currentSessionId || !sapConnection) return;
+            try {
+                const resp = await fetch(`${API_BASE_URL}/api/session/heartbeat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        connection_params: sapConnection,
+                        session_id: currentSessionId,
+                        is_guest: isGuestMode
+                    })
+                });
+                const data = await resp.json();
+                if (data.success && data.status === 'K') {
+                    stopHeartbeat();
+                    alert(getText('sessionKilledByAdmin', 'Su sesión ha sido finalizada por el Administrador de SAP.'));
+                    handleLogout();
+                }
+            } catch (e) {
+                console.warn("Heartbeat ping error:", e);
+            }
+        }, 30000);
+    }
+
+    function stopHeartbeat() {
+        if (heartbeatInterval) {
+            clearInterval(heartbeatInterval);
+            heartbeatInterval = null;
+        }
+    }
+
+    window.addEventListener('beforeunload', () => {
+        if (currentSessionId && sapConnection) {
+            const payload = JSON.stringify({
+                connection_params: sapConnection,
+                session_id: currentSessionId,
+                is_guest: isGuestMode
+            });
+            const blob = new Blob([payload], { type: 'application/json' });
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon(`${API_BASE_URL}/api/session/logout`, blob);
+            } else {
+                fetch(`${API_BASE_URL}/api/session/logout`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: payload,
+                    keepalive: true
+                });
+            }
+        }
+    });
+
     async function handleLogout() {
+        stopHeartbeat();
+        if (currentSessionId && sapConnection) {
+            try {
+                fetch(`${API_BASE_URL}/api/session/logout`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        connection_params: sapConnection,
+                        session_id: currentSessionId,
+                        is_guest: isGuestMode
+                    }),
+                    keepalive: true
+                }).catch(() => {});
+            } catch (e) {
+                console.warn("Logout notify error:", e);
+            }
+        }
+        currentSessionId = null;
         await stopAllScanners();
         sapConnection = null;
         isGuestMode = false;
@@ -2479,7 +3006,7 @@ function updateClientOptions() {
         
         if (selectedMode === 'etiqueta') {
             mainContent.style.display = 'block';
-            centroInput.value = currentPlant; // ▼ AUTO-LLENAR PLANTA
+            centroInput.value = currentPlant; //  AUTO-LLENAR PLANTA
             if (isGuestMode) {
                 headerDataSection.style.display = 'none';
             } else {
@@ -2490,7 +3017,7 @@ function updateClientOptions() {
             handleHeaderChange();
         } else if (selectedMode === 'sublocation') {
             sublocationContent.style.display = 'block';
-            sublocationCentroInput.value = currentPlant; // ▼ AUTO-LLENAR PLANTA
+            sublocationCentroInput.value = currentPlant; //  AUTO-LLENAR PLANTA
             // Proponer almacén según la planta (el usuario puede cambiarlo)
             const suggestedAlmacenSub = getDefaultAlmacen(currentPlant);
             if (suggestedAlmacenSub && !sublocationAlmacenInput.value.trim()) {
@@ -2529,6 +3056,9 @@ function updateClientOptions() {
         }
         if (html5QrCodeSublocation && html5QrCodeSublocation.isScanning) {
             try { await html5QrCodeSublocation.stop(); } catch(e) { console.error("Error stopping sublocation scanner:", e); }
+        }
+        if (html5QrCodeIngreso && html5QrCodeIngreso.isScanning) {
+            try { await html5QrCodeIngreso.stop(); } catch(e) { console.error("Error stopping ingreso scanner:", e); }
         }
         isScanning = false;
         isSublocationScanning = false;
@@ -2650,6 +3180,9 @@ function updateClientOptions() {
                 if (currentClient === '620' && currentMoveType === '101') {
                     result.msegData.SUB_LOC = '2000';
                 }
+                if (currentMoveType === '101' && headerQrDocFile && !result.msegData.DOCUMENTO_FILENAME) {
+                    result.msegData.DOCUMENTO_FILENAME = headerQrDocFile.name;
+                }
                 scannedCodes.set(key, result.msegData);
                 renderTable();
             } else {
@@ -2683,6 +3216,7 @@ msegTableBody.innerHTML = '';
     
     const currentMoveType = clMovimientoInput.value.trim();
     const is311 = currentMoveType === '311';
+    const is309 = currentMoveType === '309';
 
     scannedCodes.forEach((sapData, key) => {
         const [doc, year, item] = key.split('-');
@@ -2749,23 +3283,26 @@ msegTableBody.innerHTML = '';
             <td class="cell-qtyCol"><input type="text" class="form-control form-control-sm" value="${sapData.MENGE || '0'}" data-key="${key}" data-field="MENGE" ${isReadOnly}></td>
             <td class="cell-unitCol">${sapData.MEINS || ''}</td>
             <td class="cell-batchCol">${sapData.CHARG || ''}</td>
+            <td class="cell-batchDestCol ${is309 ? '' : 'd-none'}">
+                <input type="text" class="form-control form-control-sm text-uppercase" value="${sapData.UMCHA || ''}" data-key="${key}" data-field="UMCHA" maxlength="10" placeholder="${getText('destBatchPlaceholder', 'Lote Destino...')}" ${isReadOnly}>
+            </td>
             <td class="cell-certCol">
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control filename-display" value="${sapData.CERTIFICADO_FILENAME || ''}" readonly>
+                    <input type="text" class="form-control filename-display" value="${sapData.CERTIFICADO_FILENAME || ''}" style="${sapData.CERTIFICADO_FILENAME ? 'background-color: #d1e7dd;' : ''}" readonly>
                     <button class="btn btn-outline-secondary select-file-btn" type="button" ${isReadOnly}>...</button>
                     <input type="file" accept=".pdf, image/jpeg, image/jpg, image/png" class="file-input" data-key="${key}" data-field="CERTIFICADO" style="display: none;">
                 </div>
             </td>
             <td class="cell-docsCol">
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control filename-display" value="${sapData.DOCUMENTO_FILENAME || ''}" readonly>
+                    <input type="text" class="form-control filename-display" value="${sapData.DOCUMENTO_FILENAME || ((currentMoveType === '101' && headerQrDocFile) ? headerQrDocFile.name : '')}" style="${(sapData.DOCUMENTO_FILENAME || ((currentMoveType === '101' && headerQrDocFile) ? headerQrDocFile.name : '')) ? 'background-color: #d1e7dd;' : ''}" readonly>
                     <button class="btn btn-outline-secondary select-file-btn" type="button" ${isReadOnly}>...</button>
                     <input type="file" accept=".pdf, image/jpeg, image/jpg, image/png" class="file-input" data-key="${key}" data-field="DOCUMENTO" style="display: none;">
                 </div>
             </td>
             <td class="cell-inspCol">
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control filename-display" value="${sapData.INSPECCION_FILENAME || ''}" readonly>
+                    <input type="text" class="form-control filename-display" value="${sapData.INSPECCION_FILENAME || ''}" style="${sapData.INSPECCION_FILENAME ? 'background-color: #d1e7dd;' : ''}" readonly>
                     <button class="btn btn-outline-secondary select-file-btn" type="button" ${isReadOnly}>...</button>
                     <input type="file" accept=".pdf, image/jpeg, image/jpg, image/png" class="file-input" data-key="${key}" data-field="INSPECCION" style="display: none;">
                 </div>
@@ -2847,28 +3384,59 @@ const moveType = clMovimientoInput.value.trim();
             return; // Detenemos la ejecución para que no se abra la ventana de firmas
         }
     }
+
+    // Validación para el movimiento 309 (Lote Destino obligatorio por posición)
+    if (moveType === '309') {
+        let allBatchDestAreValid = true;
+        const batchDestInputs = msegTableBody.querySelectorAll('input[data-field="UMCHA"]');
+
+        if (batchDestInputs.length === 0 && scannedCodes.size > 0) {
+            allBatchDestAreValid = false;
+        }
+
+        batchDestInputs.forEach(input => {
+            input.classList.remove('is-invalid');
+            if (!input.value || input.value.trim() === '') {
+                input.classList.add('is-invalid');
+                allBatchDestAreValid = false;
+            }
+        });
+
+        if (!allBatchDestAreValid) {
+            const errorMessage = getText('destBatchRequired', 'El campo Lote Destino es obligatorio en todas las posiciones para el movimiento 309.');
+            alert(errorMessage);
+            setScanStatus(errorMessage, "error");
+            playSound('error');
+            return;
+        }
+    }
+
     currentSaveHandler = saveData;
     modalErrorMessage.style.display = 'none';
     receptorSelect.innerHTML = `<option value="">${getText('loading')}</option>`;
     despachadorSelect.innerHTML = `<option value="">${getText('loading')}</option>`;
     labelSizeSelect.value = '';
+    signatureReceptorBase64 = "";
+    signatureDespachadorBase64 = "";
+    if (firmaReceptorBadge) firmaReceptorBadge.classList.add('d-none');
+    if (firmaDespachadorBadge) firmaDespachadorBadge.classList.add('d-none');
 
     // --- Lógica condicional para mostrar/ocultar campos ---
     const centro = centroInput.value.trim();
 
-    if (moveType === '311') {
-        //  Para 311 ocultar Despachador y mostrar Tamaño de Etiqueta
-        despachadorSelect.parentElement.style.display = 'none';
+    if (moveType === '311' || moveType === '309') {
+        //  Para 311 y 309 ocultar Despachador y mostrar Tamaño de Etiqueta
+        despachadorContainer.style.display = 'none';
         labelSizeContainer.style.display = 'block';
     } 
     else if (moveType === '101' && (centro === '4000' || centro === '2000')) {
         //  Movimiento 101 en centros específicos oculta ambos
-        despachadorSelect.parentElement.style.display = 'none';
+        despachadorContainer.style.display = 'none';
         labelSizeContainer.style.display = 'none';
     } 
     else {
         //  Para el resto de movimientos (221, 231, 601, etc.)
-        despachadorSelect.parentElement.style.display = 'block';
+        despachadorContainer.style.display = 'block';
         
         // Ocultamos el tamaño para estos 
         const hideLabelSizeFor = ['221', '231', '601'];
@@ -2930,7 +3498,11 @@ const moveType = clMovimientoInput.value.trim();
 
                 setScanStatus("", "");
                 signatureModal.show();
-            } 
+            } else {
+                setScanStatus(`${getText('loadingData')}: ${result.error}`, "error");
+                playSound('error');
+                alert(`${getText('confirmWindowError')}:\n${result.error}`);
+            }
         } catch (e) {
             setScanStatus(`${getText('networkError')}: ${e.message}`, "error");
             playSound('error');
@@ -2982,12 +3554,16 @@ const moveType = clMovimientoInput.value.trim();
              alert('No se pudo determinar el Centro para cargar los datos del modal.');
              return;
         }
-        despachadorSelect.parentElement.style.display = 'none';
+        despachadorContainer.style.display = 'none';
         labelSizeContainer.style.display = 'block';
         currentSaveHandler = saveIngresoData;
         modalErrorMessage.style.display = 'none';
         receptorSelect.innerHTML = `<option value="">${getText('loading')}</option>`;
         labelSizeSelect.value = '';
+        signatureReceptorBase64 = "";
+        signatureDespachadorBase64 = "";
+        if (firmaReceptorBadge) firmaReceptorBadge.classList.add('d-none');
+        if (firmaDespachadorBadge) firmaDespachadorBadge.classList.add('d-none');
         setIngresoStatus(getText('loadingData'), "info");
         showSpinner();
         const moveTypeIngreso = document.getElementById('ingresoTipoMovimiento').value.trim();
@@ -3040,11 +3616,14 @@ const moveType = clMovimientoInput.value.trim();
     }
     function handleConfirmSave() {
         const isLabelSizeVisible = labelSizeContainer.style.display !== 'none';
-        const isDespachadorVisible = despachadorSelect.parentElement.style.display !== 'none';
+        const isDespachadorVisible = despachadorContainer.style.display !== 'none';
         const signatureData = {
             receptor: receptorSelect.value,
             despachador: isDespachadorVisible ? despachadorSelect.value : '',
-            labelSize: isLabelSizeVisible ? labelSizeSelect.value : ''
+            labelSize: isLabelSizeVisible ? labelSizeSelect.value : '',
+            firmaReceptorBase64: signatureReceptorBase64 || '',
+            firmaDespachadorBase64: isDespachadorVisible ? (signatureDespachadorBase64 || '') : '',
+            firmaBase64: signatureReceptorBase64 || '' // Fallback por compatibilidad
         };
         let isValid = true;
         if (!signatureData.receptor) isValid = false;
@@ -3065,6 +3644,29 @@ const moveType = clMovimientoInput.value.trim();
     }
     async function saveData(signatureData) {
         if (isGuestMode || !sapConnection) { alert("Acción no permitida."); return; }
+        
+        const moveType = clMovimientoInput.value.trim();
+        if (moveType === '309') {
+            let allBatchDestAreValid = true;
+            const batchDestInputs = msegTableBody.querySelectorAll('input[data-field="UMCHA"]');
+            if (batchDestInputs.length === 0 && scannedCodes.size > 0) {
+                allBatchDestAreValid = false;
+            }
+            batchDestInputs.forEach(input => {
+                if (!input.value || input.value.trim() === '') {
+                    input.classList.add('is-invalid');
+                    allBatchDestAreValid = false;
+                }
+            });
+            if (!allBatchDestAreValid) {
+                const errorMsg = getText('destBatchRequired', 'El campo Lote Destino es obligatorio en todas las posiciones para el movimiento 309.');
+                alert(errorMsg);
+                setScanStatus(errorMsg, "error");
+                hideSpinner();
+                return;
+            }
+        }
+
         setScanStatus(getText('preparingData'), "info");
         showSpinner();
 
@@ -3090,6 +3692,7 @@ const moveType = clMovimientoInput.value.trim();
         const subLoc2Input = row.querySelector('input[data-field="SUB_LOC2"]');
         const tagDestInput = row.querySelector('input[data-field="ZZUBICACION2"]');
         const paisDestInput = row.querySelector('input[data-field="ZZPAIS_DEST"]');
+        const batchDestInput = row.querySelector('input[data-field="UMCHA"]');
 
         // Actualizamos los datos del objeto 'sapData' con los valores actuales de la tabla
         // Esto asegura que cualquier cambio se capture
@@ -3100,6 +3703,7 @@ const moveType = clMovimientoInput.value.trim();
         if (rsnumInput) sapData.RSNUM = rsnumInput.value;
         if (tagDestInput) sapData.ZZUBICACION2 = tagDestInput.value;
         if (paisDestInput) sapData.ZZPAIS_DEST = paisDestInput.value;
+        if (batchDestInput) sapData.UMCHA = batchDestInput.value.trim().toUpperCase();
     }
 
     return {
@@ -3109,6 +3713,8 @@ const moveType = clMovimientoInput.value.trim();
         MENGE: sapData.MENGE, // Se usa el valor actualizado
         MEINS: sapData.MEINS,
         CHARG: sapData.CHARG,
+        UMCHA: (sapData.UMCHA || '').trim().toUpperCase(),
+        umcha: (sapData.UMCHA || '').trim().toUpperCase(),
         SGTXT: sapData.SGTXT, // Se usa el valor actualizado
         ZZUBICACION: sapData.ZZUBICACION, // Corregido para usar 'TAG' que sí existe en el objeto
         ZZUBICACION2: sapData.ZZUBICACION2,
@@ -3139,17 +3745,16 @@ const moveType = clMovimientoInput.value.trim();
         const fileMetadata = [];
         scannedCodes.forEach((sapData, key) => {
             ['CERTIFICADO', 'DOCUMENTO', 'INSPECCION'].forEach(field => {
-                // Usamos la validación ajustada para el iPad
-                if (sapData[field] && sapData[field].name) {
+                let fileToUpload = sapData[field];
+                if (field === 'DOCUMENTO' && (!fileToUpload || !fileToUpload.name) && headerQrDocFile && clMovimientoInput.value.trim() === '101') {
+                    fileToUpload = headerQrDocFile;
+                }
+                if (fileToUpload && fileToUpload.name) {
                     const uniqueKey = `file_${key}_${field}`;
+                    const originalName = fileToUpload.name;
                     
-                    // Extraer extensión y forzar un nombre único para evitar colisiones en iOS/SAP
-                    const originalName = sapData[field].name;
-                    const ext = originalName.includes('.') ? originalName.split('.').pop() : 'jpg';
-                    const uniqueFileName = `${key}_${field}_${Date.now()}.${ext}`;
-                    
-                    // Usamos el nombre único en lugar del nombre original
-                    formData.append(uniqueKey, sapData[field], uniqueFileName);
+                    // Mantener el nombre original del archivo para todas las posiciones
+                    formData.append(uniqueKey, fileToUpload, originalName);
                     fileMetadata.push({ key: key, field: field, formKey: uniqueKey });
                 }
             });
@@ -3178,7 +3783,7 @@ const moveType = clMovimientoInput.value.trim();
                 printDocMaterialButtonMain.style.display = 'inline-block'; // Muestra el botón de impresión
 
                 // Deshabilita inputs de cabecera y de la tabla para evitar cambios
-                [clMovimientoInput, almacenInput, centroInput, textoCabeceraInput, specialStockIndicatorInput, reservaCheckbox].forEach(el => el.disabled = true);
+                [clMovimientoInput, almacenInput, centroInput, textoCabeceraInput, specialStockIndicatorInput, reservaCheckbox, qrHeaderDocBtn, qrHeaderDocClearBtn].forEach(el => { if (el) el.disabled = true; });
                 document.querySelectorAll('#msegTableBody input, #msegTableBody button').forEach(el => el.disabled = true);
                 //await resetAll();
             } else {
@@ -3196,7 +3801,7 @@ const moveType = clMovimientoInput.value.trim();
     async function resetAll() {
        await stopScanner();
         clearFormAndTable();
-        [clMovimientoInput, almacenInput, centroInput, textoCabeceraInput, specialStockIndicatorInput, reservaCheckbox].forEach(el => el.disabled = false);
+        [clMovimientoInput, almacenInput, centroInput, textoCabeceraInput, specialStockIndicatorInput, reservaCheckbox, qrHeaderDocBtn, qrHeaderDocClearBtn].forEach(el => { if (el) el.disabled = false; });
         manageScannerState();
         toggleSpecialColumnsVisibility();
         printDocMaterialButtonMain.style.display = 'none'; 
@@ -3206,6 +3811,14 @@ const moveType = clMovimientoInput.value.trim();
         msegTableBody.innerHTML = '';
         scannedCodes.clear();
         qrContentElement.textContent = '';
+
+        headerQrDocFile = null;
+        if (qrHeaderDocInput) qrHeaderDocInput.value = '';
+        if (qrHeaderDocFilename) {
+            qrHeaderDocFilename.value = '';
+            qrHeaderDocFilename.style.backgroundColor = '';
+        }
+        if (qrHeaderDocClearBtn) qrHeaderDocClearBtn.style.display = 'none';
 
         almacenInput.value = '';
         textoCabeceraInput.value = '';
@@ -3296,6 +3909,36 @@ function toggleSpecialColumnsVisibility() {
     const centro = centroInput.value.trim();
     const isSpecialPlant = (centro === '4000' || centro === '2000');
     const is311 = (moveType === '311'); // NUEVA VARIABLE PARA 311
+    const is309 = (moveType === '309'); // NUEVA VARIABLE PARA 309
+
+    // --- LÓGICA DE DOCUMENTO CABECERA EN QR (SOLO 101) ---
+    if (qrHeaderDocContainer) {
+        qrHeaderDocContainer.style.display = (moveType === '101') ? 'block' : 'none';
+    }
+
+    // --- LÓGICA PARA COLUMNAS DEL MOVIMIENTO 309 (LOTE DESTINO POR POSICIÓN) ---
+    msegColumnVisibility['batchDestCol'] = is309;
+    const checkBatchDest = document.getElementById('check-batchDestCol');
+    if (checkBatchDest) checkBatchDest.checked = is309;
+    document.querySelectorAll('[data-column="batchDestCol"], .cell-batchDestCol')
+        .forEach(el => el.classList.toggle('d-none', !is309));
+
+    // Si NO es 309, limpiamos los valores de Lote Destino de las posiciones
+    if (!is309) {
+        document.querySelectorAll('input[data-field="UMCHA"]').forEach(input => {
+            input.value = '';
+            input.classList.remove('is-invalid');
+            input.required = false;
+        });
+        scannedCodes.forEach(sapData => {
+            if (sapData.UMCHA) sapData.UMCHA = '';
+            if (sapData.umcha) sapData.umcha = '';
+        });
+    } else {
+        document.querySelectorAll('input[data-field="UMCHA"]').forEach(input => {
+            input.required = true;
+        });
+    }
 
     // Referencias a los checkboxes del menú (Layout) originales
     const checkPedido2 = document.querySelector('input[data-column="orderNo2Col"]');
@@ -3330,7 +3973,7 @@ function toggleSpecialColumnsVisibility() {
 
     // --- LÓGICA PARA PLANTAS ESPECIALES (2000 / 4000) ---
     if (isSpecialPlant) {
-        // 1. FORZAR ACTIVACIÓN DE PEDIDO 2 Y POSICIÓN 2
+        // 1. FORZAR ACTIVACIÖN DE PEDIDO 2 Y POSICIÖN 2
         // Actualizamos el "cerebro" (msegColumnVisibility) a TRUE
         msegColumnVisibility['orderNo2Col'] = true;
         msegColumnVisibility['poItemCol2'] = true;
@@ -3361,7 +4004,7 @@ function toggleSpecialColumnsVisibility() {
             .forEach(el => el.classList.add('d-none'));
     
     } else {
-        // --- LÓGICA PARA OTRAS PLANTAS ---
+        // --- LÖGICA PARA OTRAS PLANTAS ---
         // Aquí respetamos lo que el usuario haya decidido en el Layout
         
         // Pedido 2: Respetar estado del layout
@@ -3406,6 +4049,7 @@ function toggleSpecialColumnsVisibility() {
             cell.classList.toggle('d-none', !isVisible);
             });
         }
+        if (typeof applyStickyColumns === 'function') setTimeout(applyStickyColumns, 50);
     }
     function areSublocationFiltersFilled() {
         // Ahora solo exigimos el Centro. El Almacén es opcional.
@@ -3635,11 +4279,17 @@ function toggleSpecialColumnsVisibility() {
         qrContentElement.textContent = '';
         clMovimientoInput.value = '';
         specialStockIndicatorInput.value = '';
+        const loteDestinoEl = document.getElementById('loteDestino');
+        if (loteDestinoEl) loteDestinoEl.value = '';
         centroInput.value = '';
         almacenInput.value = '';
         textoCabeceraInput.value = '';
         reservaCheckbox.checked = false;
         setScanStatus("", "");
+        signatureReceptorBase64 = "";
+        signatureDespachadorBase64 = "";
+        if (firmaReceptorBadge) firmaReceptorBadge.classList.add('d-none');
+        if (firmaDespachadorBadge) firmaDespachadorBadge.classList.add('d-none');
         updateButtonsVisibility();
         toggleReservaColumn();
         sublocationCentroInput.value = '';
@@ -3663,7 +4313,7 @@ function toggleSpecialColumnsVisibility() {
     }
 
     function clearSublocationForm() {
-       // 1. Limpiar campos de texto (Se conserva Centro y Almacén)
+        // 1. Limpiar campos de texto (Se conserva Centro y Almacén)
     sublocationMaterialInput.value = '';
     sublocationQrContent.textContent = '';
     filterInput.value = '';
@@ -3694,7 +4344,67 @@ function toggleSpecialColumnsVisibility() {
   //      document.querySelectorAll('#ingresoItemsTable .wbs-col').forEach(el => el.style.display = stockType === 'Q' ? '' : 'none');
   //      document.querySelectorAll('#ingresoItemsTable .so-col').forEach(el => el.style.display = stockType === 'E' ? '' : 'none');
   //  }
-    async function fetchPurchaseOrderItems() {
+    async function startIngresoScanner() {
+        if (isIngresoScanning) return;
+        isIngresoScanning = true;
+        ingresoReaderContainer.style.display = 'block';
+        startIngresoScanButton.style.display = 'none';
+        stopIngresoScanButton.style.display = 'inline-block';
+        ingresoScanStatus.textContent = getText('readyToScan', 'Listo para escanear');
+        ingresoScanStatus.className = "lead mt-2 message-success";
+        
+        html5QrCodeIngreso = new Html5Qrcode("ingresoReader");
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+        try {
+            await html5QrCodeIngreso.start({ facingMode: "environment" }, config, onIngresoScanSuccess, (errorMessage) => {});
+        } catch (err) {
+            ingresoScanStatus.textContent = `${getText('cameraError', 'Error de cámara')}: ${err}`;
+            ingresoScanStatus.className = "lead mt-2 message-error";
+            isIngresoScanning = false;
+            ingresoReaderContainer.style.display = 'none';
+            startIngresoScanButton.style.display = 'block';
+            stopIngresoScanButton.style.display = 'none';
+        }
+    }
+
+    async function stopIngresoScanner() {
+        if (!isIngresoScanning || !html5QrCodeIngreso) return;
+        try {
+            await html5QrCodeIngreso.stop();
+        } catch(err) { /* Ignorar error */ }
+        isIngresoScanning = false;
+        ingresoReaderContainer.style.display = 'none';
+        startIngresoScanButton.style.display = 'block';
+        stopIngresoScanButton.style.display = 'none';
+        ingresoScanStatus.textContent = '';
+    }
+
+    async function onIngresoScanSuccess(decodedText) {
+        if (!decodedText) return;
+        await stopIngresoScanner();
+
+        let textoQR = decodedText.trim();
+        let posicionSeleccionada = "";
+
+        // Verificamos si es el QR de Posición (15 dígitos)
+        if (textoQR.length === 15 && /^\d+$/.test(textoQR)) {
+            posicionSeleccionada = textoQR.substring(10, 15); 
+            textoQR = textoQR.substring(0, 10);               
+        }
+
+       ingresoNroPedidoInput.value = textoQR;
+        if(typeof playSound === 'function') playSound('beep');
+        
+        // Llamamos a la búsqueda pasándole la posición a seleccionar
+        fetchPurchaseOrderItems(posicionSeleccionada);
+    }
+
+    async function fetchPurchaseOrderItems(posicionAutoSeleccionar = "") {
+        // Si la función se llama por el clic del botón (Matchcode), el parámetro será un Evento. Lo ignoramos.
+        if (typeof posicionAutoSeleccionar !== "string") {
+            posicionAutoSeleccionar = "";
+        }
+
         const poNumber = ingresoNroPedidoInput.value.trim();
         if (!poNumber) { clearIngresoForm(false); return; }
 
@@ -3704,65 +4414,98 @@ function toggleSpecialColumnsVisibility() {
             const response = await fetch(`${API_BASE_URL}/getPurchaseOrderItems`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ connection_params: sapConnection, po_number: poNumber, is_guest: isGuestMode, user_lang: navigator.language || navigator.userLanguage })
+                body: JSON.stringify({ 
+                    connection_params: sapConnection, 
+                    po_number: poNumber, 
+                    po_item: posicionAutoSeleccionar, // <-- Aquí enviamos la posición a Python
+                    is_guest: isGuestMode, 
+                    user_lang: navigator.language || navigator.userLanguage 
+                })
             });
             const result = await response.json();
             hideSpinner();
 
-
             if (result.success && result.items) {
-const sapItems = result.items; // Datos frescos de SAP
+                const sapItems = result.items; 
             
-            if (poItemsData.length === 0 || poItemsData[0].EBELN !== poNumber) {
-                poItemsData = sapItems; 
-                setIngresoStatus(getText('poLoadedSuccess') , 'success');
-            } else {
-                // Hay datos locales para el mismo pedido. Hacemos la fusión.
-                
-                // 1. Identificar las posiciones originales (EBELP sin punto) que ya tenemos localmente.
-                const localOriginalPositions = poItemsData
-                    .map(item => String(item.EBELP).split('.')[0])
-                    .filter((value, index, self) => self.indexOf(value) === index); // Obtener únicos
-                
-                // 2. Encontrar qué posiciones originales de SAP nos faltan.
-                const missingPositions = sapItems.filter(sapItem => 
-                    !localOriginalPositions.includes(sapItem.EBELP)
-                );
-                
-                if (missingPositions.length > 0) {
-                    // 3. Añadir las posiciones faltantes (que el usuario eliminó) al final de poItemsData.
-                    poItemsData.push(...missingPositions);
-                    let msgMerged = getText('poMergedSuccess')
-            .replace('{count}', missingPositions.length)
-            .replace('{poNumber}', poNumber);
-        setIngresoStatus(msgMerged, 'warning');
-    } else {
-        setIngresoStatus(getText('poLoadedSuccess'), 'success');
-    }
-}
-    
-            // 4. Re-renderizar la tabla con los datos fusionados (que incluyen splits y ediciones locales).
-            renderIngresoItemsTable(poItemsData);
+                // Guardar los datos ingresados actualmente en la tabla antes de modificarla o re-renderizarla
+                syncTableInputsToData();
             
-            ingresoSaveButton.disabled = false;
-            
-            // LÍNEA CORREGIDA: Usamos el contenedor definido para desplazar la vista.
-            if (ingresoItemsTableContainer) {
-                 ingresoItemsTableContainer.scrollIntoView({ behavior: 'smooth' });
-            }
+                const currentPO = currentIngresoPO || (poItemsData.length > 0 && poItemsData[0].EBELN ? String(poItemsData[0].EBELN).replace(/^0+/, '') : '');
+                const newPO = String(poNumber).replace(/^0+/, '');
 
-            
-        } else {
-            throw new Error(result.error || 'Respuesta inválida.');
+                if (poItemsData.length === 0 || (currentPO && currentPO !== newPO)) {
+                    currentIngresoPO = newPO;
+                    sapItems.forEach(item => {
+                        item.EBELN = newPO;
+                        item.isSelected = true;
+                    });
+                    poItemsData = sapItems; 
+                    setIngresoStatus(getText('poLoadedSuccess') , 'success');
+                } else {
+                    currentIngresoPO = newPO;
+                    const localOriginalPositions = poItemsData
+                        .map(item => String(item.EBELP).replace(/^0+/, '').split('.')[0])
+                        .filter((value, index, self) => self.indexOf(value) === index); 
+                    
+                    const missingPositions = sapItems.filter(sapItem => 
+                        !localOriginalPositions.includes(String(sapItem.EBELP).replace(/^0+/, '').split('.')[0])
+                    );
+                    
+                    if (missingPositions.length > 0) {
+                        missingPositions.forEach(item => {
+                            item.EBELN = newPO;
+                            item.isSelected = true;
+                        });
+                        poItemsData.push(...missingPositions);
+                        let msgMerged = getText('poMergedSuccess')
+                            .replace('{count}', missingPositions.length)
+                            .replace('{poNumber}', poNumber);
+                        setIngresoStatus(msgMerged, 'warning');
+                    } else {
+                        const duplicateMsg = getText('duplicatePositionMessage', 'La posición ya se encuentra agregada en la lista.');
+                        setIngresoStatus(duplicateMsg, 'warning');
+                        alert(duplicateMsg);
+                    }
+                }
+    
+                renderIngresoItemsTable(poItemsData);
+                
+                ingresoSaveButton.disabled = false;
+                if (printDeliveryTicketButtonIngreso) printDeliveryTicketButtonIngreso.style.display = 'inline-block';
+                
+                if (ingresoItemsTableContainer) {
+                     ingresoItemsTableContainer.scrollIntoView({ behavior: 'smooth' });
+                }
+
+                // >>> LÓGICA DE AUTO-SELECCIÓN DE POSICIÓN <<<
+                if (posicionAutoSeleccionar) {
+                    // 1. Buscamos la fila correspondiente (ej. "00010")
+                    const fila = ingresoItemsTableBody.querySelector(`tr[data-pos="${posicionAutoSeleccionar}"]`);
+                    if (fila) {
+                        // 2. Marcamos el checkbox si aún no lo estaba
+                        const checkbox = fila.querySelector('.item-checkbox');
+                        if (checkbox) {
+                            checkbox.checked = true;
+                            checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                        fila.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+                
+            } else {
+                throw new Error(result.error || 'Respuesta inválida.');
+            }
+        } catch (err) {
+            if (poItemsData.length === 0) {
+                clearIngresoForm(false);
+            }
+            setIngresoStatus(`Error: ${err.message}`, 'error');
+            playSound('error');
+        } finally {
+            hideSpinner();
         }
-    } catch (err) {
-        clearIngresoForm(false);
-        setIngresoStatus(`Error: ${err.message}`, 'error');
-        playSound('error');
-    } finally {
-        // La llamada a hideSpinner() se movió arriba, antes de los bloques de éxito/error.
     }
-}
     
 function renderIngresoItemsTable(items) {
     // PASO 1: Analizar todos los items para decidir qué columnas mostrar
@@ -3824,7 +4567,7 @@ function renderIngresoItemsTable(items) {
             }
             // Si no es 'SAL GY' ni 'SAL...', se queda con el '00.00' asignado arriba.
         }
-        // --- FIN DE LA LÓGICA DE VALIDACIÓN ---
+        // --- FIN DE LA LÓGICA DE VALIDACIÖN ---
         
 
         // --- LÓGICA DE CONSTRUCCIÓN DINÁMICA DE LA FILA ---
@@ -3841,7 +4584,7 @@ function renderIngresoItemsTable(items) {
         const sgtxtValue = item.userInput_Sgtxt ?? '';
 
         const certFileName = (item.file_certificado && item.file_certificado.name) ? item.file_certificado.name : '';
-        const docFileName = (item.file_documentos && item.file_documentos.name) ? item.file_documentos.name : '';
+        const docFileName = (item.file_documentos && item.file_documentos.name) ? item.file_documentos.name : (headerIngresoDocFile ? headerIngresoDocFile.name : '');
         const inspFileName = (item.file_inspeccion && item.file_inspeccion.name) ? item.file_inspeccion.name : '';
 
 
@@ -3925,7 +4668,7 @@ function renderIngresoItemsTable(items) {
             
             <td class="cell-areaCol area-col">${item.BEDNR || ''}</td>
             <td class="cell-countryCol country-col"> <div class="input-group input-group-sm">
-                <input type="text" class="form-control" name="pais" ${readonlyForSplits}>
+                <input type="text" class="form-control" name="pais" value="${paisValue}" ${readonlyForSplits}>
                 <button class="btn btn-outline-secondary search-btn" type="button" data-search-type="pais" ${readonlyForSplits}><i class="bi bi-search"></i></button>
             </div>
             </td>
@@ -4023,20 +4766,21 @@ function renderIngresoItemsTable(items) {
                 
                 if (item.file_certificado) { 
                     const k = `file_${pos}_certificado`; 
-                    const ext = item.file_certificado.name.includes('.') ? item.file_certificado.name.split('.').pop() : 'jpg';
-                    formData.append(k, item.file_certificado, `${pos}_certificado_${ts}.${ext}`); 
+                    formData.append(k, item.file_certificado, item.file_certificado.name); 
                     fileMetadata.push({ posicion: pos, field: 'certificado', formKey: k }); 
                 }
-                if (item.file_documentos) { 
+                let docFile = item.file_documentos;
+                if (!docFile && headerIngresoDocFile) {
+                    docFile = headerIngresoDocFile;
+                }
+                if (docFile) { 
                     const k = `file_${pos}_documentos`; 
-                    const ext = item.file_documentos.name.includes('.') ? item.file_documentos.name.split('.').pop() : 'jpg';
-                    formData.append(k, item.file_documentos, `${pos}_documentos_${ts}.${ext}`); 
+                    formData.append(k, docFile, docFile.name); 
                     fileMetadata.push({ posicion: pos, field: 'documentos', formKey: k }); 
                 }
                 if (item.file_inspeccion) { 
                     const k = `file_${pos}_inspeccion`; 
-                    const ext = item.file_inspeccion.name.includes('.') ? item.file_inspeccion.name.split('.').pop() : 'jpg';
-                    formData.append(k, item.file_inspeccion, `${pos}_inspeccion_${ts}.${ext}`); 
+                    formData.append(k, item.file_inspeccion, item.file_inspeccion.name); 
                     fileMetadata.push({ posicion: pos, field: 'inspeccion', formKey: k }); 
                 }
             }
@@ -4065,7 +4809,7 @@ function renderIngresoItemsTable(items) {
                 printDocMaterialButton.style.display = 'inline-block';
                 
                 document.querySelectorAll('#ingresoContent input, #ingresoContent button').forEach(el => {
-                    if(el.id !== 'ingresoClearButton' && el.id !== 'printLabelsButton' && el.id !== 'printDocMaterialButton' && el.id !== 'backButtonIngreso' && el.id !== 'logoutButtonIngreso') {
+                    if(el.id !== 'ingresoClearButton' && el.id !== 'printLabelsButton' && el.id !== 'printDocMaterialButton' && el.id !== 'printDeliveryTicketButtonIngreso' && el.id !== 'backButtonIngreso' && el.id !== 'logoutButtonIngreso') {
                         el.disabled = true;
                     }
                 });
@@ -4295,11 +5039,19 @@ function clearIngresoForm(clearAll = true) {
     // Limpia la tabla y los datos en memoria
     ingresoItemsTableBody.innerHTML = '';
     poItemsData = []; // <-- IMPORTANTE: Resetea los datos de las posiciones
+    currentIngresoPO = '';
     selectAllIngresoItemsCheckbox.checked = false;
 
     // Si clearAll es true (llamado por Limpiar o Volver), limpia también la cabecera
     if (clearAll) {
         ingresoNroPedidoInput.value = '';
+        headerIngresoDocFile = null;
+        if (ingresoHeaderDocInput) ingresoHeaderDocInput.value = '';
+        if (ingresoHeaderDocFilename) {
+            ingresoHeaderDocFilename.value = '';
+            ingresoHeaderDocFilename.style.backgroundColor = '';
+        }
+        if (ingresoHeaderDocClearBtn) ingresoHeaderDocClearBtn.style.display = 'none';
         // Resetea todos los campos de cabecera a sus valores por defecto
         document.getElementById('ingresoTipoMovimiento').value = '101';
         document.getElementById('ingresoFechaDoc').valueAsDate = new Date();
@@ -4377,6 +5129,10 @@ function clearIngresoForm(clearAll = true) {
             const pos = tr.dataset.pos;
             const item = poItemsData.find(d => String(d.EBELP) === String(pos));
             if (item) {
+                // Sincronizamos selección de checkbox
+                const checkbox = tr.querySelector('.item-checkbox');
+                if (checkbox) item.isSelected = checkbox.checked;
+
                 // Sincronizamos SOLO los campos de texto para no perder lo que escribas en la tabla
                 const qtyInput = tr.querySelector('input[name="cantidad"]');
                 if (qtyInput) item.MENGE = qtyInput.value;
@@ -4644,9 +5400,15 @@ function addSplitLine() {
     });
 
     async function handlePrintDeliveryTicket() {
-        const poNumberInput = document.getElementById('deliveryTicketPoNumber');
-        const poNumber = poNumberInput.value.trim();
-        const statusElement = document.getElementById('deliveryTicketStatus');
+        let poNumber = '';
+        const modeIngresoChecked = document.getElementById('modeIngreso') && document.getElementById('modeIngreso').checked;
+        if (modeIngresoChecked) {
+            poNumber = document.getElementById('ingresoNroPedido').value.trim();
+        } else {
+            const poNumberInput = document.getElementById('deliveryTicketPoNumber');
+            if (poNumberInput) poNumber = poNumberInput.value.trim();
+        }
+        const statusElement = modeIngresoChecked ? document.getElementById('ingresoStatus') : document.getElementById('deliveryTicketStatus');
 
         if (!poNumber) {
             alert(getText('poNumberLabel', 'Nro de Pedido') + " es obligatorio.");
@@ -4700,6 +5462,290 @@ function addSplitLine() {
         } finally {
             hideSpinner();
         }
+    }
+    
+    window.addEventListener('resize', () => {
+        if (typeof applyStickyColumns === 'function') applyStickyColumns();
+    });
+
+    function applyStickyColumns() {
+        try {
+            const config = [
+                { tableId: 'msegTable', columns: 5 }, 
+                { tableId: 'sublocationTable', columns: 1 }, 
+                { tableId: 'ingresoItemsTable', columns: 5 } 
+            ];
+
+            config.forEach(cfg => {
+                const table = document.getElementById(cfg.tableId);
+                if (!table) return;
+                const thead = table.querySelector('thead tr');
+                if (!thead || !thead.children) return;
+
+                let leftOffsets = [];
+                let currentLeft = 0;
+                const ths = thead.children;
+                
+                for (let i = 0; i < cfg.columns; i++) {
+                    if (ths[i]) {
+                        const isHidden = ths[i].classList.contains('d-none') || ths[i].style.display === 'none';
+                        leftOffsets.push(currentLeft);
+                        if (!isHidden) {
+                            currentLeft += (ths[i].getBoundingClientRect ? ths[i].getBoundingClientRect().width : 50);
+                        }
+                    }
+                }
+
+                const applyStyles = (cell, index, isHeader) => {
+                    if (!cell || !cell.style) return;
+                    if (index < cfg.columns) {
+                        cell.style.setProperty('position', 'sticky', 'important');
+                        cell.style.setProperty('left', (leftOffsets[index] || 0) + 'px', 'important');
+                        cell.style.setProperty('z-index', isHeader ? '11' : '10', 'important');
+                        cell.style.setProperty('background-color', isHeader ? '#f8f9fa' : '#ffffff', 'important');
+                        if (index === cfg.columns - 1) {
+                            cell.style.setProperty('border-right', '2px solid #dee2e6', 'important');
+                        }
+                    } else {
+                        cell.style.position = '';
+                        cell.style.left = '';
+                        cell.style.zIndex = '';
+                        cell.style.backgroundColor = '';
+                        cell.style.borderRight = '';
+                    }
+                };
+
+                for (let i = 0; i < ths.length; i++) {
+                    applyStyles(ths[i], i, true);
+                }
+
+                const tbody = table.querySelector('tbody');
+                if (tbody) {
+                    const rows = tbody.querySelectorAll('tr');
+                    rows.forEach(row => {
+                        const cells = row.children;
+                        if (cells) {
+                            for (let i = 0; i < cells.length; i++) {
+                                applyStyles(cells[i], i, false);
+                            }
+                        }
+                    });
+                }
+            });
+        } catch(eSticky) {
+            console.warn("Aviso en applyStickyColumns:", eSticky);
+        }
+    }
+
+    // --- LÓGICA DE FIRMAS DIGITALES EN MODAL FLOTANTE INDEPENDIENTE ---
+    let currentSigningRole = null; // 'receptor' o 'despachador'
+    let hasDrawnInCanvas = false;
+
+    function initSignatureCanvas() {
+        if (!signatureCanvas) return null;
+        const ctx = signatureCanvas.getContext('2d');
+        if (!ctx) return null;
+
+        let drawing = false;
+
+        function clearCanvas() {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#000000';
+            hasDrawnInCanvas = false;
+        }
+
+        function loadFromBase64(base64Str) {
+            clearCanvas();
+            if (!base64Str) return;
+            const img = new Image();
+            img.onload = () => {
+                ctx.drawImage(img, 0, 0, signatureCanvas.width, signatureCanvas.height);
+                hasDrawnInCanvas = true;
+            };
+            img.src = base64Str;
+        }
+
+        function getPos(e) {
+            const rect = signatureCanvas.getBoundingClientRect();
+            const scaleX = signatureCanvas.width / (rect.width || signatureCanvas.width);
+            const scaleY = signatureCanvas.height / (rect.height || signatureCanvas.height);
+            let cx = 0, cy = 0;
+            if (e.touches && e.touches.length > 0) {
+                cx = e.touches[0].clientX;
+                cy = e.touches[0].clientY;
+            } else if (e.changedTouches && e.changedTouches.length > 0) {
+                cx = e.changedTouches[0].clientX;
+                cy = e.changedTouches[0].clientY;
+            } else {
+                cx = e.clientX;
+                cy = e.clientY;
+            }
+            return {
+                x: (cx - rect.left) * scaleX,
+                y: (cy - rect.top) * scaleY
+            };
+        }
+
+        function start(e) {
+            drawing = true;
+            hasDrawnInCanvas = true;
+            const pos = getPos(e);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+        }
+
+        function move(e) {
+            if (!drawing) return;
+            if (e.cancelable) e.preventDefault();
+            const pos = getPos(e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+        }
+
+        function end(e) {
+            if (drawing) {
+                drawing = false;
+                ctx.beginPath();
+            }
+        }
+
+        // Eventos Mouse
+        signatureCanvas.addEventListener('mousedown', start);
+        signatureCanvas.addEventListener('mousemove', move);
+        signatureCanvas.addEventListener('mouseup', end);
+        signatureCanvas.addEventListener('mouseleave', end);
+
+        // Eventos Touch (Móviles / Tablets)
+        signatureCanvas.addEventListener('touchstart', (e) => {
+            if (e.cancelable) e.preventDefault();
+            start(e);
+        }, { passive: false });
+
+        signatureCanvas.addEventListener('touchmove', (e) => {
+            if (e.cancelable) e.preventDefault();
+            move(e);
+        }, { passive: false });
+
+        signatureCanvas.addEventListener('touchend', (e) => {
+            if (e.cancelable) e.preventDefault();
+            end(e);
+        }, { passive: false });
+
+        clearCanvas();
+
+        return {
+            clear: clearCanvas,
+            load: loadFromBase64,
+            hasDrawn: () => hasDrawnInCanvas,
+            getBase64: () => hasDrawnInCanvas ? signatureCanvas.toDataURL('image/png') : ''
+        };
+    }
+
+    const padInstance = initSignatureCanvas();
+
+    function openFirmaOverlay(role) {
+        currentSigningRole = role;
+        if (!firmaModalOverlay) return;
+
+        if (role === 'receptor') {
+            if (firmaModalTitle) firmaModalTitle.textContent = getText('signatureReceptorTitle', 'Firma del Receptor');
+            if (padInstance) {
+                if (signatureReceptorBase64) {
+                    padInstance.load(signatureReceptorBase64);
+                } else {
+                    padInstance.clear();
+                }
+            }
+        } else {
+            if (firmaModalTitle) firmaModalTitle.textContent = getText('signatureDispatcherTitle', 'Firma del Despachador');
+            if (padInstance) {
+                if (signatureDespachadorBase64) {
+                    padInstance.load(signatureDespachadorBase64);
+                } else {
+                    padInstance.clear();
+                }
+            }
+        }
+
+        firmaModalOverlay.style.display = 'flex';
+    }
+
+    function closeFirmaOverlay() {
+        if (firmaModalOverlay) {
+            firmaModalOverlay.style.display = 'none';
+        }
+        currentSigningRole = null;
+    }
+
+    if (btnOpenCanvasReceptor) {
+        btnOpenCanvasReceptor.addEventListener('click', (e) => {
+            e.preventDefault();
+            openFirmaOverlay('receptor');
+        });
+    }
+
+    if (btnOpenCanvasDespachador) {
+        btnOpenCanvasDespachador.addEventListener('click', (e) => {
+            e.preventDefault();
+            openFirmaOverlay('despachador');
+        });
+    }
+
+    if (btnCloseFirmaOverlay) {
+        btnCloseFirmaOverlay.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeFirmaOverlay();
+        });
+    }
+
+    if (btnCancelFirmaOverlay) {
+        btnCancelFirmaOverlay.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeFirmaOverlay();
+        });
+    }
+
+    if (firmaModalOverlay) {
+        firmaModalOverlay.addEventListener('click', (e) => {
+            if (e.target === firmaModalOverlay) {
+                closeFirmaOverlay();
+            }
+        });
+    }
+
+    if (btnClearSignature) {
+        btnClearSignature.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (padInstance) padInstance.clear();
+            if (currentSigningRole === 'receptor') {
+                signatureReceptorBase64 = "";
+                if (firmaReceptorBadge) firmaReceptorBadge.classList.add('d-none');
+            } else if (currentSigningRole === 'despachador') {
+                signatureDespachadorBase64 = "";
+                if (firmaDespachadorBadge) firmaDespachadorBadge.classList.add('d-none');
+            }
+        });
+    }
+
+    if (btnSaveSignature) {
+        btnSaveSignature.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (padInstance && padInstance.hasDrawn()) {
+                const b64 = padInstance.getBase64();
+                if (currentSigningRole === 'receptor') {
+                    signatureReceptorBase64 = b64;
+                    if (firmaReceptorBadge) firmaReceptorBadge.classList.remove('d-none');
+                } else if (currentSigningRole === 'despachador') {
+                    signatureDespachadorBase64 = b64;
+                    if (firmaDespachadorBadge) firmaDespachadorBadge.classList.remove('d-none');
+                }
+            }
+            closeFirmaOverlay();
+        });
     }
 
 });
