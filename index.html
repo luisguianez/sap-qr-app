@@ -734,11 +734,17 @@ body.login-bg {
                 <div id="modal-error-message" class="alert alert-danger" style="display: none;"></div>
 
                 <div class="mb-3" id="receptorContainer">
-                    <label for="receptorSelect" class="form-label fw-bold" data-translate="receiverLabel">Receptor:</label>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label for="receptorSelect" class="form-label fw-bold mb-0" data-translate="receiverLabel">Receptor:</label>
+                        <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" id="btnToggleNewReceptor">
+                            <i class="bi bi-plus-circle"></i> <span id="lblToggleNewReceptor">Nuevo Receptor</span>
+                        </button>
+                    </div>
                     <div class="d-flex align-items-center gap-2">
                         <select id="receptorSelect" class="form-select" required>
                             <option value="" data-translate="loading">Cargando...</option>
                         </select>
+                        <input type="text" id="nuevoReceptorInput" class="form-control text-uppercase d-none" placeholder="NOMBRE DEL NUEVO RECEPTOR">
                         <button type="button" class="btn btn-outline-primary text-nowrap" id="btnOpenCanvasReceptor">
                             <i class="bi bi-pen"></i> <span data-translate="signReceiverBtn">Firmar Receptor</span>
                         </button>
@@ -751,11 +757,17 @@ body.login-bg {
                 </div>
 
                 <div class="mb-3" id="despachadorContainer">
-                    <label for="despachadorSelect" class="form-label fw-bold" data-translate="dispatcherLabel">Despachador:</label>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label for="despachadorSelect" class="form-label fw-bold mb-0" data-translate="dispatcherLabel">Despachador:</label>
+                        <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" id="btnToggleNewDespachador">
+                            <i class="bi bi-plus-circle"></i> <span id="lblToggleNewDespachador">Nuevo Despachador</span>
+                        </button>
+                    </div>
                     <div class="d-flex align-items-center gap-2">
                         <select id="despachadorSelect" class="form-select" required>
                             <option value="" data-translate="loading">Cargando...</option>
                         </select>
+                        <input type="text" id="nuevoDespachadorInput" class="form-control text-uppercase d-none" placeholder="NOMBRE DEL NUEVO DESPACHADOR">
                         <button type="button" class="btn btn-outline-primary text-nowrap" id="btnOpenCanvasDespachador">
                             <i class="bi bi-pen"></i> <span data-translate="signDispatcherBtn">Firmar Despachador</span>
                         </button>
@@ -991,11 +1003,9 @@ body.login-bg {
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-     const API_BASE_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
-        ? ''
-       : 'https://api.lndsap.com';
-
-    //    const API_BASE_URL = window.location.origin;
+    const API_BASE_URL = (window.location.hostname === 'lndsap.com' || window.location.hostname === 'www.lndsap.com' || window.location.hostname.includes('pages.dev'))
+        ? 'https://api.lndsap.com'
+        : window.location.origin;
     const translations = {
         en: {
             // General
@@ -1065,6 +1075,9 @@ document.addEventListener('DOMContentLoaded', () => {
             completeFollowingData: "Please complete the following data to finalize saving.",
             receiverLabel: "Receiver:",
             dispatcherLabel: "Dispatcher:",
+            newReceiver: "+ New Receiver",
+            newDispatcher: "+ New Dispatcher",
+            selectFromList: "Select from list",
             labelSizeLabel: "Label Size:",
             selectSize: "Select a size...",
             smallLabel: "S - Small",
@@ -1177,6 +1190,9 @@ document.addEventListener('DOMContentLoaded', () => {
             poLoadedSuccess: "Purchase Order loaded successfully.",
             poMergedSuccess: "{count} position(s) reincorporated from Purchase Order {poNumber}.",
             duplicatePositionMessage: "The position is already added to the list.",
+            noPendingQuantitiesError: "No items with pending quantities found for this Purchase Order.",
+            poNotFoundOrNoHistory: "The Purchase Order does not exist or has no history.",
+            poNoPendingOrReleased: "The Purchase Order exists but has no pending or released items.",
             // Quick Setup Modal
             quickSetupTitle: "Quick Setup",
             searchingPlant: "Searching your plant in SAP...",
@@ -1275,6 +1291,9 @@ document.addEventListener('DOMContentLoaded', () => {
             completeFollowingData: "Por favor, complete los siguientes datos para finalizar el guardado.",
             receiverLabel: "Receptor:",
             dispatcherLabel: "Despachador:",
+            newReceiver: "+ Nuevo Receptor",
+            newDispatcher: "+ Nuevo Despachador",
+            selectFromList: "Seleccionar de la lista",
             labelSizeLabel: "Tamaño de Etiqueta:",
             selectSize: "Seleccione un tamaño...",
             smallLabel: "S - Pequeña",
@@ -1386,6 +1405,9 @@ document.addEventListener('DOMContentLoaded', () => {
             poLoadedSuccess: "Pedido cargado exitosamente.",
             poMergedSuccess: "Se reincorporaron {count} posición(es) del pedido {poNumber}.",
             duplicatePositionMessage: "La posición ya se encuentra agregada en la lista.",
+            noPendingQuantitiesError: "No hay posiciones con cantidades pendientes de recibir para este pedido.",
+            poNotFoundOrNoHistory: "El pedido no existe o no tiene historial.",
+            poNoPendingOrReleased: "El pedido existe pero no tiene posiciones pendientes o liberadas.",
             // Quick Setup Modal
             quickSetupTitle: "Configuración Rápida",
             searchingPlant: "Buscando tu planta en SAP...",
@@ -1518,7 +1540,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSessionId = null;
     let heartbeatInterval = null;
     const scannedCodes = new Map();
-    const SAP_ROUTER_STRING = "/H/50.234.28.124/H/";
+    const SAP_ROUTER_STRING =   "/H/50.234.28.124/H/"; //"/H/172.16.16.15/S/3299";
     const beepSound = new Audio("{{ url_for('static', filename='beep.mp3') }}");
     const errorSound = new Audio("{{ url_for('static', filename='error.mp3') }}");
     let sublocationData = [];
@@ -1614,6 +1636,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const despachadorSelect = document.getElementById('despachadorSelect');
     const receptorContainer = document.getElementById('receptorContainer');
     const despachadorContainer = document.getElementById('despachadorContainer');
+    const btnToggleNewReceptor = document.getElementById('btnToggleNewReceptor');
+    const lblToggleNewReceptor = document.getElementById('lblToggleNewReceptor');
+    const nuevoReceptorInput = document.getElementById('nuevoReceptorInput');
+    const btnToggleNewDespachador = document.getElementById('btnToggleNewDespachador');
+    const lblToggleNewDespachador = document.getElementById('lblToggleNewDespachador');
+    const nuevoDespachadorInput = document.getElementById('nuevoDespachadorInput');
     const firmaReceptorBadge = document.getElementById('firmaReceptorBadge');
     const firmaDespachadorBadge = document.getElementById('firmaDespachadorBadge');
     const btnOpenCanvasReceptor = document.getElementById('btnOpenCanvasReceptor');
@@ -1976,6 +2004,70 @@ function updateClientOptions() {
     resetButton.addEventListener('click', resetAll);
     saveButton.addEventListener('click', openSignatureModal);
     confirmSaveButton.addEventListener('click', handleConfirmSave);
+
+    if (btnToggleNewReceptor) {
+        btnToggleNewReceptor.addEventListener('click', (e) => {
+            e.preventDefault();
+            const isCreatingNew = nuevoReceptorInput.classList.contains('d-none');
+            if (isCreatingNew) {
+                receptorSelect.classList.add('d-none');
+                nuevoReceptorInput.classList.remove('d-none');
+                nuevoReceptorInput.focus();
+                lblToggleNewReceptor.textContent = getText('selectFromList', 'Seleccionar de la lista');
+                const icon = btnToggleNewReceptor.querySelector('i');
+                if (icon) icon.className = 'bi bi-arrow-return-left';
+            } else {
+                nuevoReceptorInput.classList.add('d-none');
+                receptorSelect.classList.remove('d-none');
+                lblToggleNewReceptor.textContent = getText('newReceiver', 'Nuevo Receptor');
+                const icon = btnToggleNewReceptor.querySelector('i');
+                if (icon) icon.className = 'bi bi-plus-circle';
+            }
+        });
+    }
+
+    if (nuevoReceptorInput) {
+        nuevoReceptorInput.addEventListener('input', (e) => {
+            const start = e.target.selectionStart;
+            const end = e.target.selectionEnd;
+            e.target.value = e.target.value.toUpperCase();
+            if (start !== null && end !== null) {
+                e.target.setSelectionRange(start, end);
+            }
+        });
+    }
+
+    if (btnToggleNewDespachador) {
+        btnToggleNewDespachador.addEventListener('click', (e) => {
+            e.preventDefault();
+            const isCreatingNew = nuevoDespachadorInput.classList.contains('d-none');
+            if (isCreatingNew) {
+                despachadorSelect.classList.add('d-none');
+                nuevoDespachadorInput.classList.remove('d-none');
+                nuevoDespachadorInput.focus();
+                lblToggleNewDespachador.textContent = getText('selectFromList', 'Seleccionar de la lista');
+                const icon = btnToggleNewDespachador.querySelector('i');
+                if (icon) icon.className = 'bi bi-arrow-return-left';
+            } else {
+                nuevoDespachadorInput.classList.add('d-none');
+                despachadorSelect.classList.remove('d-none');
+                lblToggleNewDespachador.textContent = getText('newDispatcher', 'Nuevo Despachador');
+                const icon = btnToggleNewDespachador.querySelector('i');
+                if (icon) icon.className = 'bi bi-plus-circle';
+            }
+        });
+    }
+
+    if (nuevoDespachadorInput) {
+        nuevoDespachadorInput.addEventListener('input', (e) => {
+            const start = e.target.selectionStart;
+            const end = e.target.selectionEnd;
+            e.target.value = e.target.value.toUpperCase();
+            if (start !== null && end !== null) {
+                e.target.setSelectionRange(start, end);
+            }
+        });
+    }
     deleteIngresoButton.addEventListener('click', deleteSelectedIngresoRows);
     [sublocationCentroInput, sublocationAlmacenInput].forEach(input => input.addEventListener('input', manageSublocationScannerState));
     sublocationCentroInput.addEventListener('input', updateSublocationAreaVisibility);
@@ -3355,6 +3447,39 @@ function deleteSelectedQrRows() {
         updateButtonsVisibility(); 
         selectAllQrCheckbox.checked = false; 
     }
+
+    function resetNewPartyInputs() {
+        if (nuevoReceptorInput) {
+            nuevoReceptorInput.value = '';
+            nuevoReceptorInput.classList.add('d-none');
+        }
+        if (receptorSelect) {
+            receptorSelect.classList.remove('d-none');
+        }
+        if (lblToggleNewReceptor) {
+            lblToggleNewReceptor.textContent = getText('newReceiver', 'Nuevo Receptor');
+        }
+        if (btnToggleNewReceptor) {
+            const icon = btnToggleNewReceptor.querySelector('i');
+            if (icon) icon.className = 'bi bi-plus-circle';
+        }
+
+        if (nuevoDespachadorInput) {
+            nuevoDespachadorInput.value = '';
+            nuevoDespachadorInput.classList.add('d-none');
+        }
+        if (despachadorSelect) {
+            despachadorSelect.classList.remove('d-none');
+        }
+        if (lblToggleNewDespachador) {
+            lblToggleNewDespachador.textContent = getText('newDispatcher', 'Nuevo Despachador');
+        }
+        if (btnToggleNewDespachador) {
+            const icon = btnToggleNewDespachador.querySelector('i');
+            if (icon) icon.className = 'bi bi-plus-circle';
+        }
+    }
+
 async function openSignatureModal() {
 
 const moveType = clMovimientoInput.value.trim();
@@ -3412,6 +3537,7 @@ const moveType = clMovimientoInput.value.trim();
     }
 
     currentSaveHandler = saveData;
+    resetNewPartyInputs();
     modalErrorMessage.style.display = 'none';
     receptorSelect.innerHTML = `<option value="">${getText('loading')}</option>`;
     despachadorSelect.innerHTML = `<option value="">${getText('loading')}</option>`;
@@ -3556,6 +3682,7 @@ const moveType = clMovimientoInput.value.trim();
         }
         despachadorContainer.style.display = 'none';
         labelSizeContainer.style.display = 'block';
+        resetNewPartyInputs();
         currentSaveHandler = saveIngresoData;
         modalErrorMessage.style.display = 'none';
         receptorSelect.innerHTML = `<option value="">${getText('loading')}</option>`;
@@ -3617,9 +3744,16 @@ const moveType = clMovimientoInput.value.trim();
     function handleConfirmSave() {
         const isLabelSizeVisible = labelSizeContainer.style.display !== 'none';
         const isDespachadorVisible = despachadorContainer.style.display !== 'none';
+
+        const isNewReceptor = nuevoReceptorInput && !nuevoReceptorInput.classList.contains('d-none');
+        const receptorVal = (isNewReceptor ? nuevoReceptorInput.value : receptorSelect.value).trim().toUpperCase();
+
+        const isNewDespachador = nuevoDespachadorInput && !nuevoDespachadorInput.classList.contains('d-none');
+        const despachadorVal = (isNewDespachador ? nuevoDespachadorInput.value : despachadorSelect.value).trim().toUpperCase();
+
         const signatureData = {
-            receptor: receptorSelect.value,
-            despachador: isDespachadorVisible ? despachadorSelect.value : '',
+            receptor: receptorVal,
+            despachador: isDespachadorVisible ? despachadorVal : '',
             labelSize: isLabelSizeVisible ? labelSizeSelect.value : '',
             firmaReceptorBase64: signatureReceptorBase64 || '',
             firmaDespachadorBase64: isDespachadorVisible ? (signatureDespachadorBase64 || '') : '',
@@ -4419,7 +4553,7 @@ function toggleSpecialColumnsVisibility() {
                     po_number: poNumber, 
                     po_item: posicionAutoSeleccionar, // <-- Aquí enviamos la posición a Python
                     is_guest: isGuestMode, 
-                    user_lang: navigator.language || navigator.userLanguage 
+                    user_lang: currentLang || (navigator.language || navigator.userLanguage || 'es').slice(0, 2)
                 })
             });
             const result = await response.json();
@@ -4494,13 +4628,31 @@ function toggleSpecialColumnsVisibility() {
                 }
                 
             } else {
-                throw new Error(result.error || 'Respuesta inválida.');
+                let errMsg = result.error || 'Respuesta inválida.';
+                if (currentLang === 'en') {
+                    const posBorradaRegex = /[Ll]a posici[oó]n\s*(\d+)?\s*del pedido\s*(\d+)?\s*no existe o (?:est[aá]|fue)\s*borrada\.?/gi;
+                    errMsg = errMsg.replace(posBorradaRegex, (match, p1, p2) => {
+                        if (p1 && p2) return `Item ${p1} of Purchase Order ${p2} does not exist or is deleted.`;
+                        if (p1) return `Item ${p1} of Purchase Order does not exist or is deleted.`;
+                        if (p2) return `Item of Purchase Order ${p2} does not exist or is deleted.`;
+                        return 'The item of the Purchase Order does not exist or is deleted.';
+                    });
+                    if (errMsg.includes('No hay posiciones con cantidades pendientes de recibir para este pedido')) {
+                        errMsg = errMsg.replace(/No hay posiciones con cantidades pendientes de recibir para este pedido\.?/g, getText('noPendingQuantitiesError'));
+                    } else if (errMsg.includes('El pedido no existe o no tiene historial')) {
+                        errMsg = errMsg.replace(/El pedido no existe o no tiene historial\.?/g, getText('poNotFoundOrNoHistory'));
+                    } else if (errMsg.includes('El pedido existe pero no tiene posiciones pendientes o liberadas')) {
+                        errMsg = errMsg.replace(/El pedido existe pero no tiene posiciones pendientes o liberadas\.?/g, getText('poNoPendingOrReleased'));
+                    }
+                }
+                throw new Error(errMsg);
             }
         } catch (err) {
             if (poItemsData.length === 0) {
                 clearIngresoForm(false);
             }
-            setIngresoStatus(`Error: ${err.message}`, 'error');
+            const cleanErr = err.message.startsWith('Error:') ? err.message : `Error: ${err.message}`;
+            setIngresoStatus(cleanErr, 'error');
             playSound('error');
         } finally {
             hideSpinner();
@@ -4754,7 +4906,7 @@ function renderIngresoItemsTable(items) {
             connection_params: sapConnection, is_guest: isGuestMode, header: headerData, items: selectedItems,
             signature_data: signatureData
         }));
-        formData.append('user_lang', navigator.language || navigator.userLanguage);
+        formData.append('user_lang', currentLang || (navigator.language || navigator.userLanguage || 'es').slice(0, 2));
         const fileMetadata = [];
         ingresoItemsTableBody.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
             const tr = checkbox.closest('tr');
@@ -4798,9 +4950,11 @@ function renderIngresoItemsTable(items) {
                 playSound('beep');
                 alert(msg);
 
+                const yearMatch = (headerData.fecha_cont || '').match(/\b(20\d{2}|19\d{2})\b/);
+                const resolvedYear = result.doc_year || (yearMatch ? yearMatch[0] : new Date().getFullYear().toString());
                 lastSavedIngresoData = {
                     doc_number: result.doc_number,
-                    doc_year: headerData.fecha_cont.substring(0, 4),
+                    doc_year: resolvedYear,
                     items: selectedItems
                 };
 
@@ -4815,7 +4969,17 @@ function renderIngresoItemsTable(items) {
                 });
 
             } else {
-                throw new Error(result.error);
+                let errText = result.error || '';
+                if (currentLang === 'en') {
+                    const posBorradaRegex = /[Ll]a posici[oó]n\s*(\d+)?\s*del pedido\s*(\d+)?\s*no existe o (?:est[aá]|fue)\s*borrada\.?/gi;
+                    errText = errText.replace(posBorradaRegex, (match, p1, p2) => {
+                        if (p1 && p2) return `Item ${p1} of Purchase Order ${p2} does not exist or is deleted.`;
+                        if (p1) return `Item ${p1} of Purchase Order does not exist or is deleted.`;
+                        if (p2) return `Item of Purchase Order ${p2} does not exist or is deleted.`;
+                        return 'The item of the Purchase Order does not exist or is deleted.';
+                    });
+                }
+                throw new Error(errText);
             }
         } catch (err) {
             setIngresoStatus(`${getText('savingError')}: ${err.message}`, 'error');
@@ -4845,6 +5009,7 @@ function renderIngresoItemsTable(items) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     connection_params: sapConnection,
+                    is_guest: isGuestMode,
                     print_data: lastSavedIngresoData
                 })
             });
@@ -4900,6 +5065,7 @@ function renderIngresoItemsTable(items) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     connection_params: sapConnection,
+                    is_guest: isGuestMode,
                     print_data: lastSavedIngresoData
                 })
             });
@@ -4952,6 +5118,7 @@ async function handlePrintDocMaterialMain() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     connection_params: sapConnection,
+                    is_guest: isGuestMode,
                     print_data: lastSavedQRData // Usamos los datos del último guardado QR
                 })
             });
@@ -5652,7 +5819,12 @@ function addSplitLine() {
         if (!firmaModalOverlay) return;
 
         if (role === 'receptor') {
-            if (firmaModalTitle) firmaModalTitle.textContent = getText('signatureReceptorTitle', 'Firma del Receptor');
+            const isNew = nuevoReceptorInput && !nuevoReceptorInput.classList.contains('d-none');
+            const name = (isNew ? nuevoReceptorInput.value : receptorSelect.value).trim().toUpperCase();
+            if (firmaModalTitle) {
+                const baseTitle = getText('signatureReceptorTitle', 'Firma del Receptor');
+                firmaModalTitle.textContent = name ? `${baseTitle}: ${name}` : baseTitle;
+            }
             if (padInstance) {
                 if (signatureReceptorBase64) {
                     padInstance.load(signatureReceptorBase64);
@@ -5661,7 +5833,12 @@ function addSplitLine() {
                 }
             }
         } else {
-            if (firmaModalTitle) firmaModalTitle.textContent = getText('signatureDispatcherTitle', 'Firma del Despachador');
+            const isNew = nuevoDespachadorInput && !nuevoDespachadorInput.classList.contains('d-none');
+            const name = (isNew ? nuevoDespachadorInput.value : despachadorSelect.value).trim().toUpperCase();
+            if (firmaModalTitle) {
+                const baseTitle = getText('signatureDispatcherTitle', 'Firma del Despachador');
+                firmaModalTitle.textContent = name ? `${baseTitle}: ${name}` : baseTitle;
+            }
             if (padInstance) {
                 if (signatureDespachadorBase64) {
                     padInstance.load(signatureDespachadorBase64);
