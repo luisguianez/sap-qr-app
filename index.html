@@ -5319,7 +5319,7 @@ function clearIngresoForm(clearAll = true) {
                 if (storageInput) item.userInput_Almacen = storageInput.value;
 
                 const sublocInput = tr.querySelector('input[name="sublocation"]');
-                if (sublocInput) item.userInput_Sublocation = sublocInput.value;
+                if (sublocInput) item.userInput_Sublocation = sublocInput.value.trim().toUpperCase();
 
                 const tagInput = tr.querySelector('input[name="tag"]');
                 if (tagInput) item.userInput_Tag = tagInput.value;
