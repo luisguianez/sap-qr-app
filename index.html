@@ -5467,7 +5467,7 @@ function addSplitLine() {
             qty: newQty.toFixed(3),
             batch: document.getElementById(`splitNewBatch_${i}`).value.toUpperCase(),
             storageLoc: document.getElementById(`splitNewStorageLoc_${i}`).value,
-            sublocation: document.getElementById(`splitNewSublocation_${i}`).value.toUpperCase(),
+            sublocation: document.getElementById(`splitNewSublocation_${i}`).value.trim().toUpperCase(),
             tag: document.getElementById(`splitNewTag_${i}`).value
         });
     }
