@@ -2565,7 +2565,7 @@ function updateClientOptions() {
         if (name === 'cantidad') item.MENGE = target.value;
         else if (name === 'lote') item.userInput_Batch = target.value;
         else if (name === 'almacen') item.userInput_Almacen = target.value;
-        else if (name === 'sublocation') item.userInput_Sublocation = target.value;
+        else if (name === 'sublocation') item.userInput_Sublocation = target.value.toUpperCase();
         else if (name === 'tag') item.userInput_Tag = target.value;
         else if (name === 'pais') item.userInput_Pais = target.value;
         else if (name === 'sgtxt') item.userInput_Sgtxt = target.value;
