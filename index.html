@@ -2549,13 +2549,21 @@ function updateClientOptions() {
         toggleSpecialColumnsVisibility();
     });
 
-   ingresoItemsTableBody.addEventListener('input', (e) => {
+  ingresoItemsTableBody.addEventListener('input', (e) => {
         const target = e.target;
         if (!target) return;
         const name = target.getAttribute('name');
-        if (name === 'lote' || name === 'almacen') {
+
+        // Conversión en tiempo real a mayúsculas para sublocation, lote y almacén
+        if (name === 'lote' || name === 'almacen' || name === 'sublocation') {
+            const start = target.selectionStart;
+            const end = target.selectionEnd;
             target.value = target.value.toUpperCase();
+            if (start !== null && end !== null) {
+                target.setSelectionRange(start, end);
+            }
         }
+
         const tr = target.closest('tr');
         if (!tr) return;
         const pos = tr.dataset.pos;
@@ -2565,7 +2573,7 @@ function updateClientOptions() {
         if (name === 'cantidad') item.MENGE = target.value;
         else if (name === 'lote') item.userInput_Batch = target.value;
         else if (name === 'almacen') item.userInput_Almacen = target.value;
-        else if (name === 'sublocation') item.userInput_Sublocation = target.value.toUpperCase();
+        else if (name === 'sublocation') item.userInput_Sublocation = target.value;
         else if (name === 'tag') item.userInput_Tag = target.value;
         else if (name === 'pais') item.userInput_Pais = target.value;
         else if (name === 'sgtxt') item.userInput_Sgtxt = target.value;
