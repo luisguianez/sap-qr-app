@@ -907,7 +907,7 @@ body.login-bg {
                     <div class="col-md-3">
                         <label for="splitNewSublocation_0" class="form-label" data-translate="sublocationLabel">Sub-Ubic. 1</label>
                         <div class="input-group input-group-sm">
-                            <input type="text" class="form-control text-uppercase split-sublocation" id="splitNewSublocation_0">
+                            <input type="text" class="form-control split-sublocation" id="splitNewSublocation_0">
                             <button class="btn btn-outline-secondary search-btn-split" type="button" data-search-type="sublocation" data-index="0"><i class="bi bi-search"></i></button>
                         </div>
                     </div>
@@ -1539,6 +1539,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isGuestMode = false;
     let currentSessionId = null;
     let heartbeatInterval = null;
+    let currentAppMode = 'MENU_PRINCIPAL';
     const scannedCodes = new Map();
     const SAP_ROUTER_STRING =   "/H/50.234.28.124/H/"; //"/H/172.16.16.15/S/3299";
     const beepSound = new Audio("{{ url_for('static', filename='beep.mp3') }}");
@@ -2549,7 +2550,7 @@ function updateClientOptions() {
         toggleSpecialColumnsVisibility();
     });
 
-  ingresoItemsTableBody.addEventListener('input', (e) => {
+    ingresoItemsTableBody.addEventListener('input', (e) => {
         const target = e.target;
         if (!target) return;
         const name = target.getAttribute('name');
@@ -2945,6 +2946,44 @@ function updateClientOptions() {
         }
     }
 
+    function detectClientDevice() {
+        const ua = navigator.userAgent || '';
+        const isTouch = (navigator.maxTouchPoints && navigator.maxTouchPoints > 1);
+        if (/iPad/i.test(ua) || (/Macintosh/i.test(ua) && isTouch)) {
+            return 'Apple iPad';
+        } else if (/iPhone/i.test(ua)) {
+            return 'Apple iPhone';
+        } else if (/Android/i.test(ua)) {
+            return isTouch ? 'Tablet Android' : 'Móvil Android';
+        } else if (/Windows/i.test(ua)) {
+            return 'PC (Windows)';
+        } else if (/Macintosh/i.test(ua)) {
+            return 'PC (macOS)';
+        } else if (/Linux/i.test(ua)) {
+            return 'PC (Linux)';
+        }
+        return 'Navegador Web';
+    }
+
+    async function updateSessionMode(newMode) {
+        currentAppMode = newMode;
+        if (!currentSessionId || !sapConnection) return;
+        try {
+            fetch(`${API_BASE_URL}/api/session/update_mode`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    connection_params: sapConnection,
+                    session_id: currentSessionId,
+                    is_guest: isGuestMode,
+                    current_mode: currentAppMode
+                })
+            }).catch(e => console.warn("Error updating session mode:", e));
+        } catch (e) {
+            console.warn("Error updating session mode:", e);
+        }
+    }
+
     async function handleLogin(isGuest) {
         isGuestMode = isGuest;
         setLoginStatus(getText('validating'), "info");
@@ -2960,17 +2999,21 @@ function updateClientOptions() {
             connectionParamsForThisAttempt.saprouter = SAP_ROUTER_STRING;
         }
         if (!isGuest) {
-            connectionParamsForThisAttempt.user = sapUserInput.value.trim();
+            sapUserInput.value = sapUserInput.value.trim();
+            connectionParamsForThisAttempt.user = sapUserInput.value;
             connectionParamsForThisAttempt.passwd = sapPassInput.value.trim();
         }
         const endpoint = isGuest ? `${API_BASE_URL}/validateGuestLogin` : `${API_BASE_URL}/validateLogin`;
         try {
+            const detectedDevice = detectClientDevice();
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     connection_params: connectionParamsForThisAttempt,
-                    plant: sapPlantSelect.value
+                    plant: sapPlantSelect.value,
+                    device_name: detectedDevice,
+                    current_mode: 'MENU_PRINCIPAL'
                 })
             });
             const result = await response.json();
@@ -2978,6 +3021,7 @@ function updateClientOptions() {
                 sapConnection = connectionParamsForThisAttempt;
                 currentPlant = sapPlantSelect.value; // GUARDAMOS LA PLANTA GLOBALMENTE
                 currentSessionId = result.session_id || null;
+                currentAppMode = 'MENU_PRINCIPAL';
                 startHeartbeat();
                 
                 const userToShow = isGuest ? (result.guest_user || 'Invitado') : connectionParamsForThisAttempt.user;
@@ -3017,7 +3061,8 @@ function updateClientOptions() {
                     body: JSON.stringify({
                         connection_params: sapConnection,
                         session_id: currentSessionId,
-                        is_guest: isGuestMode
+                        is_guest: isGuestMode,
+                        current_mode: currentAppMode
                     })
                 });
                 const data = await resp.json();
@@ -3079,6 +3124,7 @@ function updateClientOptions() {
             }
         }
         currentSessionId = null;
+        currentAppMode = 'MENU_PRINCIPAL';
         await stopAllScanners();
         sapConnection = null;
         isGuestMode = false;
@@ -3104,7 +3150,9 @@ function updateClientOptions() {
 
         document.body.classList.remove('login-bg');
         
+        let mappedMode = 'MENU_PRINCIPAL';
         if (selectedMode === 'etiqueta') {
+            mappedMode = 'MOVIMIENTOS_QR';
             mainContent.style.display = 'block';
             centroInput.value = currentPlant; //  AUTO-LLENAR PLANTA
             if (isGuestMode) {
@@ -3116,6 +3164,7 @@ function updateClientOptions() {
             }
             handleHeaderChange();
         } else if (selectedMode === 'sublocation') {
+            mappedMode = 'CONSULTA_SUBLOCATION';
             sublocationContent.style.display = 'block';
             sublocationCentroInput.value = currentPlant; //  AUTO-LLENAR PLANTA
             // Proponer almacén según la planta (el usuario puede cambiarlo)
@@ -3126,12 +3175,15 @@ function updateClientOptions() {
             sublocationCentroInput.dispatchEvent(new Event('input')); // Dispara la validación del Área 4000
             manageSublocationScannerState();
         } else if (selectedMode === 'ingreso') {
+            mappedMode = 'INGRESO_PEDIDO';
             ingresoContent.style.display = 'block';
             document.getElementById('ingresoFechaDoc').valueAsDate = new Date();
             document.getElementById('ingresoFechaCont').valueAsDate = new Date();
         } else if (selectedMode === 'deliveryticket') {
+            mappedMode = 'DELIVERY_TICKET';
             deliveryTicketContent.style.display = 'block';
         }
+        updateSessionMode(mappedMode);
     }
 
     async function goBackToModeSelection() {
@@ -3143,6 +3195,7 @@ function updateClientOptions() {
         modeSelectionSection.style.display = 'block';
         clearAllScreens();
         document.body.classList.add('login-bg');
+        updateSessionMode('MENU_PRINCIPAL');
     }
 
     function setLoginStatus(message, type) {
